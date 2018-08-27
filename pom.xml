@@ -2,14 +2,20 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
+  <parent>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-parent</artifactId>
+    <version>2.0.3.RELEASE</version>
+  </parent>
+
   <groupId>com.github.xfslove</groupId>
-  <artifactId>smsj</artifactId>
+  <artifactId>smssp</artifactId>
   <version>1.0.0-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <name>smsj</name>
   <url>https://github.com/xfslove/smsj</url>
-  <description>SMS &amp; MMS library for the Java platform</description>
+  <description>SMS &amp; MMS SP Gateway</description>
 
   <licenses>
     <license>
@@ -18,147 +24,45 @@
     </license>
   </licenses>
 
-  <scm>
-    <connection>scm:git:https://github.com/xfslove/smsj.git</connection>
-    <developerConnection>scm:git:git@github.com:xfslove/smsj.git</developerConnection>
-    <url>https://github.com/xfslove/smsj</url>
-    <tag>HEAD</tag>
-  </scm>
-
   <developers>
-    <developer>
-      <name>marre</name>
-    </developer>
     <developer>
       <name>hanwen.huang</name>
       <email>xfslove@gmail.com</email>
     </developer>
   </developers>
 
-  <profiles>
-    <profile>
-      <id>release</id>
-      <build>
-        <plugins>
-          <!-- Source -->
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-source-plugin</artifactId>
-            <version>3.0.1</version>
-            <executions>
-              <execution>
-                <goals>
-                  <goal>jar-no-fork</goal>
-                </goals>
-              </execution>
-            </executions>
-          </plugin>
-          <!-- Javadoc -->
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-javadoc-plugin</artifactId>
-            <version>2.10.4</version>
-            <executions>
-              <execution>
-                <goals>
-                  <goal>jar</goal>
-                </goals>
-              </execution>
-            </executions>
-            <configuration>
-              <charset>UTF-8</charset>
-            </configuration>
-          </plugin>
-          <!-- GPG -->
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-gpg-plugin</artifactId>
-            <version>1.6</version>
-            <executions>
-              <execution>
-                <phase>verify</phase>
-                <goals>
-                  <goal>sign</goal>
-                </goals>
-              </execution>
-            </executions>
-          </plugin>
-        </plugins>
-      </build>
-    </profile>
-  </profiles>
-
-  <distributionManagement>
-    <snapshotRepository>
-      <id>oss</id>
-      <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
-    </snapshotRepository>
-    <repository>
-      <id>oss</id>
-      <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
-    </repository>
-  </distributionManagement>
-
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <java.version>1.7</java.version>
+    <java.version>1.8</java.version>
   </properties>
 
   <dependencies>
 
-    <dependency>  
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>3.8.1</version>
-      <scope>test</scope>
+    <dependency>
+      <groupId>com.github.xfslove</groupId>
+      <artifactId>smsj</artifactId>
+      <version>1.0.0-SNAPSHOT</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-data-redis-reactive</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-webflux</artifactId>
     </dependency>
 
   </dependencies>
 
   <build>
     <plugins>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.3</version>
-        <configuration>
-          <source>${java.version}</source>
-          <target>${java.version}</target>
-          <encoding>${project.build.sourceEncoding}</encoding>
-        </configuration>
-      </plugin>
 
       <plugin>
-        <groupId>org.sonatype.plugins</groupId>
-        <artifactId>nexus-staging-maven-plugin</artifactId>
-        <version>1.6.3</version>
-        <extensions>true</extensions>
-        <configuration>
-          <serverId>oss</serverId>
-          <nexusUrl>https://oss.sonatype.org</nexusUrl>
-          <autoReleaseAfterClose>true</autoReleaseAfterClose>
-        </configuration>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-maven-plugin</artifactId>
       </plugin>
 
-      <!--<plugin>-->
-      <!--<groupId>org.jacoco</groupId>-->
-      <!--<artifactId>jacoco-maven-plugin</artifactId>-->
-      <!--<version>0.7.7.201606060606</version>-->
-      <!--<executions>-->
-      <!--<execution>-->
-      <!--<goals>-->
-      <!--<goal>prepare-agent</goal>-->
-      <!--</goals>-->
-      <!--</execution>-->
-      <!--<execution>-->
-      <!--<id>report</id>-->
-      <!--<phase>test</phase>-->
-      <!--<goals>-->
-      <!--<goal>report</goal>-->
-      <!--</goals>-->
-      <!--</execution>-->
-      <!--</executions>-->
-      <!--</plugin>-->
     </plugins>
   </build>
 
