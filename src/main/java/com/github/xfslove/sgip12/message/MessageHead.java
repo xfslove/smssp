@@ -12,6 +12,10 @@ public class MessageHead implements Serializable {
 
   private final int commandId;
 
+  /**
+   * 整个message长度
+   * head + body
+   */
   private int messageLength;
 
   private SequenceNumber sequenceNumber;

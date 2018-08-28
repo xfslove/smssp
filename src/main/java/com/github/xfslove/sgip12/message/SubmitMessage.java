@@ -54,12 +54,12 @@ public class SubmitMessage implements SgipMessage {
    * 取值范围0-99999，该条短消息的收费值，单位为分，由SP定义，字符
    * 对于包月制收费的用户，该值为月租费的值
    */
-  private int feeValue = 0;
+  private String feeValue = "0";
 
   /**
    * 取值范围0-99999，赠送用户的话费，单位为分，由SP定义，特指由SP向用户发送广告时的赠送话费，字符
    */
-  private int givenValue = 0;
+  private String givenValue = "0";
 
   /**
    * 代收费标志，0：应收；1：实收，字符
@@ -196,19 +196,19 @@ public class SubmitMessage implements SgipMessage {
     this.feeType = feeType;
   }
 
-  public int getFeeValue() {
+  public String getFeeValue() {
     return feeValue;
   }
 
-  public void setFeeValue(int feeValue) {
+  public void setFeeValue(String feeValue) {
     this.feeValue = feeValue;
   }
 
-  public int getGivenValue() {
+  public String getGivenValue() {
     return givenValue;
   }
 
-  public void setGivenValue(int givenValue) {
+  public void setGivenValue(String givenValue) {
     this.givenValue = givenValue;
   }
 
