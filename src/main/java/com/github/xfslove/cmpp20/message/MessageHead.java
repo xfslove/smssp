@@ -1,9 +1,9 @@
-package com.github.xfslove.sgip12.message;
+package com.github.xfslove.cmpp20.message;
 
 import java.io.Serializable;
 
 /**
- * sgip 头
+ * cmpp 头
  *
  * @author hanwen
  * created at 2018/8/28
@@ -18,11 +18,7 @@ public class MessageHead implements Serializable {
    */
   private int messageLength;
 
-  private int nodeId;
-
-  private int timestamp;
-
-  private int sequence;
+  private int sequenceId;
 
   public MessageHead(int commandId) {
     this.commandId = commandId;
@@ -40,27 +36,11 @@ public class MessageHead implements Serializable {
     this.messageLength = messageLength;
   }
 
-  public int getNodeId() {
-    return nodeId;
+  public int getSequenceId() {
+    return sequenceId;
   }
 
-  public void setNodeId(int nodeId) {
-    this.nodeId = nodeId;
-  }
-
-  public int getTimestamp() {
-    return timestamp;
-  }
-
-  public void setTimestamp(int timestamp) {
-    this.timestamp = timestamp;
-  }
-
-  public int getSequence() {
-    return sequence;
-  }
-
-  public void setSequence(int sequence) {
-    this.sequence = sequence;
+  public void setSequenceId(int sequenceId) {
+    this.sequenceId = sequenceId;
   }
 }
