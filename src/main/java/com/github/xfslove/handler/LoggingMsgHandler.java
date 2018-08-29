@@ -37,7 +37,7 @@ public class LoggingMsgHandler extends ChannelDuplexHandler {
   @Override
   public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
     if (logger.isEnabled(internalLevel)) {
-      logger.trace("Receive: {}", msg);
+      logger.log(internalLevel, "Receive: {}", msg);
     }
     ctx.fireChannelRead(msg);
   }
@@ -45,7 +45,7 @@ public class LoggingMsgHandler extends ChannelDuplexHandler {
   @Override
   public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) throws Exception {
     if (logger.isEnabled(internalLevel)) {
-      logger.debug("Send: {}", msg);
+      logger.log(internalLevel, "Send: {}", msg);
     }
     ctx.write(msg, promise);
   }
