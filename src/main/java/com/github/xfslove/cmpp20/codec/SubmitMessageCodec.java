@@ -2,7 +2,7 @@ package com.github.xfslove.cmpp20.codec;
 
 import com.github.xfslove.cmpp20.message.CmppMessage;
 import com.github.xfslove.cmpp20.message.SubmitMessage;
-import com.github.xfslove.sgip12.util.StringUtil;
+import com.github.xfslove.util.StringUtil;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToMessageCodec;
@@ -28,11 +28,11 @@ public class SubmitMessageCodec extends MessageToMessageCodec<CmppMessage, Submi
     buffer.writeByte(msg.getRegisteredDelivery());
     buffer.writeByte(msg.getMsgLevel());
     // 10 bytes
-    buffer.writeBytes(StringUtil.toOctetStringBytes(msg.getServiceId(), 10));
+    buffer.writeBytes(StringUtil.getOctetStringBytes(msg.getServiceId(), 10));
     // 1 byte
     buffer.writeByte(msg.getFeeUserType());
     // 21 bytes
-    buffer.writeBytes(StringUtil.toOctetStringBytes(msg.getFeeTerminalId(), 21));
+    buffer.writeBytes(StringUtil.getOctetStringBytes(msg.getFeeTerminalId(), 21));
     // 1 byte
     buffer.writeByte(msg.getTpPid());
     buffer.writeByte(msg.getTpUdhi());
@@ -40,20 +40,20 @@ public class SubmitMessageCodec extends MessageToMessageCodec<CmppMessage, Submi
     buffer.writeByte(msg.getDcs().getValue());
 
     // 6 bytes
-    buffer.writeBytes(StringUtil.toOctetStringBytes(msg.getMsgSrc(), 6));
+    buffer.writeBytes(StringUtil.getOctetStringBytes(msg.getMsgSrc(), 6));
     // 2 bytes
-    buffer.writeBytes(StringUtil.toOctetStringBytes(msg.getFeeType(), 2));
+    buffer.writeBytes(StringUtil.getOctetStringBytes(msg.getFeeType(), 2));
     // 6 bytes
-    buffer.writeBytes(StringUtil.toOctetStringBytes(msg.getFeeCode(), 6));
+    buffer.writeBytes(StringUtil.getOctetStringBytes(msg.getFeeCode(), 6));
     // 17 bytes
-    buffer.writeBytes(StringUtil.toOctetStringBytes(msg.getValIdTime(), 17));
-    buffer.writeBytes(StringUtil.toOctetStringBytes(msg.getAtTime(), 17));
+    buffer.writeBytes(StringUtil.getOctetStringBytes(msg.getValIdTime(), 17));
+    buffer.writeBytes(StringUtil.getOctetStringBytes(msg.getAtTime(), 17));
     // 21 bytes
-    buffer.writeBytes(StringUtil.toOctetStringBytes(msg.getSrcId(), 21));
+    buffer.writeBytes(StringUtil.getOctetStringBytes(msg.getSrcId(), 21));
 
     buffer.writeByte(msg.getDestTerminalIds().size());
     for (String destTerminalId : msg.getDestTerminalIds()) {
-      buffer.writeBytes(StringUtil.toOctetStringBytes(destTerminalId, 21));
+      buffer.writeBytes(StringUtil.getOctetStringBytes(destTerminalId, 21));
     }
 
     byte[] udh = msg.getUdhBytes();
@@ -64,7 +64,7 @@ public class SubmitMessageCodec extends MessageToMessageCodec<CmppMessage, Submi
 
     // 8 bytes
     if (msg.getReserve() != null && msg.getReserve().length() > 0) {
-      buffer.writeBytes(StringUtil.toOctetStringBytes(msg.getReserve(), 8));
+      buffer.writeBytes(StringUtil.getOctetStringBytes(msg.getReserve(), 8));
     }
 
     out.add(buffer);

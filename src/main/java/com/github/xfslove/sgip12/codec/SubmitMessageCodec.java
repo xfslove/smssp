@@ -2,7 +2,7 @@ package com.github.xfslove.sgip12.codec;
 
 import com.github.xfslove.sgip12.message.SgipMessage;
 import com.github.xfslove.sgip12.message.SubmitMessage;
-import com.github.xfslove.sgip12.util.StringUtil;
+import com.github.xfslove.util.StringUtil;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToMessageCodec;
@@ -20,30 +20,30 @@ public class SubmitMessageCodec extends MessageToMessageCodec<SgipMessage, Submi
     ByteBuf buffer = ctx.alloc().buffer();
 
     // 21 bytes
-    buffer.writeBytes(StringUtil.toOctetStringBytes(msg.getSpNumber(), 21));
-    buffer.writeBytes(StringUtil.toOctetStringBytes(msg.getChargeNumber(), 21));
+    buffer.writeBytes(StringUtil.getOctetStringBytes(msg.getSpNumber(), 21));
+    buffer.writeBytes(StringUtil.getOctetStringBytes(msg.getChargeNumber(), 21));
     // 1 byte
     buffer.writeByte(msg.getUserNumbers().size());
     for (String userNumber : msg.getUserNumbers()) {
       // 21 bytes
-      buffer.writeBytes(StringUtil.toOctetStringBytes(userNumber, 21));
+      buffer.writeBytes(StringUtil.getOctetStringBytes(userNumber, 21));
     }
     // 5 bytes
-    buffer.writeBytes(StringUtil.toOctetStringBytes(msg.getCorpId(), 5));
+    buffer.writeBytes(StringUtil.getOctetStringBytes(msg.getCorpId(), 5));
     // 10 bytes
-    buffer.writeBytes(StringUtil.toOctetStringBytes(msg.getServiceType(), 10));
+    buffer.writeBytes(StringUtil.getOctetStringBytes(msg.getServiceType(), 10));
     // 1 byte
     buffer.writeByte(msg.getFeeType());
     // 6 bytes
-    buffer.writeBytes(StringUtil.toOctetStringBytes(msg.getFeeValue(), 6));
-    buffer.writeBytes(StringUtil.toOctetStringBytes(msg.getGivenValue(), 6));
+    buffer.writeBytes(StringUtil.getOctetStringBytes(msg.getFeeValue(), 6));
+    buffer.writeBytes(StringUtil.getOctetStringBytes(msg.getGivenValue(), 6));
     // 1 byte
     buffer.writeByte(msg.getAgentFlag());
     buffer.writeByte(msg.getMorelatetoMTFlag());
     buffer.writeByte(msg.getPriority());
     // 16 bytes
-    buffer.writeBytes(StringUtil.toOctetStringBytes(msg.getExpireTime(), 16));
-    buffer.writeBytes(StringUtil.toOctetStringBytes(msg.getScheduleTime(), 16));
+    buffer.writeBytes(StringUtil.getOctetStringBytes(msg.getExpireTime(), 16));
+    buffer.writeBytes(StringUtil.getOctetStringBytes(msg.getScheduleTime(), 16));
     // 1 byte
     buffer.writeByte(msg.getReportFlag());
     buffer.writeByte(msg.getTpPid());
@@ -60,7 +60,7 @@ public class SubmitMessageCodec extends MessageToMessageCodec<SgipMessage, Submi
     buffer.writeBytes(ud);
     // 8 bytes
     if (msg.getReserve() != null && msg.getReserve().length() > 0) {
-      buffer.writeBytes(StringUtil.toOctetStringBytes(msg.getReserve(), 8));
+      buffer.writeBytes(StringUtil.getOctetStringBytes(msg.getReserve(), 8));
     }
 
     out.add(buffer);
