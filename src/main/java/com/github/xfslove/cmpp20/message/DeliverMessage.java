@@ -1,12 +1,12 @@
 package com.github.xfslove.cmpp20.message;
 
-import com.github.xfslove.sms.SmsMessage;
+import com.github.xfslove.sms.SmsPdu;
 
 /**
  * @author hanwen
  * created at 2018/8/28
  */
-public class DeliverMessage implements CmppMessage {
+public class DeliverMessage extends SmsPdu implements CmppMessage {
 
   private final MessageHead head = new MessageHead(CmppConstants.CMPP_DELIVER);
 
@@ -63,16 +63,6 @@ public class DeliverMessage implements CmppMessage {
    * 保留
    */
   private String reserve;
-
-  /**
-   * 消息内容
-   */
-  private SmsMessage message;
-
-  /**
-   * 状态报告
-   */
-  private Report report;
 
   @Override
   public MessageHead getHead() {
@@ -141,22 +131,6 @@ public class DeliverMessage implements CmppMessage {
 
   public void setReserve(String reserve) {
     this.reserve = reserve;
-  }
-
-  public SmsMessage getMessage() {
-    return message;
-  }
-
-  public void setMessage(SmsMessage message) {
-    this.message = message;
-  }
-
-  public Report getReport() {
-    return report;
-  }
-
-  public void setReport(Report report) {
-    this.report = report;
   }
 
   public static class Report {

@@ -1,6 +1,6 @@
 package com.github.xfslove.sgip12.message;
 
-import com.github.xfslove.sms.SmsMessage;
+import com.github.xfslove.sms.SmsPdu;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -9,7 +9,7 @@ import java.util.List;
  * @author hanwen
  * created at 2018/8/28
  */
-public class SubmitMessage implements SgipMessage {
+public class SubmitMessage extends SmsPdu implements SgipMessage {
 
   private final MessageHead head = new MessageHead(SgipConstants.COMMAND_ID_SUBMIT);
 
@@ -130,22 +130,9 @@ public class SubmitMessage implements SgipMessage {
    */
   private String reserve;
 
-  /**
-   * 消息内容
-   */
-  private SmsMessage message;
-
   @Override
   public MessageHead getHead() {
     return head;
-  }
-
-  public SmsMessage getMessage() {
-    return message;
-  }
-
-  public void setMessage(SmsMessage message) {
-    this.message = message;
   }
 
   public String getSpNumber() {

@@ -3,7 +3,6 @@ package com.github.xfslove.sgip12.codec;
 import com.github.xfslove.sgip12.message.SgipMessage;
 import com.github.xfslove.sgip12.message.SubmitMessage;
 import com.github.xfslove.sgip12.util.StringUtil;
-import com.github.xfslove.sms.SmsPdu;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToMessageCodec;
@@ -50,14 +49,12 @@ public class SubmitMessageCodec extends MessageToMessageCodec<SgipMessage, Submi
     buffer.writeByte(msg.getTpPid());
     buffer.writeByte(msg.getTpUdhi());
 
-    // todo 多条短信
-    SmsPdu pdu = msg.getMessage().getPdus()[0];
     // 1 byte
-    buffer.writeByte(pdu.getDcs().getValue());
+    buffer.writeByte(msg.getDcs().getValue());
     buffer.writeByte(msg.getMessageType());
     // 4 bytes
-    byte[] udh = pdu.getUdhBytes();
-    byte[] ud = pdu.getUdBytes();
+    byte[] udh = msg.getUdhBytes();
+    byte[] ud = msg.getUdBytes();
     buffer.writeInt(udh.length + ud.length);
     buffer.writeBytes(udh);
     buffer.writeBytes(ud);

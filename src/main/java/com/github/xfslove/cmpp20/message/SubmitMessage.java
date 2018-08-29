@@ -1,6 +1,6 @@
 package com.github.xfslove.cmpp20.message;
 
-import com.github.xfslove.sms.SmsMessage;
+import com.github.xfslove.sms.SmsPdu;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -9,7 +9,7 @@ import java.util.List;
  * @author hanwen
  * created at 2018/8/28
  */
-public class SubmitMessage implements CmppMessage {
+public class SubmitMessage extends SmsPdu implements CmppMessage {
 
   private final MessageHead head = new MessageHead(CmppConstants.CMPP_SUBMIT);
 
@@ -117,11 +117,6 @@ public class SubmitMessage implements CmppMessage {
    * 保留
    */
   private String reserve;
-
-  /**
-   * 信息内容
-   */
-  private SmsMessage message;
 
   @Override
   public MessageHead getHead() {
@@ -270,13 +265,5 @@ public class SubmitMessage implements CmppMessage {
 
   public void setReserve(String reserve) {
     this.reserve = reserve;
-  }
-
-  public SmsMessage getMessage() {
-    return message;
-  }
-
-  public void setMessage(SmsMessage message) {
-    this.message = message;
   }
 }

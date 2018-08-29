@@ -3,7 +3,6 @@ package com.github.xfslove.cmpp20.codec;
 import com.github.xfslove.cmpp20.message.CmppMessage;
 import com.github.xfslove.cmpp20.message.SubmitMessage;
 import com.github.xfslove.sgip12.util.StringUtil;
-import com.github.xfslove.sms.SmsPdu;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToMessageCodec;
@@ -38,9 +37,7 @@ public class SubmitMessageCodec extends MessageToMessageCodec<CmppMessage, Submi
     buffer.writeByte(msg.getTpPid());
     buffer.writeByte(msg.getTpUdhi());
 
-    // todo 多条短信
-    SmsPdu pdu = msg.getMessage().getPdus()[0];
-    buffer.writeByte(pdu.getDcs().getValue());
+    buffer.writeByte(msg.getDcs().getValue());
 
     // 6 bytes
     buffer.writeBytes(StringUtil.toOctetStringBytes(msg.getMsgSrc(), 6));
@@ -59,8 +56,8 @@ public class SubmitMessageCodec extends MessageToMessageCodec<CmppMessage, Submi
       buffer.writeBytes(StringUtil.toOctetStringBytes(destTerminalId, 21));
     }
 
-    byte[] udh = pdu.getUdhBytes();
-    byte[] ud = pdu.getUdBytes();
+    byte[] udh = msg.getUdhBytes();
+    byte[] ud = msg.getUdBytes();
     buffer.writeByte(udh.length + ud.length);
     buffer.writeBytes(udh);
     buffer.writeBytes(ud);

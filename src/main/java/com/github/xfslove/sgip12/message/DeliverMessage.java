@@ -1,12 +1,12 @@
 package com.github.xfslove.sgip12.message;
 
-import com.github.xfslove.sms.SmsMessage;
+import com.github.xfslove.sms.SmsPdu;
 
 /**
  * @author hanwen
  * created at 2018/8/28
  */
-public class DeliverMessage implements SgipMessage {
+public class DeliverMessage extends SmsPdu implements SgipMessage {
 
   private final MessageHead head = new MessageHead(SgipConstants.COMMAND_ID_DELIVER);
 
@@ -37,22 +37,9 @@ public class DeliverMessage implements SgipMessage {
    */
   private String reserve;
 
-  /**
-   * 消息内容
-   */
-  private SmsMessage message;
-
   @Override
   public MessageHead getHead() {
     return head;
-  }
-
-  public SmsMessage getMessage() {
-    return message;
-  }
-
-  public void setMessage(SmsMessage message) {
-    this.message = message;
   }
 
   public String getSpNumber() {
