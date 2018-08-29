@@ -1,5 +1,10 @@
 package com.github.xfslove.sgip12.message;
 
+import com.github.xfslove.util.StringUtil;
+import io.netty.buffer.ByteBuf;
+
+import java.nio.charset.StandardCharsets;
+
 /**
  * @author hanwen
  * created at 2018/8/28
@@ -20,6 +25,19 @@ public class DeliverRespMessage implements SgipMessage {
   @Override
   public MessageHead getHead() {
     return head;
+  }
+
+  @Override
+  public void write(ByteBuf out) {
+    // 1 byte
+    out.writeByte(result);
+    // 8 bytes
+    out.writeBytes(StringUtil.getOctetStringBytes(reserve, 8, StandardCharsets.ISO_8859_1));
+  }
+
+  @Override
+  public void read(ByteBuf in) {
+    // no need implement
   }
 
   public int getResult() {

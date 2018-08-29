@@ -1,6 +1,9 @@
 package com.github.xfslove.sgip12.message;
 
 import com.github.xfslove.sms.SmsPdu;
+import io.netty.buffer.ByteBuf;
+
+import java.nio.charset.StandardCharsets;
 
 /**
  * @author hanwen
@@ -40,6 +43,28 @@ public class DeliverMessage extends SmsPdu implements SgipMessage {
   @Override
   public MessageHead getHead() {
     return head;
+  }
+
+  @Override
+  public void write(ByteBuf out) {
+    // no need implement
+  }
+
+  @Override
+  public void read(ByteBuf in) {
+    setUserNumber(in.readCharSequence(21, StandardCharsets.ISO_8859_1).toString().trim());
+    setSpNumber(in.readCharSequence(21, StandardCharsets.ISO_8859_1).toString().trim());
+    setTpPid(in.readUnsignedByte());
+    setTpUdhi(in.readUnsignedByte());
+
+    // todo 内容
+    int dcs = in.readUnsignedByte();
+
+    int msgLength = in.readInt();
+    byte[] contentbytes = new byte[msgLength];
+    in.readBytes(contentbytes);
+
+    setReserve(in.readCharSequence(8, StandardCharsets.ISO_8859_1).toString().trim());
   }
 
   public String getSpNumber() {

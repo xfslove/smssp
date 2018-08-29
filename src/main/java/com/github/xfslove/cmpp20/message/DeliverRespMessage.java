@@ -49,7 +49,10 @@ public class DeliverRespMessage implements CmppMessage {
 
   @Override
   public void write(ByteBuf out) {
-    out.writeBytes(getMsgId().getBytes());
+    // 8 bytes
+    byte[] bytes = getMsgId().getBytes();
+    out.writeBytes(bytes);
+    // 1 byte
     out.writeByte(getResult());
   }
 

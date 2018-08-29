@@ -100,6 +100,7 @@ public class DeliverMessage extends SmsPdu implements CmppMessage {
       report.setDoneTime(in.readCharSequence(10, StandardCharsets.ISO_8859_1).toString().trim());
       report.setDestTerminalId(in.readCharSequence(21, StandardCharsets.ISO_8859_1).toString().trim());
       report.setSmscSequence(in.readInt());
+      // todo setReport
       return;
     }
 

@@ -1,6 +1,6 @@
 package com.github.xfslove.util;
 
-import java.nio.charset.StandardCharsets;
+import java.nio.charset.Charset;
 
 /**
  * @author hanwen
@@ -11,16 +11,17 @@ public class StringUtil {
   /**
    * 定长字符串，左对齐存储，空余位置补’\0’
    *
-   * @param origin origin string
-   * @param length bytes size
+   * @param origin  origin string
+   * @param length  bytes size
+   * @param charset charset
    * @return 定长字符串
    */
-  public static byte[] getOctetStringBytes(String origin, int length) {
+  public static byte[] getOctetStringBytes(String origin, int length, Charset charset) {
     if (origin == null || origin.length() == 0) {
       return new byte[length];
     }
 
-    byte[] bytes = origin.getBytes(StandardCharsets.ISO_8859_1);
+    byte[] bytes = origin.getBytes(charset);
 
     int rs = bytes.length > length ? length : bytes.length;
 

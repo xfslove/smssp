@@ -1,5 +1,10 @@
 package com.github.xfslove.sgip12.message;
 
+import com.github.xfslove.util.StringUtil;
+import io.netty.buffer.ByteBuf;
+
+import java.nio.charset.StandardCharsets;
+
 /**
  * @author hanwen
  * created at 2018/8/28
@@ -21,15 +26,40 @@ public class BindMessage implements SgipMessage {
    */
   private int loginType = 1;
 
+  /**
+   * 服务器端给客户端分配的登录名
+   */
   private String loginName;
 
+  /**
+   * 服务器端和Login Name对应的密码
+   */
   private String loginPassword;
 
+  /**
+   * 保留
+   */
   private String reserve;
 
   @Override
   public MessageHead getHead() {
     return head;
+  }
+
+  @Override
+  public void write(ByteBuf out) {
+    out.writeByte(getLoginType());
+    out.writeBytes(StringUtil.getOctetStringBytes(getLoginName(), 16, StandardCharsets.ISO_8859_1));
+    out.writeBytes(StringUtil.getOctetStringBytes(getLoginPassword(), 16, StandardCharsets.ISO_8859_1));
+    out.writeBytes(StringUtil.getOctetStringBytes(getReserve(), 8, StandardCharsets.ISO_8859_1));
+  }
+
+  @Override
+  public void read(ByteBuf in) {
+    setLoginType(in.readUnsignedByte());
+    setLoginName(in.readCharSequence(16, StandardCharsets.ISO_8859_1).toString().trim());
+    setLoginPassword(in.readCharSequence(16, StandardCharsets.ISO_8859_1).toString().trim());
+    setReserve(in.readCharSequence(8, StandardCharsets.ISO_8859_1).toString().trim());
   }
 
   public int getLoginType() {

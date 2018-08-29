@@ -1,5 +1,9 @@
 package com.github.xfslove.sgip12.message;
 
+import io.netty.buffer.ByteBuf;
+
+import java.nio.charset.StandardCharsets;
+
 /**
  * @author hanwen
  * created at 2018/8/28
@@ -46,6 +50,26 @@ public class ReportMessage implements SgipMessage {
   @Override
   public MessageHead getHead() {
     return head;
+  }
+
+  @Override
+  public void write(ByteBuf out) {
+    // no need implement
+  }
+
+  @Override
+  public void read(ByteBuf in) {
+    int nodeId = in.readInt();
+    int timestamp = in.readInt();
+    int sequenceId = in.readInt();
+    setSubmitSequenceNumber(SequenceNumber.create(nodeId, timestamp, sequenceId));
+
+    setReportType(in.readUnsignedByte());
+    setUserNumber(in.readCharSequence(21, StandardCharsets.ISO_8859_1).toString().trim());
+    setState(in.readUnsignedByte());
+    setErrorCode(in.readUnsignedByte());
+
+    setReserve(in.readCharSequence(8, StandardCharsets.ISO_8859_1).toString().trim());
   }
 
   public SequenceNumber getSubmitSequenceNumber() {

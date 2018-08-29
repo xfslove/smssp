@@ -3,6 +3,8 @@ package com.github.xfslove.cmpp20.message;
 import com.github.xfslove.util.StringUtil;
 import io.netty.buffer.ByteBuf;
 
+import java.nio.charset.StandardCharsets;
+
 /**
  * @author hanwen
  * created at 2018/8/28
@@ -44,9 +46,9 @@ public class ConnectMessage implements CmppMessage {
   @Override
   public void write(ByteBuf out) {
     // 6 bytes
-    out.writeBytes(StringUtil.getOctetStringBytes(getSourceAddr(), 6));
+    out.writeBytes(StringUtil.getOctetStringBytes(getSourceAddr(), 6, StandardCharsets.ISO_8859_1));
     // 16 bytes
-    out.writeBytes(StringUtil.getOctetStringBytes(getAuthenticatorSource(), 16));
+    out.writeBytes(StringUtil.getOctetStringBytes(getAuthenticatorSource(), 16, StandardCharsets.ISO_8859_1));
     // 1 byte
     out.writeByte(getVersion());
     // 4 bytes
@@ -55,7 +57,11 @@ public class ConnectMessage implements CmppMessage {
 
   @Override
   public void read(ByteBuf in) {
-    // no need implement
+    setSourceAddr(in.readCharSequence(6, StandardCharsets.ISO_8859_1).toString().trim());
+    setAuthenticatorSource(in.readCharSequence(16, StandardCharsets.ISO_8859_1).toString().trim());
+    int version = in.readUnsignedByte();
+    // equal with 0x20
+    setTimestamp(in.readInt());
   }
 
   public String getSourceAddr() {

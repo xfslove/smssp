@@ -1,7 +1,10 @@
 package com.github.xfslove.sgip12.message;
 
 import com.github.xfslove.sms.SmsPdu;
+import com.github.xfslove.util.StringUtil;
+import io.netty.buffer.ByteBuf;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -133,6 +136,56 @@ public class SubmitMessage extends SmsPdu implements SgipMessage {
   @Override
   public MessageHead getHead() {
     return head;
+  }
+
+  @Override
+  public void write(ByteBuf out) {
+    // 21 bytes
+    out.writeBytes(StringUtil.getOctetStringBytes(getSpNumber(), 21, StandardCharsets.ISO_8859_1));
+    out.writeBytes(StringUtil.getOctetStringBytes(getChargeNumber(), 21, StandardCharsets.ISO_8859_1));
+    // 1 byte
+    out.writeByte(getUserNumbers().size());
+    for (String userNumber : getUserNumbers()) {
+      // 21 bytes
+      out.writeBytes(StringUtil.getOctetStringBytes(userNumber, 21, StandardCharsets.ISO_8859_1));
+    }
+    // 5 bytes
+    out.writeBytes(StringUtil.getOctetStringBytes(getCorpId(), 5, StandardCharsets.ISO_8859_1));
+    // 10 bytes
+    out.writeBytes(StringUtil.getOctetStringBytes(getServiceType(), 10, StandardCharsets.ISO_8859_1));
+    // 1 byte
+    out.writeByte(getFeeType());
+    // 6 bytes
+    out.writeBytes(StringUtil.getOctetStringBytes(getFeeValue(), 6, StandardCharsets.ISO_8859_1));
+    out.writeBytes(StringUtil.getOctetStringBytes(getGivenValue(), 6, StandardCharsets.ISO_8859_1));
+    // 1 byte
+    out.writeByte(getAgentFlag());
+    out.writeByte(getMorelatetoMTFlag());
+    out.writeByte(getPriority());
+    // 16 bytes
+    out.writeBytes(StringUtil.getOctetStringBytes(getExpireTime(), 16, StandardCharsets.ISO_8859_1));
+    out.writeBytes(StringUtil.getOctetStringBytes(getScheduleTime(), 16, StandardCharsets.ISO_8859_1));
+    // 1 byte
+    out.writeByte(getReportFlag());
+    out.writeByte(getTpPid());
+    out.writeByte(getTpUdhi());
+
+    // 1 byte
+    out.writeByte(getDcs().getValue());
+    out.writeByte(getMessageType());
+    // 4 bytes
+    byte[] udh = getUdhBytes();
+    byte[] ud = getUdBytes();
+    out.writeInt(udh.length + ud.length);
+    out.writeBytes(udh);
+    out.writeBytes(ud);
+    // 8 bytes
+    out.writeBytes(StringUtil.getOctetStringBytes(getReserve(), 8, StandardCharsets.ISO_8859_1));
+  }
+
+  @Override
+  public void read(ByteBuf in) {
+    // no need implement
   }
 
   public String getSpNumber() {

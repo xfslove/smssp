@@ -8,22 +8,24 @@ import io.netty.handler.codec.ByteToMessageCodec;
 import java.util.List;
 
 /**
- * sgip 消息头的codec，应该放在其它codec之前
+ * sgip 消息的codec
  *
  * @author hanwen
  * created at 2018/8/28
  */
-public class MesssageHeadCodec extends ByteToMessageCodec<SgipMessage> {
+public class MesssageCodec extends ByteToMessageCodec<SgipMessage> {
 
   @Override
-  protected void encode(ChannelHandlerContext ctx, SgipMessage message, ByteBuf out) throws Exception {
-    MessageHead head = message.getHead();
+  protected void encode(ChannelHandlerContext ctx, SgipMessage msg, ByteBuf out) throws Exception {
+    MessageHead head = msg.getHead();
     // 4 bytes
     out.writeInt(head.getMessageLength());
     out.writeInt(head.getCommandId());
 
     byte[] bytes = head.getSequenceNumber().getBytes();
     out.writeBytes(bytes);
+
+    msg.write(out);
   }
 
   @Override
@@ -41,23 +43,14 @@ public class MesssageHeadCodec extends ByteToMessageCodec<SgipMessage> {
       case SgipConstants.COMMAND_ID_BIND_RESP:
         message = new BindRespMessage();
         break;
-      case SgipConstants.COMMAND_ID_SUBMIT:
-        message = new SubmitMessage();
-        break;
       case SgipConstants.COMMAND_ID_SUBMIT_RESP:
         message = new SubmitRespMessage();
         break;
       case SgipConstants.COMMAND_ID_DELIVER:
         message = new DeliverMessage();
         break;
-      case SgipConstants.COMMAND_ID_DELIVER_RESP:
-        message = new DeliverRespMessage();
-        break;
       case SgipConstants.COMMAND_ID_REPORT:
         message = new ReportMessage();
-        break;
-      case SgipConstants.COMMAND_ID_REPORT_RESP:
-        message = new ReportRespMessage();
         break;
       case SgipConstants.COMMAND_ID_UNBIND:
         message = new UnBindMessage();
@@ -70,12 +63,14 @@ public class MesssageHeadCodec extends ByteToMessageCodec<SgipMessage> {
     }
 
     message.getHead().setMessageLength(messageLength);
-
-    // 12 bytes
-    byte[] bytes = new byte[12];
-    in.readBytes(bytes);
-    SequenceNumber sequenceNumber = SequenceNumber.create(bytes);
+    // 4 bytes
+    int nodeId = in.readInt();
+    int timestamp = in.readInt();
+    int sequenceId = in.readInt();
+    SequenceNumber sequenceNumber = SequenceNumber.create(nodeId, timestamp, sequenceId);
     message.getHead().setSequenceNumber(sequenceNumber);
+
+    message.read(in);
 
     out.add(message);
   }

@@ -2,7 +2,6 @@ package com.github.xfslove.sgip12.message;
 
 import java.io.Serializable;
 import java.nio.ByteBuffer;
-import java.util.Arrays;
 import java.util.Objects;
 
 /**
@@ -42,10 +41,7 @@ public class SequenceNumber implements Serializable {
 
   }
 
-  public static SequenceNumber create(byte[] bytes) {
-    int nodeId = ByteBuffer.wrap(Arrays.copyOfRange(bytes, 0, 4)).getInt();
-    int timestamp = ByteBuffer.wrap(Arrays.copyOfRange(bytes, 4, 8)).getInt();
-    int sequenceId = ByteBuffer.wrap(Arrays.copyOfRange(bytes, 8, 12)).getInt();
+  public static SequenceNumber create(int nodeId, int timestamp, int sequenceId) {
     return new SequenceNumber(nodeId, timestamp, sequenceId);
   }
 
