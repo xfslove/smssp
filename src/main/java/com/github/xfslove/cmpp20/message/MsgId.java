@@ -65,7 +65,6 @@ public class MsgId implements Serializable {
   public byte[] getBytes() {
     // 64 bits
     byte[] bytes = new byte[8];
-
     long result = 0;
     result |= (long) getMonth() << 60;
     result |= (long) getDay() << 55;
@@ -78,15 +77,14 @@ public class MsgId implements Serializable {
     return bytes;
   }
 
-  public static MsgId create(byte[] bytes) {
-    long result = ByteBuffer.wrap(bytes).getLong();
-    int month = (int) ((result >>> 60) & 0xf);
-    int day = (int) ((result >>> 55) & 0x1f);
-    int hour = (int) ((result >>> 50) & 0x1f);
-    int min = (int) ((result >>> 44) & 0x3f);
-    int sec = (int) ((result >>> 38) & 0x3f);
-    int gateId = (int) ((result >>> 16) & 0x3fffff);
-    int sequenceId = (int) (result & 0xffff);
+  public static MsgId create(long msgId) {
+    int month = (int) ((msgId >>> 60) & 0xf);
+    int day = (int) ((msgId >>> 55) & 0x1f);
+    int hour = (int) ((msgId >>> 50) & 0x1f);
+    int min = (int) ((msgId >>> 44) & 0x3f);
+    int sec = (int) ((msgId >>> 38) & 0x3f);
+    int gateId = (int) ((msgId >>> 16) & 0x3fffff);
+    int sequenceId = (int) (msgId & 0xffff);
     return new MsgId(gateId, month, day, hour, min, sec, sequenceId);
   }
 

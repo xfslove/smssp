@@ -1,5 +1,7 @@
 package com.github.xfslove.cmpp20.message;
 
+import io.netty.buffer.ByteBuf;
+
 /**
  * @author hanwen
  * created at 2018/8/28
@@ -43,6 +45,17 @@ public class DeliverRespMessage implements CmppMessage {
   @Override
   public MessageHead getHead() {
     return head;
+  }
+
+  @Override
+  public void write(ByteBuf out) {
+    out.writeBytes(getMsgId().getBytes());
+    out.writeByte(getResult());
+  }
+
+  @Override
+  public void read(ByteBuf in) {
+    // no need implement
   }
 
   public MsgId getMsgId() {

@@ -1,5 +1,9 @@
 package com.github.xfslove.cmpp20.message;
 
+import io.netty.buffer.ByteBuf;
+
+import java.nio.charset.StandardCharsets;
+
 /**
  * @author hanwen
  * created at 2018/8/28
@@ -36,6 +40,18 @@ public class ConnectRespMessage implements CmppMessage {
   @Override
   public MessageHead getHead() {
     return head;
+  }
+
+  @Override
+  public void write(ByteBuf out) {
+    // no need implement
+  }
+
+  @Override
+  public void read(ByteBuf in) {
+    setStatus(in.readInt());
+    setAuthenticatorISMG(in.readCharSequence(16, StandardCharsets.ISO_8859_1).toString().trim());
+    setVersion(in.readUnsignedByte());
   }
 
   public int getStatus() {

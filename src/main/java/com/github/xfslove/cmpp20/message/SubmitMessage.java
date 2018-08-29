@@ -1,6 +1,8 @@
 package com.github.xfslove.cmpp20.message;
 
 import com.github.xfslove.sms.SmsPdu;
+import com.github.xfslove.util.StringUtil;
+import io.netty.buffer.ByteBuf;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -121,6 +123,62 @@ public class SubmitMessage extends SmsPdu implements CmppMessage {
   @Override
   public MessageHead getHead() {
     return head;
+  }
+
+  @Override
+  public void write(ByteBuf out) {
+    // 8 bytes
+    byte[] bytes = getMsgId().getBytes();
+    out.writeBytes(bytes);
+    // 1 byte
+    out.writeByte(getPkTotal());
+    out.writeByte(getPkNumber());
+    out.writeByte(getRegisteredDelivery());
+    out.writeByte(getMsgLevel());
+    // 10 bytes
+    out.writeBytes(StringUtil.getOctetStringBytes(getServiceId(), 10));
+    // 1 byte
+    out.writeByte(getFeeUserType());
+    // 21 bytes
+    out.writeBytes(StringUtil.getOctetStringBytes(getFeeTerminalId(), 21));
+    // 1 byte
+    out.writeByte(getTpPid());
+    out.writeByte(getTpUdhi());
+
+    out.writeByte(getDcs().getValue());
+
+    // 6 bytes
+    out.writeBytes(StringUtil.getOctetStringBytes(getMsgSrc(), 6));
+    // 2 bytes
+    out.writeBytes(StringUtil.getOctetStringBytes(getFeeType(), 2));
+    // 6 bytes
+    out.writeBytes(StringUtil.getOctetStringBytes(getFeeCode(), 6));
+    // 17 bytes
+    out.writeBytes(StringUtil.getOctetStringBytes(getValIdTime(), 17));
+    out.writeBytes(StringUtil.getOctetStringBytes(getAtTime(), 17));
+    // 21 bytes
+    out.writeBytes(StringUtil.getOctetStringBytes(getSrcId(), 21));
+
+    out.writeByte(getDestTerminalIds().size());
+    for (String destTerminalId : getDestTerminalIds()) {
+      out.writeBytes(StringUtil.getOctetStringBytes(destTerminalId, 21));
+    }
+
+    byte[] udh = getUdhBytes();
+    byte[] ud = getUdBytes();
+    out.writeByte(udh.length + ud.length);
+    out.writeBytes(udh);
+    out.writeBytes(ud);
+
+    // 8 bytes
+    if (getReserve() != null && getReserve().length() > 0) {
+      out.writeBytes(StringUtil.getOctetStringBytes(getReserve(), 8));
+    }
+  }
+
+  @Override
+  public void read(ByteBuf in) {
+    // no need implement
   }
 
   public MsgId getMsgId() {

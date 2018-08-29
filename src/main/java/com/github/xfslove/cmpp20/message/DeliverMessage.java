@@ -1,6 +1,9 @@
 package com.github.xfslove.cmpp20.message;
 
 import com.github.xfslove.sms.SmsPdu;
+import io.netty.buffer.ByteBuf;
+
+import java.nio.charset.StandardCharsets;
 
 /**
  * @author hanwen
@@ -24,7 +27,7 @@ public class DeliverMessage extends SmsPdu implements CmppMessage {
    * 序列号：bit16~bit1，顺序增加，步长为1，循环使用。
    * 各部分如不能填满，左补零，右对齐
    */
-  private int msgId;
+  private MsgId msgId;
 
   /**
    * 目的号码
@@ -69,11 +72,51 @@ public class DeliverMessage extends SmsPdu implements CmppMessage {
     return head;
   }
 
-  public int getMsgId() {
+  @Override
+  public void write(ByteBuf out) {
+    // no need implement
+  }
+
+  @Override
+  public void read(ByteBuf in) {
+    setMsgId(MsgId.create(in.readLong()));
+    setDestId(in.readCharSequence(21, StandardCharsets.ISO_8859_1).toString().trim());
+    setServiceId(in.readCharSequence(10, StandardCharsets.ISO_8859_1).toString().trim());
+    setTpPid(in.readUnsignedByte());
+    setTpUdhi(in.readUnsignedByte());
+
+    int dcs = in.readUnsignedByte();
+
+    setSrcTerminalId(in.readCharSequence(21, StandardCharsets.ISO_8859_1).toString().trim());
+    int registeredDelivery = in.readUnsignedByte();
+    setRegisteredDelivery(registeredDelivery);
+
+    if (1 == registeredDelivery) {
+      // 状态报告
+      Report report = new Report();
+      report.setMsgId(MsgId.create(in.readLong()));
+      report.setStat(in.readCharSequence(7, StandardCharsets.ISO_8859_1).toString().trim());
+      report.setSubmitTime(in.readCharSequence(10, StandardCharsets.ISO_8859_1).toString().trim());
+      report.setDoneTime(in.readCharSequence(10, StandardCharsets.ISO_8859_1).toString().trim());
+      report.setDestTerminalId(in.readCharSequence(21, StandardCharsets.ISO_8859_1).toString().trim());
+      report.setSmscSequence(in.readInt());
+      return;
+    }
+
+    // deliver
+    // todo 内容
+    int msgLength = in.readUnsignedByte();
+    byte[] content = new byte[msgLength];
+    in.readBytes(content);
+
+    setReserve(in.readCharSequence(8, StandardCharsets.ISO_8859_1).toString().trim());
+  }
+
+  public MsgId getMsgId() {
     return msgId;
   }
 
-  public void setMsgId(int msgId) {
+  public void setMsgId(MsgId msgId) {
     this.msgId = msgId;
   }
 

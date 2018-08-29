@@ -1,5 +1,8 @@
 package com.github.xfslove.cmpp20.message;
 
+import com.github.xfslove.util.StringUtil;
+import io.netty.buffer.ByteBuf;
+
 /**
  * @author hanwen
  * created at 2018/8/28
@@ -36,6 +39,23 @@ public class ConnectMessage implements CmppMessage {
   @Override
   public MessageHead getHead() {
     return head;
+  }
+
+  @Override
+  public void write(ByteBuf out) {
+    // 6 bytes
+    out.writeBytes(StringUtil.getOctetStringBytes(getSourceAddr(), 6));
+    // 16 bytes
+    out.writeBytes(StringUtil.getOctetStringBytes(getAuthenticatorSource(), 16));
+    // 1 byte
+    out.writeByte(getVersion());
+    // 4 bytes
+    out.writeInt(getTimestamp());
+  }
+
+  @Override
+  public void read(ByteBuf in) {
+    // no need implement
   }
 
   public String getSourceAddr() {
