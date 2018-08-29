@@ -8,12 +8,12 @@ import io.netty.handler.codec.ByteToMessageCodec;
 import java.util.List;
 
 /**
- * sgip 消息的codec
+ * sgip1.2 消息的codec
  *
  * @author hanwen
  * created at 2018/8/28
  */
-public class MesssageCodec extends ByteToMessageCodec<SgipMessage> {
+public class Sgip12MesssageCodec extends ByteToMessageCodec<SgipMessage> {
 
   @Override
   protected void encode(ChannelHandlerContext ctx, SgipMessage msg, ByteBuf out) throws Exception {

@@ -8,12 +8,12 @@ import io.netty.handler.codec.ByteToMessageCodec;
 import java.util.List;
 
 /**
- * cmpp 消息的codec
+ * cmpp2.0 消息的codec
  *
  * @author hanwen
  * created at 2018/8/28
  */
-public class MessageCodec extends ByteToMessageCodec<CmppMessage> {
+public class Cmpp20MessageCodec extends ByteToMessageCodec<CmppMessage> {
 
   @Override
   protected void encode(ChannelHandlerContext ctx, CmppMessage msg, ByteBuf out) throws Exception {
