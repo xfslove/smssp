@@ -7,13 +7,13 @@ package com.github.xfslove.sgip12.util;
 public class StringUtil {
 
   /**
-   * ensure a string with a specified size
+   * 定长字符串，左对齐存储，空余位置补’\0’
    *
    * @param origin origin string
-   * @param size   ensure size
-   * @return ensured string
+   * @param size   bytes size
+   * @return 定长字符串
    */
-  public static byte[] ensure(String origin, int size) {
+  public static byte[] toOctetStringBytes(String origin, int size) {
     if (origin == null || origin.length() == 0) {
       return new byte[size];
     }

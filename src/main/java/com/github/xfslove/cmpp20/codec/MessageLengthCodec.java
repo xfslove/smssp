@@ -3,7 +3,7 @@ package com.github.xfslove.cmpp20.codec;
 import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 
 /**
- * sgip 消息长度codec，应该放在最前面
+ * cmpp 消息长度codec，应该放在最前面
  *
  * @author hanwen
  * created at 2018/8/28

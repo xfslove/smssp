@@ -21,30 +21,30 @@ public class SubmitMessageCodec extends MessageToMessageCodec<SgipMessage, Submi
     ByteBuf buffer = ctx.alloc().buffer();
 
     // 21 bytes
-    buffer.writeBytes(StringUtil.ensure(msg.getSpNumber(), 21));
-    buffer.writeBytes(StringUtil.ensure(msg.getChargeNumber(), 21));
+    buffer.writeBytes(StringUtil.toOctetStringBytes(msg.getSpNumber(), 21));
+    buffer.writeBytes(StringUtil.toOctetStringBytes(msg.getChargeNumber(), 21));
     // 1 byte
     buffer.writeByte(msg.getUserNumbers().size());
     for (String userNumber : msg.getUserNumbers()) {
       // 21 bytes
-      buffer.writeBytes(StringUtil.ensure(userNumber, 21));
+      buffer.writeBytes(StringUtil.toOctetStringBytes(userNumber, 21));
     }
     // 5 bytes
-    buffer.writeBytes(StringUtil.ensure(msg.getCorpId(), 5));
+    buffer.writeBytes(StringUtil.toOctetStringBytes(msg.getCorpId(), 5));
     // 10 bytes
-    buffer.writeBytes(StringUtil.ensure(msg.getServiceType(), 10));
+    buffer.writeBytes(StringUtil.toOctetStringBytes(msg.getServiceType(), 10));
     // 1 byte
     buffer.writeByte(msg.getFeeType());
     // 6 bytes
-    buffer.writeBytes(StringUtil.ensure(msg.getFeeValue(), 6));
-    buffer.writeBytes(StringUtil.ensure(msg.getGivenValue(), 6));
+    buffer.writeBytes(StringUtil.toOctetStringBytes(msg.getFeeValue(), 6));
+    buffer.writeBytes(StringUtil.toOctetStringBytes(msg.getGivenValue(), 6));
     // 1 byte
     buffer.writeByte(msg.getAgentFlag());
     buffer.writeByte(msg.getMorelatetoMTFlag());
     buffer.writeByte(msg.getPriority());
     // 16 bytes
-    buffer.writeBytes(StringUtil.ensure(msg.getExpireTime(), 16));
-    buffer.writeBytes(StringUtil.ensure(msg.getScheduleTime(), 16));
+    buffer.writeBytes(StringUtil.toOctetStringBytes(msg.getExpireTime(), 16));
+    buffer.writeBytes(StringUtil.toOctetStringBytes(msg.getScheduleTime(), 16));
     // 1 byte
     buffer.writeByte(msg.getReportFlag());
     buffer.writeByte(msg.getTpPid());
@@ -63,7 +63,7 @@ public class SubmitMessageCodec extends MessageToMessageCodec<SgipMessage, Submi
     buffer.writeBytes(ud);
     // 8 bytes
     if (msg.getReserve() != null && msg.getReserve().length() > 0) {
-      buffer.writeBytes(StringUtil.ensure(msg.getReserve(), 8));
+      buffer.writeBytes(StringUtil.toOctetStringBytes(msg.getReserve(), 8));
     }
 
     out.add(buffer);

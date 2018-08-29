@@ -18,11 +18,7 @@ public class MessageHead implements Serializable {
    */
   private int messageLength;
 
-  private int nodeId;
-
-  private int timestamp;
-
-  private int sequence;
+  private SequenceNumber sequenceNumber;
 
   public MessageHead(int commandId) {
     this.commandId = commandId;
@@ -40,27 +36,11 @@ public class MessageHead implements Serializable {
     this.messageLength = messageLength;
   }
 
-  public int getNodeId() {
-    return nodeId;
+  public SequenceNumber getSequenceNumber() {
+    return sequenceNumber;
   }
 
-  public void setNodeId(int nodeId) {
-    this.nodeId = nodeId;
-  }
-
-  public int getTimestamp() {
-    return timestamp;
-  }
-
-  public void setTimestamp(int timestamp) {
-    this.timestamp = timestamp;
-  }
-
-  public int getSequence() {
-    return sequence;
-  }
-
-  public void setSequence(int sequence) {
-    this.sequence = sequence;
+  public void setSequenceNumber(SequenceNumber sequenceNumber) {
+    this.sequenceNumber = sequenceNumber;
   }
 }

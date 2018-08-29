@@ -22,11 +22,11 @@ public class BindMessageCodec extends MessageToMessageCodec<SgipMessage, BindMes
     // 1 byte
     buffer.writeByte(msg.getLoginType());
     // 16 bytes
-    buffer.writeBytes(StringUtil.ensure(msg.getLoginName(), 16));
-    buffer.writeBytes(StringUtil.ensure(msg.getLoginPassword(), 16));
+    buffer.writeBytes(StringUtil.toOctetStringBytes(msg.getLoginName(), 16));
+    buffer.writeBytes(StringUtil.toOctetStringBytes(msg.getLoginPassword(), 16));
     // 8 bytes
     if (msg.getReserve() != null && msg.getReserve().length() > 0) {
-      buffer.writeBytes(StringUtil.ensure(msg.getReserve(), 8));
+      buffer.writeBytes(StringUtil.toOctetStringBytes(msg.getReserve(), 8));
     }
 
     out.add(buffer);

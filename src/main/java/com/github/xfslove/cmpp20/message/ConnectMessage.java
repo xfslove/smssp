@@ -6,10 +6,63 @@ package com.github.xfslove.cmpp20.message;
  */
 public class ConnectMessage implements CmppMessage {
 
-  private MessageHead head = new MessageHead(CmppConstants.CMPP_CONNECT);
+  private final MessageHead head = new MessageHead(CmppConstants.CMPP_CONNECT);
+
+  /**
+   * 双方协商的版本号(高位4bit表示主版本号,低位4bit表示次版本号)
+   * cmpp2.0
+   */
+  private final int version = 0x20;
+
+  /**
+   * 源地址，此处为SP_Id，即SP的企业代码
+   */
+  private String sourceAddr;
+
+  /**
+   * 用于鉴别源地址。其值通过单向MD5 hash计算得出，表示如下：
+   * AuthenticatorSource =
+   * MD5（Source_Addr+9 字节的0 +shared secret+timestamp）
+   * Shared secret 由中国移动与源地址实体事先商定，timestamp格式为：MMDDHHMMSS，即月日时分秒，10位
+   */
+  private String authenticatorSource;
+
+
+  /**
+   * 时间戳的明文,由客户端产生,格式为MMDDHHMMSS，即月日时分秒，10位数字的整型，右对齐
+   */
+  private int timestamp;
 
   @Override
   public MessageHead getHead() {
     return head;
+  }
+
+  public String getSourceAddr() {
+    return sourceAddr;
+  }
+
+  public void setSourceAddr(String sourceAddr) {
+    this.sourceAddr = sourceAddr;
+  }
+
+  public String getAuthenticatorSource() {
+    return authenticatorSource;
+  }
+
+  public void setAuthenticatorSource(String authenticatorSource) {
+    this.authenticatorSource = authenticatorSource;
+  }
+
+  public int getVersion() {
+    return version;
+  }
+
+  public int getTimestamp() {
+    return timestamp;
+  }
+
+  public void setTimestamp(int timestamp) {
+    this.timestamp = timestamp;
   }
 }

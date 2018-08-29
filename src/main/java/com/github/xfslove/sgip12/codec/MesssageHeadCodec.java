@@ -22,9 +22,8 @@ public class MesssageHeadCodec extends ByteToMessageCodec<SgipMessage> {
     out.writeInt(head.getMessageLength());
     out.writeInt(head.getCommandId());
 
-    out.writeInt(head.getNodeId());
-    out.writeInt(head.getTimestamp());
-    out.writeInt(head.getSequence());
+    byte[] bytes = head.getSequenceNumber().getBytes();
+    out.writeBytes(bytes);
   }
 
   @Override
@@ -72,12 +71,11 @@ public class MesssageHeadCodec extends ByteToMessageCodec<SgipMessage> {
 
     message.getHead().setMessageLength(messageLength);
 
-    int nodeId = in.readInt();
-    message.getHead().setNodeId(nodeId);
-    int timestamp = in.readInt();
-    message.getHead().setTimestamp(timestamp);
-    int sequence = in.readInt();
-    message.getHead().setSequence(sequence);
+    // 12 bytes
+    byte[] bytes = new byte[12];
+    in.readBytes(bytes);
+    SequenceNumber sequenceNumber = SequenceNumber.create(bytes);
+    message.getHead().setSequenceNumber(sequenceNumber);
 
     out.add(message);
   }
