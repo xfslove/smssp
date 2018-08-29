@@ -119,4 +119,17 @@ public class ReportMessage implements SgipMessage {
   public void setReserve(String reserve) {
     this.reserve = reserve;
   }
+
+  @Override
+  public String toString() {
+    return "ReportMessage{" +
+        "head=" + head +
+        ", submitSequenceNumber=" + submitSequenceNumber +
+        ", reportType=" + reportType +
+        ", userNumber='" + userNumber + '\'' +
+        ", state=" + state +
+        ", errorCode=" + errorCode +
+        ", reserve='" + reserve + '\'' +
+        '}';
+  }
 }

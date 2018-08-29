@@ -83,4 +83,14 @@ public class ConnectRespMessage implements CmppMessage {
   public void setVersion(int version) {
     this.version = version;
   }
+
+  @Override
+  public String toString() {
+    return "ConnectRespMessage{" +
+        "head=" + head +
+        ", status=" + status +
+        ", authenticatorISMG='" + authenticatorISMG + '\'' +
+        ", version=" + version +
+        '}';
+  }
 }

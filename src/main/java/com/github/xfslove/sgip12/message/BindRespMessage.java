@@ -56,4 +56,13 @@ public class BindRespMessage implements SgipMessage {
   public void setReserve(String reserve) {
     this.reserve = reserve;
   }
+
+  @Override
+  public String toString() {
+    return "BindRespMessage{" +
+        "head=" + head +
+        ", result=" + result +
+        ", reserve='" + reserve + '\'' +
+        '}';
+  }
 }

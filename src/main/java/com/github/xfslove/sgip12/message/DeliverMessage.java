@@ -106,4 +106,17 @@ public class DeliverMessage extends SmsPdu implements SgipMessage {
   public void setReserve(String reserve) {
     this.reserve = reserve;
   }
+
+  @Override
+  public String toString() {
+    // todo 内容
+    return "DeliverMessage{" +
+        "head=" + head +
+        ", spNumber='" + spNumber + '\'' +
+        ", userNumber='" + userNumber + '\'' +
+        ", tpPid=" + tpPid +
+        ", tpUdhi=" + tpUdhi +
+        ", reserve='" + reserve + '\'' +
+        '}';
+  }
 }

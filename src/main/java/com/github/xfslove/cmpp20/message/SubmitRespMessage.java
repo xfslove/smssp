@@ -73,4 +73,13 @@ public class SubmitRespMessage implements CmppMessage {
   public void setResult(int result) {
     this.result = result;
   }
+
+  @Override
+  public String toString() {
+    return "SubmitRespMessage{" +
+        "head=" + head +
+        ", msgId=" + msgId +
+        ", result=" + result +
+        '}';
+  }
 }

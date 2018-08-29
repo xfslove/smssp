@@ -38,7 +38,6 @@ public class SequenceNumber implements Serializable {
     byte[] bytes = new byte[12];
     ByteBuffer.wrap(bytes).putInt(getNodeId()).putInt(getTimestamp()).putInt(getSequenceId());
     return bytes;
-
   }
 
   public static SequenceNumber create(int nodeId, int timestamp, int sequenceId) {
@@ -58,5 +57,12 @@ public class SequenceNumber implements Serializable {
   @Override
   public int hashCode() {
     return Objects.hash(nodeId, timestamp, sequenceId);
+  }
+
+  @Override
+  public String toString() {
+    return "SequenceNumber{" +
+        "sequenceId=" + nodeId + "" + timestamp + "" + sequenceId +
+        '}';
   }
 }

@@ -106,4 +106,12 @@ public class MsgId implements Serializable {
   public int hashCode() {
     return Objects.hash(gateId, month, day, hour, minute, second, sequenceId);
   }
+
+  @Override
+  public String toString() {
+    byte[] bytes = getBytes();
+    return "MsgId{" +
+        "msgId=" + ByteBuffer.wrap(bytes).getLong() +
+        '}';
+  }
 }

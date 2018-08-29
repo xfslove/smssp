@@ -76,4 +76,13 @@ public class DeliverRespMessage implements CmppMessage {
   public void setResult(int result) {
     this.result = result;
   }
+
+  @Override
+  public String toString() {
+    return "DeliverRespMessage{" +
+        "head=" + head +
+        ", msgId=" + msgId +
+        ", result=" + result +
+        '}';
+  }
 }

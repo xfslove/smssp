@@ -58,4 +58,13 @@ public class ReportRespMessage implements SgipMessage {
   public void setReserve(String reserve) {
     this.reserve = reserve;
   }
+
+  @Override
+  public String toString() {
+    return "ReportRespMessage{" +
+        "head=" + head +
+        ", result=" + result +
+        ", reserve='" + reserve + '\'' +
+        '}';
+  }
 }

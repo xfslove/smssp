@@ -264,5 +264,33 @@ public class DeliverMessage extends SmsPdu implements CmppMessage {
     public void setSmscSequence(int smscSequence) {
       this.smscSequence = smscSequence;
     }
+
+    @Override
+    public String toString() {
+      return "Report{" +
+          "msgId=" + msgId +
+          ", stat='" + stat + '\'' +
+          ", submitTime='" + submitTime + '\'' +
+          ", doneTime='" + doneTime + '\'' +
+          ", destTerminalId='" + destTerminalId + '\'' +
+          ", smscSequence=" + smscSequence +
+          '}';
+    }
+  }
+
+  @Override
+  public String toString() {
+    // todo 内容
+    return "DeliverMessage{" +
+        "head=" + head +
+        ", msgId=" + msgId +
+        ", destId='" + destId + '\'' +
+        ", serviceId='" + serviceId + '\'' +
+        ", tpPid=" + tpPid +
+        ", tpUdhi=" + tpUdhi +
+        ", srcTerminalId='" + srcTerminalId + '\'' +
+        ", registeredDelivery=" + registeredDelivery +
+        ", reserve='" + reserve + '\'' +
+        '}';
   }
 }

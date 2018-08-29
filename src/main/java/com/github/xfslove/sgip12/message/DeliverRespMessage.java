@@ -55,4 +55,13 @@ public class DeliverRespMessage implements SgipMessage {
   public void setReserve(String reserve) {
     this.reserve = reserve;
   }
+
+  @Override
+  public String toString() {
+    return "DeliverRespMessage{" +
+        "head=" + head +
+        ", result=" + result +
+        ", reserve='" + reserve + '\'' +
+        '}';
+  }
 }

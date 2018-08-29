@@ -331,4 +331,30 @@ public class SubmitMessage extends SmsPdu implements SgipMessage {
   public void setReserve(String reserve) {
     this.reserve = reserve;
   }
+
+  @Override
+  public String toString() {
+    // todo 内容
+    return "SubmitMessage{" +
+        "head=" + head +
+        ", spNumber='" + spNumber + '\'' +
+        ", chargeNumber='" + chargeNumber + '\'' +
+        ", userNumbers=" + userNumbers +
+        ", corpId='" + corpId + '\'' +
+        ", serviceType='" + serviceType + '\'' +
+        ", feeType=" + feeType +
+        ", feeValue='" + feeValue + '\'' +
+        ", givenValue='" + givenValue + '\'' +
+        ", agentFlag=" + agentFlag +
+        ", morelatetoMTFlag=" + morelatetoMTFlag +
+        ", priority=" + priority +
+        ", expireTime='" + expireTime + '\'' +
+        ", scheduleTime='" + scheduleTime + '\'' +
+        ", reportFlag=" + reportFlag +
+        ", tpPid=" + tpPid +
+        ", tpUdhi=" + tpUdhi +
+        ", messageType=" + messageType +
+        ", reserve='" + reserve + '\'' +
+        '}';
+  }
 }

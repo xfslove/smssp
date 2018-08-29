@@ -24,4 +24,11 @@ public class UnBindRespMessage implements SgipMessage {
   public void read(ByteBuf in) {
     // nothing
   }
+
+  @Override
+  public String toString() {
+    return "UnBindRespMessage{" +
+        "head=" + head +
+        '}';
+  }
 }

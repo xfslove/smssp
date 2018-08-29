@@ -43,4 +43,13 @@ public class MessageHead implements Serializable {
   public void setSequenceId(int sequenceId) {
     this.sequenceId = sequenceId;
   }
+
+  @Override
+  public String toString() {
+    return "MessageHead{" +
+        "commandId=" + commandId +
+        ", messageLength=" + messageLength +
+        ", sequenceId=" + sequenceId +
+        '}';
+  }
 }

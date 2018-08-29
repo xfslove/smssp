@@ -91,4 +91,15 @@ public class ConnectMessage implements CmppMessage {
   public void setTimestamp(int timestamp) {
     this.timestamp = timestamp;
   }
+
+  @Override
+  public String toString() {
+    return "ConnectMessage{" +
+        "head=" + head +
+        ", version=" + version +
+        ", sourceAddr='" + sourceAddr + '\'' +
+        ", authenticatorSource='" + authenticatorSource + '\'' +
+        ", timestamp=" + timestamp +
+        '}';
+  }
 }

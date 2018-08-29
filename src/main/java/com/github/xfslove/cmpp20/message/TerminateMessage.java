@@ -24,4 +24,11 @@ public class TerminateMessage implements CmppMessage {
   public MessageHead getHead() {
     return head;
   }
+
+  @Override
+  public String toString() {
+    return "TerminateMessage{" +
+        "head=" + head +
+        '}';
+  }
 }

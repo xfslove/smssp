@@ -93,4 +93,14 @@ public class BindMessage implements SgipMessage {
   public void setReserve(String reserve) {
     this.reserve = reserve;
   }
+
+  @Override
+  public String toString() {
+    return "BindMessage{" +
+        "head=" + head +
+        ", loginType=" + loginType +
+        ", loginName='" + loginName + '\'' +
+        ", reserve='" + reserve + '\'' +
+        '}';
+  }
 }

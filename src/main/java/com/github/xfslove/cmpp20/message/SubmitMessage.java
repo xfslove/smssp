@@ -322,4 +322,30 @@ public class SubmitMessage extends SmsPdu implements CmppMessage {
   public void setReserve(String reserve) {
     this.reserve = reserve;
   }
+
+  @Override
+  public String toString() {
+    // todo 内容
+    return "SubmitMessage{" +
+        "head=" + head +
+        ", msgId=" + msgId +
+        ", pkTotal=" + pkTotal +
+        ", pkNumber=" + pkNumber +
+        ", registeredDelivery=" + registeredDelivery +
+        ", msgLevel=" + msgLevel +
+        ", serviceId='" + serviceId + '\'' +
+        ", feeUserType=" + feeUserType +
+        ", feeTerminalId='" + feeTerminalId + '\'' +
+        ", tpPid=" + tpPid +
+        ", tpUdhi=" + tpUdhi +
+        ", msgSrc='" + msgSrc + '\'' +
+        ", feeType='" + feeType + '\'' +
+        ", feeCode='" + feeCode + '\'' +
+        ", valIdTime='" + valIdTime + '\'' +
+        ", atTime='" + atTime + '\'' +
+        ", srcId='" + srcId + '\'' +
+        ", destTerminalIds=" + destTerminalIds +
+        ", reserve='" + reserve + '\'' +
+        '}';
+  }
 }
