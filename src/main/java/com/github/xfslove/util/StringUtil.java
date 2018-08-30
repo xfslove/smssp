@@ -22,10 +22,10 @@ public class StringUtil {
     }
 
     byte[] bytes = origin.getBytes(charset);
+    byte[] octet = new byte[length];
 
     int rs = bytes.length > length ? length : bytes.length;
 
-    byte[] octet = new byte[rs];
     System.arraycopy(bytes, 0, octet, 0, rs);
 
     return octet;
