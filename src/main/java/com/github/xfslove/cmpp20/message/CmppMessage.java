@@ -13,6 +13,11 @@ public interface CmppMessage extends Serializable {
   MessageHead getHead();
 
   /**
+   * @return 消息长度 bytes
+   */
+  int getLength();
+
+  /**
    * 把 message body 写到 buf
    *
    * @param out buf

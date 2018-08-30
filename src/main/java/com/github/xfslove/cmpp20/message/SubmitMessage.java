@@ -127,6 +127,13 @@ public class SubmitMessage extends SmsPdu implements CmppMessage {
   }
 
   @Override
+  public int getLength() {
+    byte[] udh = getUdhBytes();
+    byte[] ud = getUdBytes();
+    return getMsgId().getLength() + 1 + 1 + 1 + 1 + 10 + 1 + 21 + 1 + 1 + 1 + 6 + 2 + 6 + 17 + 17 + 21 + 1 + 21 * getDestTerminalIds().size() + 1 + udh.length + ud.length + 8;
+  }
+
+  @Override
   public void write(ByteBuf out) {
     // 8 bytes
     byte[] bytes = getMsgId().getBytes();

@@ -19,7 +19,7 @@ public class Sgip12MesssageCodec extends ByteToMessageCodec<SgipMessage> {
   protected void encode(ChannelHandlerContext ctx, SgipMessage msg, ByteBuf out) throws Exception {
     MessageHead head = msg.getHead();
     // 4 bytes
-    out.writeInt(head.getMessageLength());
+    out.writeInt(head.getLength() + msg.getLength());
     out.writeInt(head.getCommandId());
 
     byte[] bytes = head.getSequenceNumber().getBytes();
@@ -62,7 +62,6 @@ public class Sgip12MesssageCodec extends ByteToMessageCodec<SgipMessage> {
         throw new IllegalArgumentException("unsupported commandId: " + commandId);
     }
 
-    message.getHead().setMessageLength(messageLength);
     // 4 bytes
     int nodeId = in.readInt();
     int timestamp = in.readInt();

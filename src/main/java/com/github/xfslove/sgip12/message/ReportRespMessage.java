@@ -31,6 +31,11 @@ public class ReportRespMessage implements SgipMessage {
   }
 
   @Override
+  public int getLength() {
+    return 1 + 8;
+  }
+
+  @Override
   public void write(ByteBuf out) {
     // 1 byte
     out.writeByte(result);

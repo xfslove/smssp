@@ -22,6 +22,13 @@ public class SequenceNumber implements Serializable {
     this.sequenceId = sequenceId;
   }
 
+  /**
+   * @return sequenceNumber 长度 bytes
+   */
+  public final int getLength() {
+    return 4 + 4 + 4;
+  }
+
   public int getNodeId() {
     return nodeId;
   }

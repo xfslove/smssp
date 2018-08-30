@@ -47,10 +47,19 @@ public class BindMessage implements SgipMessage {
   }
 
   @Override
+  public int getLength() {
+    return 1 + 16 + 16 + 8;
+  }
+
+  @Override
   public void write(ByteBuf out) {
+    // 1 byte
     out.writeByte(getLoginType());
+    // 16 bytes
     out.writeBytes(StringUtil.getOctetStringBytes(getLoginName(), 16, StandardCharsets.ISO_8859_1));
+    // 16 bytes
     out.writeBytes(StringUtil.getOctetStringBytes(getLoginPassword(), 16, StandardCharsets.ISO_8859_1));
+    // 8 byte
     out.writeBytes(StringUtil.getOctetStringBytes(getReserve(), 8, StandardCharsets.ISO_8859_1));
   }
 

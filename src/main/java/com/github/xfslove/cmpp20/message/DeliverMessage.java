@@ -73,6 +73,12 @@ public class DeliverMessage extends SmsPdu implements CmppMessage {
   }
 
   @Override
+  public int getLength() {
+    // no need implement
+    return -1;
+  }
+
+  @Override
   public void write(ByteBuf out) {
     // no need implement
   }
@@ -91,6 +97,8 @@ public class DeliverMessage extends SmsPdu implements CmppMessage {
     int registeredDelivery = in.readUnsignedByte();
     setRegisteredDelivery(registeredDelivery);
 
+    int msgLength = in.readUnsignedByte();
+
     if (1 == registeredDelivery) {
       // 状态报告
       Report report = new Report();
@@ -106,7 +114,6 @@ public class DeliverMessage extends SmsPdu implements CmppMessage {
 
     // deliver
     // todo 内容
-    int msgLength = in.readUnsignedByte();
     byte[] content = new byte[msgLength];
     in.readBytes(content);
 

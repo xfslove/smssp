@@ -44,6 +44,11 @@ public class ConnectRespMessage implements CmppMessage {
   }
 
   @Override
+  public int getLength() {
+    return 4 + 16 + 1;
+  }
+
+  @Override
   public void write(ByteBuf out) {
     // 4 bytes
     out.writeByte(getStatus());

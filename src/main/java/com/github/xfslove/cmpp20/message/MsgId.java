@@ -34,6 +34,14 @@ public class MsgId implements Serializable {
     this.sequenceId = sequenceId;
   }
 
+  /**
+   *
+   * @return msgId长度 bytes
+   */
+  public final int getLength() {
+    return 8;
+  }
+
   public int getGateId() {
     return gateId;
   }

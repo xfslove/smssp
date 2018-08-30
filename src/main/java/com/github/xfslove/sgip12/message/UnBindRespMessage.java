@@ -16,6 +16,11 @@ public class UnBindRespMessage implements SgipMessage {
   }
 
   @Override
+  public int getLength() {
+    return 0;
+  }
+
+  @Override
   public void write(ByteBuf out) {
     // nothing
   }

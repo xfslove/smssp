@@ -44,6 +44,11 @@ public class ConnectMessage implements CmppMessage {
   }
 
   @Override
+  public int getLength() {
+    return 6 + 16 + 1 + 4;
+  }
+
+  @Override
   public void write(ByteBuf out) {
     // 6 bytes
     out.writeBytes(StringUtil.getOctetStringBytes(getSourceAddr(), 6, StandardCharsets.ISO_8859_1));

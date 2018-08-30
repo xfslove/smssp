@@ -11,6 +11,11 @@ public class TerminateMessage implements CmppMessage {
   private final MessageHead head = new MessageHead(CmppConstants.CMPP_TERMINATE);
 
   @Override
+  public int getLength() {
+    return 0;
+  }
+
+  @Override
   public void write(ByteBuf out) {
     // nothing
   }

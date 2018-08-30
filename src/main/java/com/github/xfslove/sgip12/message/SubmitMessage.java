@@ -139,6 +139,13 @@ public class SubmitMessage extends SmsPdu implements SgipMessage {
   }
 
   @Override
+  public int getLength() {
+    byte[] udh = getUdhBytes();
+    byte[] ud = getUdBytes();
+    return 21 + 21 + 1 + 21 * getUserNumbers().size() + 5 + 10 + 1 + 6 + 6 + 1 + 1 + 1 + 16 + 16 + 1 + 1 + 1 + 1 + 1 + 4 + udh.length + ud.length + 8;
+  }
+
+  @Override
   public void write(ByteBuf out) {
     // 21 bytes
     out.writeBytes(StringUtil.getOctetStringBytes(getSpNumber(), 21, StandardCharsets.ISO_8859_1));

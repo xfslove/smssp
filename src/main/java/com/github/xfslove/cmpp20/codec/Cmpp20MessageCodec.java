@@ -19,7 +19,7 @@ public class Cmpp20MessageCodec extends ByteToMessageCodec<CmppMessage> {
   protected void encode(ChannelHandlerContext ctx, CmppMessage msg, ByteBuf out) throws Exception {
     MessageHead head = msg.getHead();
     // 4 bytes
-    out.writeInt(head.getMessageLength());
+    out.writeInt(head.getLength() + msg.getLength());
     out.writeInt(head.getCommandId());
     out.writeInt(head.getSequenceId());
 
@@ -56,7 +56,6 @@ public class Cmpp20MessageCodec extends ByteToMessageCodec<CmppMessage> {
         throw new IllegalArgumentException("unsupported commandId: " + commandId);
     }
 
-    message.getHead().setMessageLength(messageLength);
     int sequenceId = in.readInt();
     message.getHead().setSequenceId(sequenceId);
 

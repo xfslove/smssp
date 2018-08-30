@@ -12,28 +12,25 @@ public class MessageHead implements Serializable {
 
   private final int commandId;
 
-  /**
-   * 整个message长度
-   * head + body
-   */
-  private int messageLength;
-
   private SequenceNumber sequenceNumber;
 
   public MessageHead(int commandId) {
     this.commandId = commandId;
   }
 
+  /**
+   * 整个message长度
+   * head + body
+   *
+   * @return 头长度 bytes
+   */
+  public final int getLength() {
+    // include message length 4 bytes
+    return 4 + 4 + getSequenceNumber().getLength();
+  }
+
   public int getCommandId() {
     return commandId;
-  }
-
-  public int getMessageLength() {
-    return messageLength;
-  }
-
-  public void setMessageLength(int messageLength) {
-    this.messageLength = messageLength;
   }
 
   public SequenceNumber getSequenceNumber() {
@@ -48,7 +45,6 @@ public class MessageHead implements Serializable {
   public String toString() {
     return "MessageHead{" +
         "commandId=" + commandId +
-        ", messageLength=" + messageLength +
         ", sequenceNumber=" + sequenceNumber +
         '}';
   }

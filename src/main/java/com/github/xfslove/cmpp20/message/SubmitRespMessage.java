@@ -48,6 +48,12 @@ public class SubmitRespMessage implements CmppMessage {
   }
 
   @Override
+  public int getLength() {
+    // no need implement
+    return -1;
+  }
+
+  @Override
   public void write(ByteBuf out) {
     // no need implement
   }

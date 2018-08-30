@@ -48,6 +48,11 @@ public class DeliverRespMessage implements CmppMessage {
   }
 
   @Override
+  public int getLength() {
+    return 8 + 1;
+  }
+
+  @Override
   public void write(ByteBuf out) {
     // 8 bytes
     byte[] bytes = getMsgId().getBytes();

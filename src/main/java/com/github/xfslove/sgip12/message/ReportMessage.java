@@ -53,6 +53,12 @@ public class ReportMessage implements SgipMessage {
   }
 
   @Override
+  public int getLength() {
+    // no need implement
+    return -1;
+  }
+
+  @Override
   public void write(ByteBuf out) {
     // no need implement
   }
