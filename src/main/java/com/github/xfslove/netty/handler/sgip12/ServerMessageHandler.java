@@ -1,6 +1,9 @@
 package com.github.xfslove.netty.handler.sgip12;
 
-import com.github.xfslove.message.sgip12.*;
+import com.github.xfslove.message.sgip12.DeliverMessage;
+import com.github.xfslove.message.sgip12.DeliverRespMessage;
+import com.github.xfslove.message.sgip12.ReportMessage;
+import com.github.xfslove.message.sgip12.ReportRespMessage;
 import com.github.xfslove.netty.SessionEvent;
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandler;
@@ -59,7 +62,7 @@ public class ServerMessageHandler extends ChannelDuplexHandler {
 
       SessionEvent sEvt = (SessionEvent) evt;
 
-      SgipMessage msg = sEvt.getMessage();
+      Object msg = sEvt.getMessage();
 
       if (msg instanceof DeliverMessage) {
 

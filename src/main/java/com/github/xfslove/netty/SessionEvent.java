@@ -1,7 +1,5 @@
 package com.github.xfslove.netty;
 
-import com.github.xfslove.message.sgip12.SgipMessage;
-
 /**
  * @author hanwen
  * created at 2018/8/31
@@ -11,15 +9,15 @@ public class SessionEvent {
   /**
    * session还为注册
    */
-  public static SessionEvent NOT_VALID(SgipMessage message) {
+  public static SessionEvent NOT_VALID(Object message) {
     return new SessionEvent("NOT_VALID", message);
   }
 
   private String state;
 
-  private SgipMessage message;
+  private Object message;
 
-  SessionEvent(String state, SgipMessage message) {
+  SessionEvent(String state, Object message) {
     this.state = state;
     this.message = message;
   }
@@ -28,7 +26,7 @@ public class SessionEvent {
     return state;
   }
 
-  public SgipMessage getMessage() {
+  public Object getMessage() {
     return message;
   }
 }
