@@ -102,6 +102,7 @@ public class ServerSessionHandler extends ChannelDuplexHandler {
       logger.log(internalLevel, "{} received message when session not valid, fire SESSION_EVENT[NOT_VALID]", loginName, msg);
 
       ctx.fireUserEventTriggered(SessionEvent.NOT_VALID(msg));
+      return;
     }
 
     ctx.fireChannelRead(msg);
