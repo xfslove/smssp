@@ -1,6 +1,5 @@
 package com.github.xfslove.smssp.message.sgip12;
 
-import com.github.xfslove.smssp.util.StringUtil;
 import io.netty.buffer.ByteBuf;
 
 import java.nio.charset.StandardCharsets;
@@ -56,21 +55,12 @@ public class ReportMessage implements SgipMessage {
   @Override
   public int getLength() {
     // no need implement
-//    return -1;
-    return getSubmitSequenceNumber().getLength() + 1 + 21 + 1 + 1 + 8;
+    return -1;
   }
 
   @Override
   public void write(ByteBuf out) {
     // no need implement
-    // todo
-    byte[] bytes = getSubmitSequenceNumber().getBytes();
-    out.writeBytes(bytes);
-    out.writeByte(getReportType());
-    out.writeBytes(StringUtil.getOctetStringBytes(getUserNumber(), 21, StandardCharsets.ISO_8859_1));
-    out.writeByte(getState());
-    out.writeByte(getErrorCode());
-    out.writeBytes(StringUtil.getOctetStringBytes(getReserve(), 8, StandardCharsets.ISO_8859_1));
   }
 
   @Override

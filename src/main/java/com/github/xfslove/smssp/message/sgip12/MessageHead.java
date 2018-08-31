@@ -16,8 +16,6 @@ public class MessageHead implements Serializable {
 
   public MessageHead(int commandId) {
     this.commandId = commandId;
-    // todo
-    sequenceNumber = SequenceNumber.create(1, 444444444, 223323);
   }
 
   /**

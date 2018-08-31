@@ -48,19 +48,16 @@ public class ClientSessionHandler extends ChannelDuplexHandler {
   public void channelActive(ChannelHandlerContext ctx) throws Exception {
 
     // 判断登录状态
-    if (Boolean.TRUE.equals(ctx.channel().attr(sessionValid).get())) {
+    if (!Boolean.TRUE.equals(ctx.channel().attr(sessionValid).get())) {
 
-      ctx.fireChannelActive();
-      return;
+      logger.log(internalLevel, "{} send bind request prepare login", loginName);
+      // 发送bind请求
+      BindMessage bind = new BindMessage();
+      bind.setLoginName(loginName);
+      bind.setLoginPassword(loginPassword);
+
+      ctx.channel().writeAndFlush(bind);
     }
-
-    logger.log(internalLevel, "{} send bind request prepare login", loginName);
-    // 发送bind请求
-    BindMessage bind = new BindMessage();
-    bind.setLoginName(loginName);
-    bind.setLoginPassword(loginPassword);
-
-    ctx.channel().writeAndFlush(bind);
 
     ctx.fireChannelActive();
   }
@@ -78,8 +75,8 @@ public class ClientSessionHandler extends ChannelDuplexHandler {
       if (result == 0) {
         // bind 成功
         channel.attr(sessionValid).set(true);
-        ctx.fireChannelRead(msg);
         logger.log(internalLevel, "{} bind success", loginName);
+
       } else {
 
         ctx.close();

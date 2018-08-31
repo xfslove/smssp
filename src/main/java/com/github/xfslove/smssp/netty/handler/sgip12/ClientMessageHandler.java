@@ -1,48 +1,50 @@
 package com.github.xfslove.smssp.netty.handler.sgip12;
 
-import com.github.xfslove.smssp.message.sgip12.SubmitMessage;
+import com.github.xfslove.smssp.message.sgip12.ReportRespMessage;
+import com.github.xfslove.smssp.message.sgip12.SgipMessage;
 import com.github.xfslove.smssp.message.sgip12.SubmitRespMessage;
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelPromise;
 import io.netty.util.AttributeKey;
+import io.netty.util.ReferenceCountUtil;
 
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 /**
- * todo
- *
  * @author hanwen
  * created at 2018/8/31
  */
 @ChannelHandler.Sharable
 public class ClientMessageHandler extends ChannelDuplexHandler {
 
-  private AttributeKey<BlockingQueue<SubmitRespMessage>> submitRespQueue = AttributeKey.valueOf("submitRespQueue");
+  // todo
+  private AttributeKey<BlockingQueue<SgipMessage>> submitRespQueue = AttributeKey.valueOf("submitRespQueue");
+
+  @Override
+  public void channelActive(ChannelHandlerContext ctx) throws Exception {
+
+    // 接受submitResp的queue
+    ctx.channel().attr(submitRespQueue).set(new LinkedBlockingQueue<>(16));
+
+    ctx.fireChannelActive();
+  }
 
   @Override
   public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
 
-    if (msg instanceof SubmitRespMessage) {
-      SubmitRespMessage submitResp = (SubmitRespMessage) msg;
+    if (msg instanceof ReportRespMessage) {
+      ReportRespMessage submitResp = (ReportRespMessage) msg;
 
-      ctx.channel().attr(submitRespQueue).get().offer(submitResp);
+      BlockingQueue<SgipMessage> respQueue = ctx.channel().attr(submitRespQueue).get();
+
+      respQueue.offer(submitResp);
+      return;
     }
+
+    ctx.fireChannelRead(msg);
 
   }
 
-
-
-  @Override
-  public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) throws Exception {
-
-    if (msg instanceof SubmitMessage) {
-      SubmitMessage submit = (SubmitMessage) msg;
-
-
-      ctx.writeAndFlush(msg);
-    }
-
-  }
 }

@@ -42,6 +42,7 @@ public class ServerMessageHandler extends ChannelDuplexHandler {
       deliverResp.setResult(0);
 
       ctx.writeAndFlush(deliverResp);
+      return;
     }
 
     if (msg instanceof ReportMessage) {
@@ -50,6 +51,7 @@ public class ServerMessageHandler extends ChannelDuplexHandler {
       reportResp.setResult(0);
 
       ctx.writeAndFlush(reportResp);
+      return;
     }
 
     ctx.fireChannelRead(msg);
@@ -74,6 +76,7 @@ public class ServerMessageHandler extends ChannelDuplexHandler {
           ctx.close();
           logger.log(internalLevel, "discard[NOT_VALID] deliver message {}, channel closed", msg);
         });
+
         return;
       }
 
@@ -87,6 +90,8 @@ public class ServerMessageHandler extends ChannelDuplexHandler {
           ctx.close();
           logger.log(internalLevel, "discard[NOT_VALID] report message {}, channel closed", msg);
         });
+
+        return;
       }
     }
 

@@ -1,6 +1,9 @@
 package com.github.xfslove.smssp.netty.handler.sgip12;
 
-import com.github.xfslove.smssp.message.sgip12.*;
+import com.github.xfslove.smssp.message.sgip12.BindMessage;
+import com.github.xfslove.smssp.message.sgip12.BindRespMessage;
+import com.github.xfslove.smssp.message.sgip12.UnBindMessage;
+import com.github.xfslove.smssp.message.sgip12.UnBindRespMessage;
 import com.github.xfslove.smssp.netty.SessionEvent;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelDuplexHandler;
@@ -64,11 +67,11 @@ public class ServerSessionHandler extends ChannelDuplexHandler {
         return;
       }
 
-//      if (2 != bind.getLoginType()) {
-//        // 登录类型不对
-//        bindRespError(ctx, 4);
-//        return;
-//      }
+      if (2 != bind.getLoginType()) {
+        // 登录类型不对
+        bindRespError(ctx, 4);
+        return;
+      }
 
       // bind 成功
       channel.writeAndFlush(bindResp).addListener(future -> {
@@ -98,7 +101,7 @@ public class ServerSessionHandler extends ChannelDuplexHandler {
       // 没有注册 session 收到消息
       logger.log(internalLevel, "{} received message when session not valid, fire SESSION_EVENT[NOT_VALID]", loginName, msg);
 
-      ctx.fireUserEventTriggered(SessionEvent.NOT_VALID((SgipMessage) msg));
+      ctx.fireUserEventTriggered(SessionEvent.NOT_VALID(msg));
     }
 
     ctx.fireChannelRead(msg);

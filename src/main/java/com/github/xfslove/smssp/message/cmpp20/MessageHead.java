@@ -22,7 +22,7 @@ public class MessageHead implements Serializable {
    */
   public final int getLength() {
     // include message length 4 bytes
-    return 4 + 4 + 12;
+    return 4 + 4 + 4;
   }
 
   public MessageHead(int commandId) {
