@@ -1,10 +1,11 @@
-package com.github.xfslove.smssp.netty.handler.sgip12;
+package com.github.xfslove.smssp.handler.sgip12.subscriber;
 
+import com.github.xfslove.smssp.dispatcher.sgip12.MessageDispatcher;
+import com.github.xfslove.smssp.message.SessionEvent;
 import com.github.xfslove.smssp.message.sgip12.DeliverMessage;
 import com.github.xfslove.smssp.message.sgip12.DeliverRespMessage;
 import com.github.xfslove.smssp.message.sgip12.ReportMessage;
 import com.github.xfslove.smssp.message.sgip12.ReportRespMessage;
-import com.github.xfslove.smssp.netty.SessionEvent;
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
@@ -20,15 +21,15 @@ import io.netty.util.internal.logging.InternalLoggerFactory;
  * created at 2018/8/31
  */
 @ChannelHandler.Sharable
-public class ServerMessageHandler extends ChannelDuplexHandler {
+public class SubscriberMessageHandler extends ChannelDuplexHandler {
+
+  private MessageDispatcher dispatcher;
 
   private final InternalLogger logger;
   private final InternalLogLevel internalLevel;
 
-  public ServerMessageHandler(LogLevel level) {
-    if (level == null) {
-      level = LogLevel.DEBUG;
-    }
+  public SubscriberMessageHandler(MessageDispatcher dispatcher, LogLevel level) {
+    this.dispatcher = dispatcher;
     logger = InternalLoggerFactory.getInstance(getClass());
     internalLevel = level.toInternalLevel();
   }
@@ -38,6 +39,8 @@ public class ServerMessageHandler extends ChannelDuplexHandler {
 
     if (msg instanceof DeliverMessage) {
 
+      dispatcher.deliver((DeliverMessage) msg);
+
       DeliverRespMessage deliverResp = new DeliverRespMessage();
       deliverResp.setResult(0);
 
@@ -46,6 +49,8 @@ public class ServerMessageHandler extends ChannelDuplexHandler {
     }
 
     if (msg instanceof ReportMessage) {
+
+      dispatcher.report((ReportMessage) msg);
 
       ReportRespMessage reportResp = new ReportRespMessage();
       reportResp.setResult(0);
@@ -73,7 +78,7 @@ public class ServerMessageHandler extends ChannelDuplexHandler {
         deliverResp.setResult(1);
 
         ctx.writeAndFlush(deliverResp).addListener(listener -> {
-          ctx.close();
+          ctx.channel().close();
           logger.log(internalLevel, "discard[NOT_VALID] deliver message {}, channel closed", msg);
         });
 
@@ -87,7 +92,7 @@ public class ServerMessageHandler extends ChannelDuplexHandler {
         reportResp.setResult(1);
 
         ctx.writeAndFlush(reportResp).addListener(listener -> {
-          ctx.close();
+          ctx.channel().close();
           logger.log(internalLevel, "discard[NOT_VALID] report message {}, channel closed", msg);
         });
 

@@ -1,4 +1,4 @@
-package com.github.xfslove.smssp.netty.codec.cmpp20;
+package com.github.xfslove.smssp.codec.cmpp20;
 
 import com.github.xfslove.smssp.message.cmpp20.*;
 import io.netty.buffer.ByteBuf;

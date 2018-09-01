@@ -1,4 +1,4 @@
-package com.github.xfslove.smssp.netty.handler.sgip12;
+package com.github.xfslove.smssp.handler.sgip12.sender;
 
 import com.github.xfslove.smssp.message.sgip12.BindMessage;
 import com.github.xfslove.smssp.message.sgip12.BindRespMessage;
@@ -11,7 +11,6 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.timeout.IdleState;
 import io.netty.handler.timeout.IdleStateEvent;
-import io.netty.util.AttributeKey;
 import io.netty.util.internal.logging.InternalLogLevel;
 import io.netty.util.internal.logging.InternalLogger;
 import io.netty.util.internal.logging.InternalLoggerFactory;
@@ -23,21 +22,16 @@ import io.netty.util.internal.logging.InternalLoggerFactory;
  * created at 2018/8/31
  */
 @ChannelHandler.Sharable
-public class ClientSessionHandler extends ChannelDuplexHandler {
+public class SenderSessionHandler extends ChannelDuplexHandler {
 
   private final InternalLogger logger;
   private final InternalLogLevel internalLevel;
 
-  private AttributeKey<Boolean> sessionValid = AttributeKey.valueOf("sessionValid");
+  private String loginName;
 
-  private final String loginName;
+  private String loginPassword;
 
-  private final String loginPassword;
-
-  public ClientSessionHandler(String loginName, String loginPassword, LogLevel level) {
-    if (level == null) {
-      level = LogLevel.DEBUG;
-    }
+  public SenderSessionHandler(String loginName, String loginPassword, LogLevel level) {
     this.loginName = loginName;
     this.loginPassword = loginPassword;
     logger = InternalLoggerFactory.getInstance(getClass());
@@ -47,17 +41,12 @@ public class ClientSessionHandler extends ChannelDuplexHandler {
   @Override
   public void channelActive(ChannelHandlerContext ctx) throws Exception {
 
-    // 判断登录状态
-    if (!Boolean.TRUE.equals(ctx.channel().attr(sessionValid).get())) {
-
-      logger.log(internalLevel, "{} send bind request prepare login", loginName);
-      // 发送bind请求
-      BindMessage bind = new BindMessage();
-      bind.setLoginName(loginName);
-      bind.setLoginPassword(loginPassword);
-
-      ctx.channel().writeAndFlush(bind);
-    }
+    // 发送bind请求
+    BindMessage bind = new BindMessage();
+    bind.setLoginName(loginName);
+    bind.setLoginPassword(loginPassword);
+    ctx.channel().writeAndFlush(bind);
+    logger.log(internalLevel, "send bind request");
 
     ctx.fireChannelActive();
   }
@@ -74,13 +63,12 @@ public class ClientSessionHandler extends ChannelDuplexHandler {
 
       if (result == 0) {
         // bind 成功
-        channel.attr(sessionValid).set(true);
-        logger.log(internalLevel, "{} bind success", loginName);
+        logger.log(internalLevel, "bind success");
 
       } else {
 
-        ctx.close();
-        logger.log(internalLevel, "{} bind failure[result:{}]", loginName, result);
+        channel.close();
+        logger.log(internalLevel, "bind failure[result:{}]", result);
       }
 
       return;
@@ -91,11 +79,17 @@ public class ClientSessionHandler extends ChannelDuplexHandler {
       // 直接回复UnbindResp
       channel.writeAndFlush(new UnBindRespMessage()).addListener(future -> {
         if (future.isSuccess()) {
-          ctx.close();
-          logger.log(internalLevel, "{} unbind success and channel closed", loginName);
+          channel.close();
+          logger.log(internalLevel, "unbind success and channel closed");
         }
       });
 
+      return;
+    }
+
+    // unbindResp
+    if (msg instanceof UnBindRespMessage) {
+      channel.close();
       return;
     }
 
@@ -104,8 +98,6 @@ public class ClientSessionHandler extends ChannelDuplexHandler {
 
   @Override
   public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-
-    ctx.channel().attr(sessionValid).set(false);
 
     ctx.fireChannelInactive();
   }
@@ -121,8 +113,8 @@ public class ClientSessionHandler extends ChannelDuplexHandler {
         // 发送unbind
         ctx.channel().writeAndFlush(new UnBindMessage()).addListener(future -> {
           if (future.isSuccess()) {
-            ctx.close();
-            logger.log(internalLevel, "{} request unbind when idle and channel closed", loginName);
+            ctx.channel().close();
+            logger.log(internalLevel, "request unbind when idle and channel closed");
           }
         });
 
@@ -133,4 +125,10 @@ public class ClientSessionHandler extends ChannelDuplexHandler {
     ctx.fireUserEventTriggered(evt);
   }
 
+  @Override
+  public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+
+    ctx.channel().close();
+    logger.log(internalLevel, "catch exception and channel closed, {}", cause);
+  }
 }

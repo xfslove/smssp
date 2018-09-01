@@ -1,4 +1,4 @@
-package com.github.xfslove.smssp.netty;
+package com.github.xfslove.smssp.message;
 
 /**
  * @author hanwen

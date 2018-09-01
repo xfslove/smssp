@@ -1,4 +1,4 @@
-package com.github.xfslove.smssp.netty.codec.sgip12;
+package com.github.xfslove.smssp.codec.sgip12;
 
 import com.github.xfslove.smssp.message.sgip12.*;
 import io.netty.buffer.ByteBuf;
