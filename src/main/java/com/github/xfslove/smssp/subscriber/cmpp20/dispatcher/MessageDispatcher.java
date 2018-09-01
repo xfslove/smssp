@@ -1,4 +1,4 @@
-package com.github.xfslove.smssp.dispatcher.cmpp20;
+package com.github.xfslove.smssp.subscriber.cmpp20.dispatcher;
 
 import com.github.xfslove.smssp.message.cmpp20.DeliverMessage;
 

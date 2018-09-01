@@ -1,4 +1,4 @@
-package com.github.xfslove.smssp.dispatcher.sgip12;
+package com.github.xfslove.smssp.subscriber.sgip12.dispatcher;
 
 import com.github.xfslove.smssp.message.sgip12.DeliverMessage;
 import com.github.xfslove.smssp.message.sgip12.ReportMessage;

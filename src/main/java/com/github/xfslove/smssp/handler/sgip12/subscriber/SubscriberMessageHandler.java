@@ -1,6 +1,6 @@
 package com.github.xfslove.smssp.handler.sgip12.subscriber;
 
-import com.github.xfslove.smssp.dispatcher.sgip12.MessageDispatcher;
+import com.github.xfslove.smssp.subscriber.sgip12.dispatcher.MessageDispatcher;
 import com.github.xfslove.smssp.message.SessionEvent;
 import com.github.xfslove.smssp.message.sgip12.DeliverMessage;
 import com.github.xfslove.smssp.message.sgip12.DeliverRespMessage;
