@@ -1,9 +1,7 @@
 package com.github.xfslove.smssp.subscriber.sgip12.netty4;
 
-import com.github.xfslove.smssp.subscriber.sgip12.dispatcher.MessageDispatcher;
 import com.github.xfslove.smssp.handler.sgip12.subscriber.SubscriberHandlerInitializer;
-import com.github.xfslove.smssp.message.sgip12.DeliverMessage;
-import com.github.xfslove.smssp.message.sgip12.ReportMessage;
+import com.github.xfslove.smssp.message.sgip12.SgipMessage;
 import com.github.xfslove.smssp.subscriber.Subscriber;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.PooledByteBufAllocator;
@@ -13,11 +11,13 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.util.concurrent.DefaultThreadFactory;
 
+import java.util.function.Consumer;
+
 /**
  * @author hanwen
  * created at 2018/9/1
  */
-public class Netty4Subsriber implements Subscriber, MessageDispatcher {
+public class Netty4Subsriber implements Subscriber<SgipMessage> {
 
   private EventLoopGroup bossGroup = new NioEventLoopGroup(1, new DefaultThreadFactory("sgipSubscribeBoss", true));
   private EventLoopGroup workGroup = new NioEventLoopGroup(Math.min(Runtime.getRuntime().availableProcessors() + 1, 32), new DefaultThreadFactory("sgipSubscribeWorker", true));
@@ -33,6 +33,11 @@ public class Netty4Subsriber implements Subscriber, MessageDispatcher {
 
   private String loginPassword;
 
+  /**
+   * 默认什么都不做
+   */
+  private Consumer<SgipMessage> consumer = m -> {};
+
   public Netty4Subsriber(String loginName, String loginPassword) {
     this.loginName = loginName;
     this.loginPassword = loginPassword;
@@ -40,7 +45,7 @@ public class Netty4Subsriber implements Subscriber, MessageDispatcher {
 
   @Override
   public void bind(String host, int port) {
-    SubscriberHandlerInitializer initializer = new SubscriberHandlerInitializer(this, loginName, loginPassword);
+    SubscriberHandlerInitializer initializer = new SubscriberHandlerInitializer(consumer, loginName, loginPassword);
     bootstrap.childHandler(initializer);
     bootstrap.bind(host, port).addListener(listener -> {
 
@@ -58,12 +63,7 @@ public class Netty4Subsriber implements Subscriber, MessageDispatcher {
   }
 
   @Override
-  public void deliver(DeliverMessage deliver) {
-
-  }
-
-  @Override
-  public void report(ReportMessage report) {
-
+  public void handleMessage(Consumer<SgipMessage> consumer) {
+    this.consumer = consumer;
   }
 }

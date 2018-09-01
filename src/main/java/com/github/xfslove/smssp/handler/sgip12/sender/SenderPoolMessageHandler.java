@@ -2,7 +2,6 @@ package com.github.xfslove.smssp.handler.sgip12.sender;
 
 import com.github.xfslove.smssp.codec.MesssageLengthCodec;
 import com.github.xfslove.smssp.codec.sgip12.MesssageCodec;
-import com.github.xfslove.smssp.message.sgip12.SgipMessage;
 import com.github.xfslove.smssp.message.sgip12.SubmitRespMessage;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelDuplexHandler;
@@ -73,7 +72,7 @@ public class SenderPoolMessageHandler extends ChannelDuplexHandler implements Ch
     logger.log(internalLevel, "initialized sender pipeline[sgipSocketLogging, sgipIdleState, sgipMessageLengthCodec, sgipMessageCodec, sgipMessageLogging, sgipSessionHandler, sgipMessageHandler]");
 
     // 接受resp的queue
-    Attribute<LinkedBlockingQueue<SgipMessage>> respQueue = channel.attr(RESP_QUEUE);
+    Attribute<LinkedBlockingQueue<SubmitRespMessage>> respQueue = channel.attr(RESP_QUEUE);
     if (respQueue.get() == null) {
       respQueue.set(new LinkedBlockingQueue<>(windowSize));
     }
@@ -86,9 +85,9 @@ public class SenderPoolMessageHandler extends ChannelDuplexHandler implements Ch
 
     // sender会接受submitResp
     if (msg instanceof SubmitRespMessage) {
-      LinkedBlockingQueue<SgipMessage> respQueue = ctx.channel().attr(RESP_QUEUE).get();
+      LinkedBlockingQueue<SubmitRespMessage> respQueue = ctx.channel().attr(RESP_QUEUE).get();
 
-      respQueue.offer((SgipMessage) msg);
+      respQueue.offer((SubmitRespMessage) msg);
       logger.log(internalLevel, "current sender resp queue size:[{}]", respQueue.size());
       return;
     }

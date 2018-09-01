@@ -1,11 +1,7 @@
 package com.github.xfslove.smssp.handler.sgip12.subscriber;
 
-import com.github.xfslove.smssp.subscriber.sgip12.dispatcher.MessageDispatcher;
 import com.github.xfslove.smssp.message.SessionEvent;
-import com.github.xfslove.smssp.message.sgip12.DeliverMessage;
-import com.github.xfslove.smssp.message.sgip12.DeliverRespMessage;
-import com.github.xfslove.smssp.message.sgip12.ReportMessage;
-import com.github.xfslove.smssp.message.sgip12.ReportRespMessage;
+import com.github.xfslove.smssp.message.sgip12.*;
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
@@ -13,6 +9,8 @@ import io.netty.handler.logging.LogLevel;
 import io.netty.util.internal.logging.InternalLogLevel;
 import io.netty.util.internal.logging.InternalLogger;
 import io.netty.util.internal.logging.InternalLoggerFactory;
+
+import java.util.function.Consumer;
 
 /**
  * smg -&gt; sp 消息的handler
@@ -23,13 +21,13 @@ import io.netty.util.internal.logging.InternalLoggerFactory;
 @ChannelHandler.Sharable
 public class SubscriberMessageHandler extends ChannelDuplexHandler {
 
-  private MessageDispatcher dispatcher;
+  private Consumer<SgipMessage> consumer;
 
   private final InternalLogger logger;
   private final InternalLogLevel internalLevel;
 
-  public SubscriberMessageHandler(MessageDispatcher dispatcher, LogLevel level) {
-    this.dispatcher = dispatcher;
+  public SubscriberMessageHandler(Consumer<SgipMessage> consumer, LogLevel level) {
+    this.consumer = consumer;
     logger = InternalLoggerFactory.getInstance(getClass());
     internalLevel = level.toInternalLevel();
   }
@@ -39,7 +37,7 @@ public class SubscriberMessageHandler extends ChannelDuplexHandler {
 
     if (msg instanceof DeliverMessage) {
 
-      dispatcher.deliver((DeliverMessage) msg);
+      consumer.accept((DeliverMessage) msg);
 
       DeliverRespMessage deliverResp = new DeliverRespMessage();
       deliverResp.setResult(0);
@@ -50,7 +48,7 @@ public class SubscriberMessageHandler extends ChannelDuplexHandler {
 
     if (msg instanceof ReportMessage) {
 
-      dispatcher.report((ReportMessage) msg);
+      consumer.accept((ReportMessage) msg);
 
       ReportRespMessage reportResp = new ReportRespMessage();
       reportResp.setResult(0);

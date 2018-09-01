@@ -1,7 +1,8 @@
 package com.github.xfslove.smssp.sender.sgip12.netty4;
 
 import com.github.xfslove.smssp.handler.sgip12.sender.SenderPoolMessageHandler;
-import com.github.xfslove.smssp.message.sgip12.SgipMessage;
+import com.github.xfslove.smssp.message.sgip12.SubmitMessage;
+import com.github.xfslove.smssp.message.sgip12.SubmitRespMessage;
 import com.github.xfslove.smssp.sender.Sender;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.PooledByteBufAllocator;
@@ -25,7 +26,7 @@ import static com.github.xfslove.smssp.handler.sgip12.AttributeKeyConstants.RESP
  * @author hanwen
  * created at 2018/9/1
  */
-public class Netty4Sender implements Sender {
+public class Netty4Sender implements Sender<SubmitMessage, SubmitRespMessage> {
 
   private EventLoopGroup workGroup = new NioEventLoopGroup(Math.min(Runtime.getRuntime().availableProcessors() + 1, 32), new DefaultThreadFactory("sgipSendWorker", true));
 
@@ -56,7 +57,7 @@ public class Netty4Sender implements Sender {
   }
 
   @Override
-  public SgipMessage send(SgipMessage message) {
+  public SubmitRespMessage send(SubmitMessage message) {
 
     Channel channel = null;
     try {
@@ -64,7 +65,7 @@ public class Netty4Sender implements Sender {
       channel = future.getNow();
       channel.writeAndFlush(message);
 
-      BlockingQueue<SgipMessage> queue = channel.attr(RESP_QUEUE).get();
+      BlockingQueue<SubmitRespMessage> queue = channel.attr(RESP_QUEUE).get();
       return queue.poll(3000, TimeUnit.MILLISECONDS);
     } catch (InterruptedException e) {
       e.printStackTrace();
