@@ -1,6 +1,6 @@
 package com.github.xfslove.smssp.sender.sgip12.netty4;
 
-import com.github.xfslove.smssp.handler.sgip12.sender.SenderPoolMessageHandler;
+import com.github.xfslove.smssp.netty4.handler.sgip12.sender.SenderPoolMessageHandler;
 import com.github.xfslove.smssp.message.sgip12.SubmitMessage;
 import com.github.xfslove.smssp.message.sgip12.SubmitRespMessage;
 import com.github.xfslove.smssp.sender.Sender;
@@ -19,7 +19,7 @@ import io.netty.util.concurrent.Future;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
 
-import static com.github.xfslove.smssp.handler.AttributeKeyConstants.RESP_QUEUE;
+import static com.github.xfslove.smssp.netty4.handler.AttributeKeyConstants.RESP_QUEUE;
 
 
 /**

@@ -1,4 +1,4 @@
-package com.github.xfslove.smssp.codec;
+package com.github.xfslove.smssp.netty4.codec;
 
 import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 

@@ -1,6 +1,5 @@
-package com.github.xfslove.smssp.handler.sgip12.subscriber;
+package com.github.xfslove.smssp.netty4.handler.sgip12.sender;
 
-import com.github.xfslove.smssp.message.SessionEvent;
 import com.github.xfslove.smssp.message.sgip12.BindMessage;
 import com.github.xfslove.smssp.message.sgip12.BindRespMessage;
 import com.github.xfslove.smssp.message.sgip12.UnBindMessage;
@@ -18,25 +17,23 @@ import io.netty.util.internal.logging.InternalLoggerFactory;
 
 import java.util.concurrent.TimeUnit;
 
-import static com.github.xfslove.smssp.handler.AttributeKeyConstants.SESSION_VALID;
-
 /**
- * smg -> sp 链接session管理handler
+ * sp -> smg session管理handler
  *
  * @author hanwen
  * created at 2018/8/31
  */
 @ChannelHandler.Sharable
-public class SubscriberSessionHandler extends ChannelDuplexHandler {
+public class SenderSessionHandler extends ChannelDuplexHandler {
 
   private final InternalLogger logger;
   private final InternalLogLevel internalLevel;
 
-  private final String loginName;
+  private String loginName;
 
-  private final String loginPassword;
+  private String loginPassword;
 
-  public SubscriberSessionHandler(String loginName, String loginPassword, LogLevel level) {
+  public SenderSessionHandler(String loginName, String loginPassword, LogLevel level) {
     this.loginName = loginName;
     this.loginPassword = loginPassword;
     logger = InternalLoggerFactory.getInstance(getClass());
@@ -44,40 +41,37 @@ public class SubscriberSessionHandler extends ChannelDuplexHandler {
   }
 
   @Override
+  public void channelActive(ChannelHandlerContext ctx) throws Exception {
+
+    // 发送bind请求
+    BindMessage bind = new BindMessage();
+    bind.setLoginName(loginName);
+    bind.setLoginPassword(loginPassword);
+    ctx.channel().writeAndFlush(bind);
+    logger.log(internalLevel, "{} send bind request", loginName);
+
+    ctx.fireChannelActive();
+  }
+
+  @Override
   public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
     Channel channel = ctx.channel();
 
-    // bind 请求
-    if (msg instanceof BindMessage) {
-      BindRespMessage bindResp = new BindRespMessage();
+    // 获取bindResp
+    if (msg instanceof BindRespMessage) {
+      BindRespMessage bindResp = (BindRespMessage) msg;
 
-      if (Boolean.TRUE.equals(ctx.channel().attr(SESSION_VALID).get())) {
-        // 重复登录
-        bindRespError(ctx, 2);
-        return;
+      int result = bindResp.getResult();
+
+      if (result == 0) {
+        // bind 成功
+        logger.log(internalLevel, "{} bind success", loginName);
+
+      } else {
+
+        channel.close();
+        logger.log(internalLevel, "{} bind failure[result:{}]", loginName, result);
       }
-
-      BindMessage bind = (BindMessage) msg;
-
-      if (!loginName.equals(bind.getLoginName()) || !loginPassword.equals(bind.getLoginPassword())) {
-        // 用户名密码错误
-        bindRespError(ctx, 1);
-        return;
-      }
-
-      if (2 != bind.getLoginType()) {
-        // 登录类型不对
-        bindRespError(ctx, 4);
-        return;
-      }
-
-      // bind 成功
-      channel.writeAndFlush(bindResp).addListener(future -> {
-        if (future.isSuccess()) {
-          logger.log(internalLevel, "{} bind success", loginName);
-          channel.attr(SESSION_VALID).set(true);
-        }
-      });
 
       return;
     }
@@ -102,23 +96,7 @@ public class SubscriberSessionHandler extends ChannelDuplexHandler {
       return;
     }
 
-    if (!Boolean.TRUE.equals(channel.attr(SESSION_VALID).get())) {
-      // 没有注册 session 收到消息
-      logger.log(internalLevel, "{} received message when session not valid, fire SESSION_EVENT[NOT_VALID]", loginName, msg);
-
-      ctx.fireUserEventTriggered(SessionEvent.NOT_VALID(msg));
-      return;
-    }
-
     ctx.fireChannelRead(msg);
-  }
-
-  @Override
-  public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-
-    ctx.channel().attr(SESSION_VALID).set(false);
-
-    ctx.fireChannelInactive();
   }
 
   @Override
@@ -152,24 +130,7 @@ public class SubscriberSessionHandler extends ChannelDuplexHandler {
   @Override
   public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
 
-    if (!Boolean.TRUE.equals(ctx.channel().attr(SESSION_VALID).get())) {
-      ctx.channel().close();
-      logger.log(internalLevel, "{} catch exception when login and channel closed, {}", loginName, cause);
-
-      return;
-    }
-
-    ctx.fireExceptionCaught(cause);
-  }
-
-  private void bindRespError(ChannelHandlerContext ctx, int result) {
-    BindRespMessage bindResp = new BindRespMessage();
-    bindResp.setResult(result);
-    ctx.channel().writeAndFlush(bindResp).addListener(future -> {
-      if (future.isSuccess()) {
-        ctx.channel().close();
-        logger.log(internalLevel, "{} bind failure[result:{}] and channel closed", loginName, result);
-      }
-    });
+    ctx.channel().close();
+    logger.log(internalLevel, "{} catch exception and channel closed, {}", loginName, cause);
   }
 }

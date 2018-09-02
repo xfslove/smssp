@@ -1,6 +1,6 @@
 package com.github.xfslove.smssp.subscriber.cmpp20.netty4;
 
-import com.github.xfslove.smssp.handler.cmpp20.subscriber.SubscriberHandlerInitializer;
+import com.github.xfslove.smssp.netty4.handler.cmpp20.subscriber.SubscriberHandlerInitializer;
 import com.github.xfslove.smssp.message.cmpp20.CmppMessage;
 import com.github.xfslove.smssp.subscriber.Subscriber;
 import io.netty.bootstrap.ServerBootstrap;

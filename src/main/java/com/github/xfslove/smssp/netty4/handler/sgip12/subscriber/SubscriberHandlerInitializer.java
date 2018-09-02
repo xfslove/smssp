@@ -1,7 +1,7 @@
-package com.github.xfslove.smssp.handler.sgip12.subscriber;
+package com.github.xfslove.smssp.netty4.handler.sgip12.subscriber;
 
-import com.github.xfslove.smssp.codec.MesssageLengthCodec;
-import com.github.xfslove.smssp.codec.sgip12.MessageCodec;
+import com.github.xfslove.smssp.netty4.codec.MesssageLengthCodec;
+import com.github.xfslove.smssp.netty4.codec.sgip12.MessageCodec;
 import com.github.xfslove.smssp.message.sgip12.SgipMessage;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelInitializer;

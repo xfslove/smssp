@@ -1,8 +1,7 @@
-package com.github.xfslove.smssp.handler.cmpp20.subscriber;
+package com.github.xfslove.smssp.netty4.handler.cmpp20.subscriber;
 
-import com.github.xfslove.smssp.codec.MesssageLengthCodec;
-import com.github.xfslove.smssp.codec.cmpp20.MessageCodec;
-import com.github.xfslove.smssp.message.cmpp20.CmppMessage;
+import com.github.xfslove.smssp.netty4.codec.MesssageLengthCodec;
+import com.github.xfslove.smssp.netty4.codec.cmpp20.MessageCodec;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelInitializer;
 import io.netty.handler.logging.LogLevel;

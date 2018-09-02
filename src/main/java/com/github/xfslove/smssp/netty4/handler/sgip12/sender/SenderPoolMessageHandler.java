@@ -1,7 +1,7 @@
-package com.github.xfslove.smssp.handler.sgip12.sender;
+package com.github.xfslove.smssp.netty4.handler.sgip12.sender;
 
-import com.github.xfslove.smssp.codec.MesssageLengthCodec;
-import com.github.xfslove.smssp.codec.sgip12.MessageCodec;
+import com.github.xfslove.smssp.netty4.codec.MesssageLengthCodec;
+import com.github.xfslove.smssp.netty4.codec.sgip12.MessageCodec;
 import com.github.xfslove.smssp.message.sgip12.SubmitRespMessage;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelDuplexHandler;
@@ -20,7 +20,7 @@ import io.netty.util.internal.logging.InternalLoggerFactory;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
-import static com.github.xfslove.smssp.handler.AttributeKeyConstants.RESP_QUEUE;
+import static com.github.xfslove.smssp.netty4.handler.AttributeKeyConstants.RESP_QUEUE;
 
 /**
  * @author hanwen

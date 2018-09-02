@@ -1,6 +1,6 @@
 package com.github.xfslove.smssp.subscriber.sgip12.netty4;
 
-import com.github.xfslove.smssp.handler.sgip12.subscriber.SubscriberHandlerInitializer;
+import com.github.xfslove.smssp.netty4.handler.sgip12.subscriber.SubscriberHandlerInitializer;
 import com.github.xfslove.smssp.message.sgip12.SgipMessage;
 import com.github.xfslove.smssp.subscriber.Subscriber;
 import io.netty.bootstrap.ServerBootstrap;
