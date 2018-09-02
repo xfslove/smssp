@@ -1,8 +1,8 @@
-package com.github.xfslove.smssp.handler.sgip12.sender;
+package com.github.xfslove.smssp.handler.cmpp20.sender;
 
 import com.github.xfslove.smssp.codec.MesssageLengthCodec;
-import com.github.xfslove.smssp.codec.sgip12.MessageCodec;
-import com.github.xfslove.smssp.message.sgip12.SubmitRespMessage;
+import com.github.xfslove.smssp.codec.cmpp20.MessageCodec;
+import com.github.xfslove.smssp.message.cmpp20.SubmitRespMessage;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandler;
@@ -61,15 +61,15 @@ public class SenderPoolMessageHandler extends ChannelDuplexHandler implements Ch
   @Override
   public void channelCreated(Channel channel) throws Exception {
 
-    channel.pipeline().addLast("sgipSocketLogging", new LoggingHandler(LogLevel.DEBUG));
-    channel.pipeline().addLast("sgipIdleState", new IdleStateHandler(0, 0, idleTime, TimeUnit.SECONDS));
-    channel.pipeline().addLast("sgipMessageLengthCodec", new MesssageLengthCodec(true));
-    channel.pipeline().addLast("sgipMessageCodec", new MessageCodec());
-    channel.pipeline().addLast("sgipMessageLogging", new LoggingHandler(level));
-    channel.pipeline().addLast("sgipSessionHandler", new SenderSessionHandler(loginName, loginPassword, level));
-    channel.pipeline().addLast("sgipMessageHandler", this);
+    channel.pipeline().addLast("cmppSocketLogging", new LoggingHandler(LogLevel.DEBUG));
+    channel.pipeline().addLast("cmppIdleState", new IdleStateHandler(0, 0, idleTime, TimeUnit.SECONDS));
+    channel.pipeline().addLast("cmppMessageLengthCodec", new MesssageLengthCodec(true));
+    channel.pipeline().addLast("cmppMessageCodec", new MessageCodec());
+    channel.pipeline().addLast("cmppMessageLogging", new LoggingHandler(level));
+    channel.pipeline().addLast("cmppSessionHandler", new SenderSessionHandler(loginName, loginPassword, level));
+    channel.pipeline().addLast("cmppMessageHandler", this);
 
-    logger.log(internalLevel, "initialized sender pipeline[sgipSocketLogging, sgipIdleState, sgipMessageLengthCodec, sgipMessageCodec, sgipMessageLogging, sgipSessionHandler, sgipMessageHandler]");
+    logger.log(internalLevel, "initialized sender pipeline[cmppSocketLogging, cmppIdleState, cmppMessageLengthCodec, cmppMessageCodec, cmppMessageLogging, cmppSessionHandler, cmppMessageHandler]");
 
     // 接受resp的queue
     Attribute<LinkedBlockingQueue> respQueue = channel.attr(RESP_QUEUE);
@@ -92,7 +92,7 @@ public class SenderPoolMessageHandler extends ChannelDuplexHandler implements Ch
       return;
     }
 
-    logger.log(internalLevel, "received unknown sgip message {}, drop it", msg);
+    logger.log(internalLevel, "received unknown cmpp message {}, drop it", msg);
     ReferenceCountUtil.release(msg);
   }
 

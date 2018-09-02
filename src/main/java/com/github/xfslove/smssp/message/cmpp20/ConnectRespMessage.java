@@ -1,6 +1,6 @@
 package com.github.xfslove.smssp.message.cmpp20;
 
-import com.github.xfslove.smssp.util.StringUtil;
+import com.github.xfslove.smssp.util.ByteUtil;
 import io.netty.buffer.ByteBuf;
 
 import java.nio.charset.StandardCharsets;
@@ -53,7 +53,7 @@ public class ConnectRespMessage implements CmppMessage {
     // 4 bytes
     out.writeByte(getStatus());
     // 16 bytes
-    out.writeBytes(StringUtil.getOctetStringBytes(getAuthenticatorISMG(), 16, StandardCharsets.ISO_8859_1));
+    out.writeBytes(ByteUtil.getStringOctetBytes(getAuthenticatorISMG(), 16, StandardCharsets.ISO_8859_1));
     // 1 byte
     out.writeByte(getVersion());
   }

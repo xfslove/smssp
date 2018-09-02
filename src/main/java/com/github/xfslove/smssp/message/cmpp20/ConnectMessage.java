@@ -1,6 +1,6 @@
 package com.github.xfslove.smssp.message.cmpp20;
 
-import com.github.xfslove.smssp.util.StringUtil;
+import com.github.xfslove.smssp.util.ByteUtil;
 import io.netty.buffer.ByteBuf;
 
 import java.nio.charset.StandardCharsets;
@@ -11,13 +11,15 @@ import java.nio.charset.StandardCharsets;
  */
 public class ConnectMessage implements CmppMessage {
 
+  public static final int VERSION_20 = 0x20;
+
   private final MessageHead head = new MessageHead(CmppConstants.CMPP_CONNECT);
 
   /**
    * 双方协商的版本号(高位4bit表示主版本号,低位4bit表示次版本号)
    * cmpp2.0
    */
-  private final int version = 0x20;
+  private final int version = VERSION_20;
 
   /**
    * 源地址，此处为SP_Id，即SP的企业代码
@@ -30,7 +32,7 @@ public class ConnectMessage implements CmppMessage {
    * MD5（Source_Addr+9 字节的0 +shared secret+timestamp）
    * Shared secret 由中国移动与源地址实体事先商定，timestamp格式为：MMDDHHMMSS，即月日时分秒，10位
    */
-  private String authenticatorSource;
+  private byte[] authenticatorSource;
 
 
   /**
@@ -51,9 +53,9 @@ public class ConnectMessage implements CmppMessage {
   @Override
   public void write(ByteBuf out) {
     // 6 bytes
-    out.writeBytes(StringUtil.getOctetStringBytes(getSourceAddr(), 6, StandardCharsets.ISO_8859_1));
+    out.writeBytes(ByteUtil.getStringOctetBytes(getSourceAddr(), 6, StandardCharsets.ISO_8859_1));
     // 16 bytes
-    out.writeBytes(StringUtil.getOctetStringBytes(getAuthenticatorSource(), 16, StandardCharsets.ISO_8859_1));
+    out.writeBytes(ByteUtil.getOctetBytes(getAuthenticatorSource(), 16));
     // 1 byte
     out.writeByte(getVersion());
     // 4 bytes
@@ -63,7 +65,9 @@ public class ConnectMessage implements CmppMessage {
   @Override
   public void read(ByteBuf in) {
     setSourceAddr(in.readCharSequence(6, StandardCharsets.ISO_8859_1).toString().trim());
-    setAuthenticatorSource(in.readCharSequence(16, StandardCharsets.ISO_8859_1).toString().trim());
+    byte[] bytes = new byte[16];
+    in.readBytes(bytes);
+    setAuthenticatorSource(bytes);
     int version = in.readUnsignedByte();
     // equal with 0x20
     setTimestamp(in.readInt());
@@ -77,11 +81,11 @@ public class ConnectMessage implements CmppMessage {
     this.sourceAddr = sourceAddr;
   }
 
-  public String getAuthenticatorSource() {
+  public byte[] getAuthenticatorSource() {
     return authenticatorSource;
   }
 
-  public void setAuthenticatorSource(String authenticatorSource) {
+  public void setAuthenticatorSource(byte[] authenticatorSource) {
     this.authenticatorSource = authenticatorSource;
   }
 
@@ -103,7 +107,6 @@ public class ConnectMessage implements CmppMessage {
         "head=" + head +
         ", version=" + version +
         ", sourceAddr='" + sourceAddr + '\'' +
-        ", authenticatorSource='" + authenticatorSource + '\'' +
         ", timestamp=" + timestamp +
         '}';
   }

@@ -99,20 +99,7 @@ public class DeliverMessage extends SmsPdu implements CmppMessage {
 
     int msgLength = in.readUnsignedByte();
 
-    if (1 == registeredDelivery) {
-      // 状态报告
-      Report report = new Report();
-      report.setMsgId(MsgId.create(in.readLong()));
-      report.setStat(in.readCharSequence(7, StandardCharsets.ISO_8859_1).toString().trim());
-      report.setSubmitTime(in.readCharSequence(10, StandardCharsets.ISO_8859_1).toString().trim());
-      report.setDoneTime(in.readCharSequence(10, StandardCharsets.ISO_8859_1).toString().trim());
-      report.setDestTerminalId(in.readCharSequence(21, StandardCharsets.ISO_8859_1).toString().trim());
-      report.setSmscSequence(in.readInt());
-      // todo setReport
-      return;
-    }
-
-    // deliver
+    // deliver or report
     // todo 内容
     byte[] content = new byte[msgLength];
     in.readBytes(content);

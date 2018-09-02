@@ -1,6 +1,6 @@
 package com.github.xfslove.smssp.message.sgip12;
 
-import com.github.xfslove.smssp.util.StringUtil;
+import com.github.xfslove.smssp.util.ByteUtil;
 import io.netty.buffer.ByteBuf;
 
 import java.nio.charset.StandardCharsets;
@@ -37,7 +37,7 @@ public class BindRespMessage implements SgipMessage {
     // 1 byte
     out.writeByte(result);
     // 8 bytes
-    out.writeBytes(StringUtil.getOctetStringBytes(reserve, 8, StandardCharsets.ISO_8859_1));
+    out.writeBytes(ByteUtil.getStringOctetBytes(reserve, 8, StandardCharsets.ISO_8859_1));
   }
 
   @Override

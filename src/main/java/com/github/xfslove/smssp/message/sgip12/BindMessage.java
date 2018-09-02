@@ -1,6 +1,6 @@
 package com.github.xfslove.smssp.message.sgip12;
 
-import com.github.xfslove.smssp.util.StringUtil;
+import com.github.xfslove.smssp.util.ByteUtil;
 import io.netty.buffer.ByteBuf;
 
 import java.nio.charset.StandardCharsets;
@@ -56,11 +56,11 @@ public class BindMessage implements SgipMessage {
     // 1 byte
     out.writeByte(getLoginType());
     // 16 bytes
-    out.writeBytes(StringUtil.getOctetStringBytes(getLoginName(), 16, StandardCharsets.ISO_8859_1));
+    out.writeBytes(ByteUtil.getStringOctetBytes(getLoginName(), 16, StandardCharsets.ISO_8859_1));
     // 16 bytes
-    out.writeBytes(StringUtil.getOctetStringBytes(getLoginPassword(), 16, StandardCharsets.ISO_8859_1));
+    out.writeBytes(ByteUtil.getStringOctetBytes(getLoginPassword(), 16, StandardCharsets.ISO_8859_1));
     // 8 byte
-    out.writeBytes(StringUtil.getOctetStringBytes(getReserve(), 8, StandardCharsets.ISO_8859_1));
+    out.writeBytes(ByteUtil.getStringOctetBytes(getReserve(), 8, StandardCharsets.ISO_8859_1));
   }
 
   @Override

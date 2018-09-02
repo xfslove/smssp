@@ -13,7 +13,7 @@ import java.util.List;
  * @author hanwen
  * created at 2018/8/28
  */
-public class MesssageCodec extends ByteToMessageCodec<SgipMessage> {
+public class MessageCodec extends ByteToMessageCodec<SgipMessage> {
 
   @Override
   protected void encode(ChannelHandlerContext ctx, SgipMessage msg, ByteBuf out) throws Exception {

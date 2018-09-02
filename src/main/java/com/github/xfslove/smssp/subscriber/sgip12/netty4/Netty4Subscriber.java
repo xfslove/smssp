@@ -17,7 +17,7 @@ import java.util.function.Consumer;
  * @author hanwen
  * created at 2018/9/1
  */
-public class Netty4Subsriber implements Subscriber<SgipMessage> {
+public class Netty4Subscriber implements Subscriber<SgipMessage> {
 
   private EventLoopGroup bossGroup = new NioEventLoopGroup(1, new DefaultThreadFactory("sgipSubscribeBoss", true));
   private EventLoopGroup workGroup = new NioEventLoopGroup(Math.min(Runtime.getRuntime().availableProcessors() + 1, 32), new DefaultThreadFactory("sgipSubscribeWorker", true));
@@ -38,7 +38,7 @@ public class Netty4Subsriber implements Subscriber<SgipMessage> {
    */
   private Consumer<SgipMessage> consumer = m -> {};
 
-  public Netty4Subsriber(String loginName, String loginPassword) {
+  public Netty4Subscriber(String loginName, String loginPassword) {
     this.loginName = loginName;
     this.loginPassword = loginPassword;
   }

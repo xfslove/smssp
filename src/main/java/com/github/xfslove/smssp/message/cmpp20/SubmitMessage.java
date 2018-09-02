@@ -1,7 +1,7 @@
 package com.github.xfslove.smssp.message.cmpp20;
 
 import com.github.xfslove.smsj.sms.SmsPdu;
-import com.github.xfslove.smssp.util.StringUtil;
+import com.github.xfslove.smssp.util.ByteUtil;
 import io.netty.buffer.ByteBuf;
 
 import java.nio.charset.StandardCharsets;
@@ -144,11 +144,11 @@ public class SubmitMessage extends SmsPdu implements CmppMessage {
     out.writeByte(getRegisteredDelivery());
     out.writeByte(getMsgLevel());
     // 10 bytes
-    out.writeBytes(StringUtil.getOctetStringBytes(getServiceId(), 10, StandardCharsets.ISO_8859_1));
+    out.writeBytes(ByteUtil.getStringOctetBytes(getServiceId(), 10, StandardCharsets.ISO_8859_1));
     // 1 byte
     out.writeByte(getFeeUserType());
     // 21 bytes
-    out.writeBytes(StringUtil.getOctetStringBytes(getFeeTerminalId(), 21, StandardCharsets.ISO_8859_1));
+    out.writeBytes(ByteUtil.getStringOctetBytes(getFeeTerminalId(), 21, StandardCharsets.ISO_8859_1));
     // 1 byte
     out.writeByte(getTpPid());
     out.writeByte(getTpUdhi());
@@ -156,20 +156,20 @@ public class SubmitMessage extends SmsPdu implements CmppMessage {
     out.writeByte(getDcs().getValue());
 
     // 6 bytes
-    out.writeBytes(StringUtil.getOctetStringBytes(getMsgSrc(), 6, StandardCharsets.ISO_8859_1));
+    out.writeBytes(ByteUtil.getStringOctetBytes(getMsgSrc(), 6, StandardCharsets.ISO_8859_1));
     // 2 bytes
-    out.writeBytes(StringUtil.getOctetStringBytes(getFeeType(), 2, StandardCharsets.ISO_8859_1));
+    out.writeBytes(ByteUtil.getStringOctetBytes(getFeeType(), 2, StandardCharsets.ISO_8859_1));
     // 6 bytes
-    out.writeBytes(StringUtil.getOctetStringBytes(getFeeCode(), 6, StandardCharsets.ISO_8859_1));
+    out.writeBytes(ByteUtil.getStringOctetBytes(getFeeCode(), 6, StandardCharsets.ISO_8859_1));
     // 17 bytes
-    out.writeBytes(StringUtil.getOctetStringBytes(getValIdTime(), 17, StandardCharsets.ISO_8859_1));
-    out.writeBytes(StringUtil.getOctetStringBytes(getAtTime(), 17, StandardCharsets.ISO_8859_1));
+    out.writeBytes(ByteUtil.getStringOctetBytes(getValIdTime(), 17, StandardCharsets.ISO_8859_1));
+    out.writeBytes(ByteUtil.getStringOctetBytes(getAtTime(), 17, StandardCharsets.ISO_8859_1));
     // 21 bytes
-    out.writeBytes(StringUtil.getOctetStringBytes(getSrcId(), 21, StandardCharsets.ISO_8859_1));
+    out.writeBytes(ByteUtil.getStringOctetBytes(getSrcId(), 21, StandardCharsets.ISO_8859_1));
 
     out.writeByte(getDestTerminalIds().size());
     for (String destTerminalId : getDestTerminalIds()) {
-      out.writeBytes(StringUtil.getOctetStringBytes(destTerminalId, 21, StandardCharsets.ISO_8859_1));
+      out.writeBytes(ByteUtil.getStringOctetBytes(destTerminalId, 21, StandardCharsets.ISO_8859_1));
     }
 
     byte[] udh = getUdhBytes();
@@ -178,7 +178,7 @@ public class SubmitMessage extends SmsPdu implements CmppMessage {
     out.writeBytes(udh);
     out.writeBytes(ud);
     // 8 bytes
-    out.writeBytes(StringUtil.getOctetStringBytes(getReserve(), 8, StandardCharsets.ISO_8859_1));
+    out.writeBytes(ByteUtil.getStringOctetBytes(getReserve(), 8, StandardCharsets.ISO_8859_1));
   }
 
   @Override

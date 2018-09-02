@@ -19,7 +19,7 @@ import io.netty.util.concurrent.Future;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
 
-import static com.github.xfslove.smssp.handler.sgip12.AttributeKeyConstants.RESP_QUEUE;
+import static com.github.xfslove.smssp.handler.AttributeKeyConstants.RESP_QUEUE;
 
 
 /**

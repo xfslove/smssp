@@ -1,9 +1,7 @@
-package com.github.xfslove.smssp.handler.sgip12.sender;
+package com.github.xfslove.smssp.handler.cmpp20.sender;
 
-import com.github.xfslove.smssp.message.sgip12.BindMessage;
-import com.github.xfslove.smssp.message.sgip12.BindRespMessage;
-import com.github.xfslove.smssp.message.sgip12.UnBindMessage;
-import com.github.xfslove.smssp.message.sgip12.UnBindRespMessage;
+import com.github.xfslove.smssp.message.cmpp20.*;
+import com.github.xfslove.smssp.util.ByteUtil;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandler;
@@ -14,8 +12,12 @@ import io.netty.handler.timeout.IdleStateEvent;
 import io.netty.util.internal.logging.InternalLogLevel;
 import io.netty.util.internal.logging.InternalLogger;
 import io.netty.util.internal.logging.InternalLoggerFactory;
+import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.time.DateFormatUtils;
 
-import java.util.concurrent.TimeUnit;
+import java.nio.charset.StandardCharsets;
+import java.util.Date;
 
 /**
  * sp -> smg session管理handler
@@ -43,12 +45,19 @@ public class SenderSessionHandler extends ChannelDuplexHandler {
   @Override
   public void channelActive(ChannelHandlerContext ctx) throws Exception {
 
-    // 发送bind请求
-    BindMessage bind = new BindMessage();
-    bind.setLoginName(loginName);
-    bind.setLoginPassword(loginPassword);
-    ctx.channel().writeAndFlush(bind);
-    logger.log(internalLevel, "{} send bind request", loginName);
+    // 发送connect请求
+    ConnectMessage connect = new ConnectMessage();
+
+    connect.setTimestamp(Integer.valueOf(DateFormatUtils.format(new Date(), "MMddHHmmss")));
+    connect.setSourceAddr(loginName);
+    byte[] sourceBytes = connect.getSourceAddr().getBytes(StandardCharsets.ISO_8859_1);
+    byte[] secretBytes = loginPassword.getBytes(StandardCharsets.ISO_8859_1);
+    byte[] timestampBytes = StringUtils.leftPad(String.valueOf(connect.getTimestamp()), 10, "0").getBytes(StandardCharsets.ISO_8859_1);
+    byte[] authenticationBytes = DigestUtils.md5(ByteUtil.concat(sourceBytes, new byte[9], secretBytes, timestampBytes));
+    connect.setAuthenticatorSource(authenticationBytes);
+
+    ctx.channel().writeAndFlush(connect);
+    logger.log(internalLevel, "send connect request");
 
     ctx.fireChannelActive();
   }
@@ -57,43 +66,41 @@ public class SenderSessionHandler extends ChannelDuplexHandler {
   public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
     Channel channel = ctx.channel();
 
-    // 获取bindResp
-    if (msg instanceof BindRespMessage) {
-      BindRespMessage bindResp = (BindRespMessage) msg;
+    // 获取connectResp
+    if (msg instanceof ConnectRespMessage) {
+      ConnectRespMessage resp = (ConnectRespMessage) msg;
 
-      int result = bindResp.getResult();
+      int result = resp.getStatus();
 
       if (result == 0) {
         // bind 成功
-        logger.log(internalLevel, "{} bind success", loginName);
+        logger.log(internalLevel, "{} connect success", loginName);
 
       } else {
 
         channel.close();
-        logger.log(internalLevel, "{} bind failure[result:{}]", loginName, result);
+        logger.log(internalLevel, "{} connect failure[result:{}]", loginName, result);
       }
 
       return;
     }
 
-    // unbind
-    if (msg instanceof UnBindMessage) {
+    // terminate
+    if (msg instanceof TerminateMessage) {
       // 直接回复UnbindResp
-      channel.writeAndFlush(new UnBindRespMessage()).addListener(future -> {
+      channel.writeAndFlush(new TerminateRespMessage()).addListener(future -> {
         if (future.isSuccess()) {
           channel.close();
-          logger.log(internalLevel, "{} unbind success and channel closed", loginName);
+          logger.log(internalLevel, "{} terminate success and channel closed", loginName);
         }
       });
 
       return;
     }
 
-    // unbindResp
-    if (msg instanceof UnBindRespMessage) {
-      logger.log(internalLevel, "{} received unbind resp message and close channel", loginName);
-      channel.close();
-      return;
+    // activeTestResp
+    if (msg instanceof ActiveTestRespMessage) {
+      logger.log(internalLevel, "{} received active test resp message", loginName);
     }
 
     ctx.fireChannelRead(msg);
@@ -108,15 +115,9 @@ public class SenderSessionHandler extends ChannelDuplexHandler {
       if (iEvt.state().equals(IdleState.ALL_IDLE)) {
 
         // 发送unbind
-        ctx.channel().writeAndFlush(new UnBindMessage()).addListener(future -> {
+        ctx.channel().writeAndFlush(new ActiveTestMessage()).addListener(future -> {
           if (future.isSuccess()) {
-
-            ctx.executor().schedule(() -> {
-              ctx.channel().close();
-              logger.log(internalLevel, "{} channel closed due to not received resp", loginName);
-            }, 500, TimeUnit.MILLISECONDS);
-
-            logger.log(internalLevel, "{} request unbind when idle and delay 500ms close channel if no resp", loginName);
+            logger.log(internalLevel, "{} request active test when idle", loginName);
           }
         });
 
