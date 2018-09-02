@@ -27,7 +27,7 @@ public class SubscriberHandlerInitializer extends ChannelInitializer<Channel> {
 
   private Consumer<Message> consumer;
 
-  private int idleTime = 5 * 60;
+  private int idleCheckInterval = 5 * 60;
 
   private String loginName;
 
@@ -44,7 +44,7 @@ public class SubscriberHandlerInitializer extends ChannelInitializer<Channel> {
   @Override
   protected void initChannel(Channel channel) throws Exception {
     channel.pipeline().addLast("cmppSocketLogging", new LoggingHandler(LogLevel.DEBUG));
-    channel.pipeline().addLast("cmppIdleState", new IdleStateHandler(0, 0, idleTime, TimeUnit.SECONDS));
+    channel.pipeline().addLast("cmppIdleState", new IdleStateHandler(0, 0, idleCheckInterval, TimeUnit.SECONDS));
     channel.pipeline().addLast("cmppMessageLengthCodec", new MesssageLengthCodec(true));
     channel.pipeline().addLast("cmppMessageCodec", new MessageCodec());
     channel.pipeline().addLast("cmppMessageLogging", new LoggingHandler(logLevel));
@@ -54,7 +54,7 @@ public class SubscriberHandlerInitializer extends ChannelInitializer<Channel> {
     logger.log(internalLevel, "initialized sender pipeline[cmppSocketLogging, cmppIdleState, cmppMessageLengthCodec, cmppMessageCodec, cmppMessageLogging, cmppSessionHandler, cmppMessageHandler]");
   }
 
-  public void setIdleTime(int idleTime) {
-    this.idleTime = idleTime;
+  public void setIdleCheckInterval(int idleCheckInterval) {
+    this.idleCheckInterval = idleCheckInterval;
   }
 }

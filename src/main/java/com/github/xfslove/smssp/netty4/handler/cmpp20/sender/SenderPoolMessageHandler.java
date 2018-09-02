@@ -34,8 +34,9 @@ public class SenderPoolMessageHandler extends ChannelDuplexHandler implements Ch
   private final InternalLogger logger;
   private final InternalLogLevel internalLevel;
 
-  private int idleTime = 5 * 60;
+  private int idleCheckInterval = 5 * 60;
 
+  // todo
   private int windowSize = 32;
 
   private String loginName;
@@ -63,7 +64,7 @@ public class SenderPoolMessageHandler extends ChannelDuplexHandler implements Ch
   public void channelCreated(Channel channel) throws Exception {
 
     channel.pipeline().addLast("cmppSocketLogging", new LoggingHandler(LogLevel.DEBUG));
-    channel.pipeline().addLast("cmppIdleState", new IdleStateHandler(0, 0, idleTime, TimeUnit.SECONDS));
+    channel.pipeline().addLast("cmppIdleState", new IdleStateHandler(0, 0, idleCheckInterval, TimeUnit.SECONDS));
     channel.pipeline().addLast("cmppMessageLengthCodec", new MesssageLengthCodec(true));
     channel.pipeline().addLast("cmppMessageCodec", new MessageCodec());
     channel.pipeline().addLast("cmppMessageLogging", new LoggingHandler(level));
@@ -97,8 +98,8 @@ public class SenderPoolMessageHandler extends ChannelDuplexHandler implements Ch
     ReferenceCountUtil.release(msg);
   }
 
-  public void setIdleTime(int idleTime) {
-    this.idleTime = idleTime;
+  public void setIdleCheckInterval(int idleCheckInterval) {
+    this.idleCheckInterval = idleCheckInterval;
   }
 
   public void setWindowSize(int windowSize) {
