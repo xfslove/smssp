@@ -1,8 +1,8 @@
 package com.github.xfslove.smssp.netty4.handler.cmpp20.subscriber;
 
 import com.github.xfslove.smssp.message.Message;
-import com.github.xfslove.smssp.netty4.SessionEvent;
 import com.github.xfslove.smssp.message.cmpp20.*;
+import com.github.xfslove.smssp.netty4.SessionEvent;
 import com.github.xfslove.smssp.util.ByteUtil;
 import io.netty.channel.*;
 import io.netty.handler.logging.LogLevel;
@@ -50,7 +50,7 @@ public class SubscriberSessionHandler extends ChannelDuplexHandler {
     // connect
     if (msg instanceof ConnectMessage) {
       ConnectRespMessage resp = new ConnectRespMessage();
-      resp.setVersion(0x20);
+      resp.setVersion(ConnectMessage.VERSION_20);
 
       ConnectMessage connect = (ConnectMessage) msg;
 
