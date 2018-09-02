@@ -1,8 +1,12 @@
 package com.github.xfslove.smssp.message.cmpp20;
 
 import com.github.xfslove.smsj.sms.SmsPdu;
+import com.github.xfslove.smsj.sms.dcs.SmsDcs;
+import com.github.xfslove.smsj.sms.ud.SmsUdhElement;
+import com.github.xfslove.smsj.sms.ud.SmsUdhUtil;
 import com.github.xfslove.smssp.message.Message;
 import com.github.xfslove.smssp.message.MessageHead;
+import com.github.xfslove.smssp.util.ByteUtil;
 import io.netty.buffer.ByteBuf;
 
 import java.nio.charset.StandardCharsets;
@@ -91,7 +95,9 @@ public class DeliverMessage extends SmsPdu implements CmppMessage {
     setDestId(in.readCharSequence(21, StandardCharsets.ISO_8859_1).toString().trim());
     setServiceId(in.readCharSequence(10, StandardCharsets.ISO_8859_1).toString().trim());
     setTpPid(in.readUnsignedByte());
-    setTpUdhi(in.readUnsignedByte());
+
+    int tpUdhi = in.readUnsignedByte();
+    setTpUdhi(tpUdhi);
 
     int dcs = in.readUnsignedByte();
 
@@ -102,9 +108,26 @@ public class DeliverMessage extends SmsPdu implements CmppMessage {
     int msgLength = in.readUnsignedByte();
 
     // deliver or report
-    // todo 内容
-    byte[] content = new byte[msgLength];
-    in.readBytes(content);
+    if (tpUdhi == 0) {
+
+      byte[] content = new byte[msgLength];
+      in.readBytes(content);
+      setUserData(content, new SmsDcs((byte) dcs));
+    } else {
+
+      int udhl = in.readUnsignedByte();
+
+      byte[] udh = new byte[udhl];
+      in.readBytes(udh);
+      // include udhl
+      SmsUdhElement[] udhElements = SmsUdhUtil.deserialize(udh);
+
+      setUserDataHeaders(udhElements);
+
+      int udl = msgLength - udhl - 1;
+      byte[] ud = new byte[udl];
+      setUserData(ud, new SmsDcs((byte) dcs));
+    }
 
     setReserve(in.readCharSequence(8, StandardCharsets.ISO_8859_1).toString().trim());
   }
@@ -306,10 +329,11 @@ public class DeliverMessage extends SmsPdu implements CmppMessage {
 
   @Override
   public String toString() {
-    // todo 内容
     return "DeliverMessage{" +
         "head=" + head +
         ", msgId=" + msgId +
+        ", userDataHeader='" + ByteUtil.getString(getUdhBytes(), getDcs().getAlphabet()) + '\'' +
+        ", userData='" + ByteUtil.getString(getUdBytes(), getDcs().getAlphabet()) + '\'' +
         ", destId='" + destId + '\'' +
         ", serviceId='" + serviceId + '\'' +
         ", tpPid=" + tpPid +

@@ -341,9 +341,10 @@ public class SubmitMessage extends SmsPdu implements SgipMessage {
 
   @Override
   public String toString() {
-    // todo 内容
     return "SubmitMessage{" +
         "head=" + head +
+        ", userDataHeader='" + ByteUtil.getString(getUdhBytes(), getDcs().getAlphabet()) + '\'' +
+        ", userData='" + ByteUtil.getString(getUdBytes(), getDcs().getAlphabet()) + '\'' +
         ", spNumber='" + spNumber + '\'' +
         ", chargeNumber='" + chargeNumber + '\'' +
         ", userNumbers=" + userNumbers +

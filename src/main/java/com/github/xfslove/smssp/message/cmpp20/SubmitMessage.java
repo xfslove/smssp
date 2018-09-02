@@ -332,10 +332,11 @@ public class SubmitMessage extends SmsPdu implements CmppMessage {
 
   @Override
   public String toString() {
-    // todo 内容
     return "SubmitMessage{" +
         "head=" + head +
         ", msgId=" + msgId +
+        ", userDataHeader='" + ByteUtil.getString(getUdhBytes(), getDcs().getAlphabet()) + '\'' +
+        ", userData='" + ByteUtil.getString(getUdBytes(), getDcs().getAlphabet()) + '\'' +
         ", pkTotal=" + pkTotal +
         ", pkNumber=" + pkNumber +
         ", registeredDelivery=" + registeredDelivery +
