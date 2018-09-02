@@ -11,6 +11,10 @@ public interface Sender {
 
   void connect(MessageProtocol protocol, String host, int port);
 
+  /**
+   * @param message 发送的消息
+   * @return 收到的消息
+   */
   Message send(Message message);
 
   /**

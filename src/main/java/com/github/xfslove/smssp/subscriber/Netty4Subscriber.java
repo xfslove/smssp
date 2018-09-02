@@ -1,7 +1,7 @@
 package com.github.xfslove.smssp.subscriber;
 
+import com.github.xfslove.smssp.message.Message;
 import com.github.xfslove.smssp.message.MessageProtocol;
-import com.github.xfslove.smssp.message.cmpp20.CmppMessage;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.ChannelInitializer;
@@ -10,6 +10,8 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.util.concurrent.DefaultThreadFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.function.Consumer;
 
@@ -17,7 +19,9 @@ import java.util.function.Consumer;
  * @author hanwen
  * created at 2018/9/1
  */
-public class Netty4Subscriber implements Subscriber<CmppMessage> {
+public class Netty4Subscriber implements Subscriber {
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(Netty4Subscriber.class);
 
   private EventLoopGroup bossGroup = new NioEventLoopGroup(1, new DefaultThreadFactory("SubscribeBoss", true));
   private EventLoopGroup workGroup = new NioEventLoopGroup(Math.min(Runtime.getRuntime().availableProcessors() + 1, 32), new DefaultThreadFactory("SubscribeWorker", true));
@@ -34,10 +38,9 @@ public class Netty4Subscriber implements Subscriber<CmppMessage> {
   private String loginPassword;
 
   /**
-   * 默认什么都不做
+   * 默认打印
    */
-  private Consumer consumer = m -> {
-  };
+  private Consumer<Message> consumer = m -> LOGGER.info("Received: {}", m);
 
   public Netty4Subscriber(String loginName, String loginPassword) {
     this.loginName = loginName;
@@ -61,23 +64,30 @@ public class Netty4Subscriber implements Subscriber<CmppMessage> {
 
 
     bootstrap.childHandler(initializer);
-    bootstrap.bind(host, port).addListener(listener -> {
-
-    }).syncUninterruptibly();
+    bootstrap.bind(host, port).syncUninterruptibly()
+        .addListener(listener -> {
+          if (listener.isSuccess()) {
+            LOGGER.info("netty subscriber started, listen at {}:{}", host, port);
+          }
+        });
   }
 
   @Override
   public void close() {
     bossGroup.shutdownGracefully().addListener(listener -> {
-
+      if (listener.isSuccess()) {
+        LOGGER.info("netty subscriber boss group closed");
+      }
     });
     workGroup.shutdownGracefully().addListener(listener -> {
-
+      if (listener.isSuccess()) {
+        LOGGER.info("netty subscriber work group closed");
+      }
     });
   }
 
   @Override
-  public void handleMessage(Consumer consumer) {
+  public void handleMessage(Consumer<Message> consumer) {
     this.consumer = consumer;
   }
 }

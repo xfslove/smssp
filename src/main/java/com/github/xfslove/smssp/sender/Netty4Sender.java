@@ -14,6 +14,9 @@ import io.netty.channel.pool.FixedChannelPool;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.util.concurrent.DefaultThreadFactory;
 import io.netty.util.concurrent.Future;
+import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
@@ -26,6 +29,8 @@ import static com.github.xfslove.smssp.netty4.handler.AttributeKeyConstants.RESP
  * created at 2018/9/1
  */
 public class Netty4Sender implements Sender {
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(Netty4Sender.class);
 
   private EventLoopGroup workGroup = new NioEventLoopGroup(Math.min(Runtime.getRuntime().availableProcessors() + 1, 32), new DefaultThreadFactory("sgipSendWorker", true));
 
@@ -79,7 +84,7 @@ public class Netty4Sender implements Sender {
       BlockingQueue<Message> queue = channel.attr(RESP_QUEUE).get();
       return queue.poll(3000, TimeUnit.MILLISECONDS);
     } catch (InterruptedException e) {
-      e.printStackTrace();
+      LOGGER.error(ExceptionUtils.getStackTrace(e));
       return null;
     } finally {
 
