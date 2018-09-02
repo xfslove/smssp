@@ -14,7 +14,7 @@ import java.util.List;
  */
 public class SubmitMessage extends SmsPdu implements SgipMessage {
 
-  private final MessageHead head = new MessageHead(SgipConstants.COMMAND_ID_SUBMIT);
+  private final Sgip12Head head = new Sgip12Head(SgipConstants.COMMAND_ID_SUBMIT);
 
   /**
    * SP的接入号码
@@ -134,7 +134,7 @@ public class SubmitMessage extends SmsPdu implements SgipMessage {
   private String reserve;
 
   @Override
-  public MessageHead getHead() {
+  public Sgip12Head getHead() {
     return head;
   }
 

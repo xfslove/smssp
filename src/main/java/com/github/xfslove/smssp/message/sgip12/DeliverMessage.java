@@ -11,7 +11,7 @@ import java.nio.charset.StandardCharsets;
  */
 public class DeliverMessage extends SmsPdu implements SgipMessage {
 
-  private final MessageHead head = new MessageHead(SgipConstants.COMMAND_ID_DELIVER);
+  private final Sgip12Head head = new Sgip12Head(SgipConstants.COMMAND_ID_DELIVER);
 
   /**
    * SP的接入号码
@@ -41,7 +41,7 @@ public class DeliverMessage extends SmsPdu implements SgipMessage {
   private String reserve;
 
   @Override
-  public MessageHead getHead() {
+  public Sgip12Head getHead() {
     return head;
   }
 

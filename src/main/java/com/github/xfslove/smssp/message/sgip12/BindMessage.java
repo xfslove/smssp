@@ -11,7 +11,7 @@ import java.nio.charset.StandardCharsets;
  */
 public class BindMessage implements SgipMessage {
 
-  private final MessageHead head = new MessageHead(SgipConstants.COMMAND_ID_BIND);
+  private final Sgip12Head head = new Sgip12Head(SgipConstants.COMMAND_ID_BIND);
 
   /**
    * 登录类型
@@ -42,7 +42,7 @@ public class BindMessage implements SgipMessage {
   private String reserve;
 
   @Override
-  public MessageHead getHead() {
+  public Sgip12Head getHead() {
     return head;
   }
 

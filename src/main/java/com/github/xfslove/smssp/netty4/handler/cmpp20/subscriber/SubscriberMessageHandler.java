@@ -1,9 +1,9 @@
 package com.github.xfslove.smssp.netty4.handler.cmpp20.subscriber;
 
-import com.github.xfslove.smssp.message.SessionEvent;
+import com.github.xfslove.smssp.message.Message;
 import com.github.xfslove.smssp.message.cmpp20.DeliverMessage;
 import com.github.xfslove.smssp.message.cmpp20.DeliverRespMessage;
-import com.github.xfslove.smssp.message.cmpp20.MsgId;
+import com.github.xfslove.smssp.netty4.SessionEvent;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelDuplexHandler;
@@ -15,7 +15,6 @@ import io.netty.util.internal.logging.InternalLogLevel;
 import io.netty.util.internal.logging.InternalLogger;
 import io.netty.util.internal.logging.InternalLoggerFactory;
 
-import java.nio.charset.StandardCharsets;
 import java.util.function.Consumer;
 
 /**
@@ -27,12 +26,12 @@ import java.util.function.Consumer;
 @ChannelHandler.Sharable
 public class SubscriberMessageHandler extends ChannelDuplexHandler {
 
-  private Consumer consumer;
+  private Consumer<Message> consumer;
 
   private final InternalLogger logger;
   private final InternalLogLevel internalLevel;
 
-  public SubscriberMessageHandler(Consumer consumer, LogLevel level) {
+  public SubscriberMessageHandler(Consumer<Message> consumer, LogLevel level) {
     this.consumer = consumer;
     logger = InternalLoggerFactory.getInstance(getClass());
     internalLevel = level.toInternalLevel();
@@ -53,18 +52,10 @@ public class SubscriberMessageHandler extends ChannelDuplexHandler {
 
       if (deliver.getRegisteredDelivery() == 1) {
         // 状态报告
-
         ByteBuf in = Unpooled.wrappedBuffer(deliver.getUdBytes());
-        DeliverMessage.Report report = new DeliverMessage.Report();
-        report.setMsgId(MsgId.create(in.readLong()));
-        report.setStat(in.readCharSequence(7, StandardCharsets.ISO_8859_1).toString().trim());
-        report.setSubmitTime(in.readCharSequence(10, StandardCharsets.ISO_8859_1).toString().trim());
-        report.setDoneTime(in.readCharSequence(10, StandardCharsets.ISO_8859_1).toString().trim());
-        report.setDestTerminalId(in.readCharSequence(21, StandardCharsets.ISO_8859_1).toString().trim());
-        report.setSmscSequence(in.readInt());
-
-        // todo
-        consumer.accept((DeliverMessage.Report) report);
+        DeliverMessage.Report report = deliver.createReport();
+        report.read(in);
+        consumer.accept(report);
 
         ReferenceCountUtil.release(in);
         return;
@@ -85,7 +76,7 @@ public class SubscriberMessageHandler extends ChannelDuplexHandler {
 
       SessionEvent sEvt = (SessionEvent) evt;
 
-      Object msg = sEvt.getMessage();
+      Message msg = sEvt.getMessage();
 
       if (msg instanceof DeliverMessage) {
 

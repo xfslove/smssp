@@ -11,7 +11,7 @@ import java.nio.charset.StandardCharsets;
  */
 public class ConnectRespMessage implements CmppMessage {
 
-  private final MessageHead head = new MessageHead(CmppConstants.CMPP_CONNECT_RESP);
+  private final CmppHead head = new CmppHead(CmppConstants.CMPP_CONNECT_RESP);
 
   /**
    * 状态
@@ -39,7 +39,7 @@ public class ConnectRespMessage implements CmppMessage {
   private int version;
 
   @Override
-  public MessageHead getHead() {
+  public CmppHead getHead() {
     return head;
   }
 

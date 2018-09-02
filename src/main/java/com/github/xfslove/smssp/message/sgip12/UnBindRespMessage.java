@@ -8,10 +8,10 @@ import io.netty.buffer.ByteBuf;
  */
 public class UnBindRespMessage implements SgipMessage {
 
-  private final MessageHead head = new MessageHead(SgipConstants.COMMAND_ID_UNBIND_RESP);
+  private final Sgip12Head head = new Sgip12Head(SgipConstants.COMMAND_ID_UNBIND_RESP);
 
   @Override
-  public MessageHead getHead() {
+  public Sgip12Head getHead() {
     return head;
   }
 

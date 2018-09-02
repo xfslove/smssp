@@ -11,7 +11,7 @@ import java.nio.charset.StandardCharsets;
  */
 public class BindRespMessage implements SgipMessage {
 
-  private final MessageHead head = new MessageHead(SgipConstants.COMMAND_ID_BIND_RESP);
+  private final Sgip12Head head = new Sgip12Head(SgipConstants.COMMAND_ID_BIND_RESP);
 
   /**
    * Bind命令是否成功接收
@@ -23,7 +23,7 @@ public class BindRespMessage implements SgipMessage {
   private String reserve;
 
   @Override
-  public MessageHead getHead() {
+  public Sgip12Head getHead() {
     return head;
   }
 

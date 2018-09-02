@@ -1,8 +1,9 @@
 package com.github.xfslove.smssp.netty4.handler.cmpp20.sender;
 
+import com.github.xfslove.smssp.message.Message;
+import com.github.xfslove.smssp.message.cmpp20.SubmitRespMessage;
 import com.github.xfslove.smssp.netty4.codec.MesssageLengthCodec;
 import com.github.xfslove.smssp.netty4.codec.cmpp20.MessageCodec;
-import com.github.xfslove.smssp.message.cmpp20.SubmitRespMessage;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandler;
@@ -72,7 +73,7 @@ public class SenderPoolMessageHandler extends ChannelDuplexHandler implements Ch
     logger.log(internalLevel, "initialized sender pipeline[cmppSocketLogging, cmppIdleState, cmppMessageLengthCodec, cmppMessageCodec, cmppMessageLogging, cmppSessionHandler, cmppMessageHandler]");
 
     // 接受resp的queue
-    Attribute<LinkedBlockingQueue> respQueue = channel.attr(RESP_QUEUE);
+    Attribute<LinkedBlockingQueue<Message>> respQueue = channel.attr(RESP_QUEUE);
     if (respQueue.get() == null) {
       respQueue.set(new LinkedBlockingQueue<>(windowSize));
     }
@@ -85,9 +86,9 @@ public class SenderPoolMessageHandler extends ChannelDuplexHandler implements Ch
 
     // sender会接受submitResp
     if (msg instanceof SubmitRespMessage) {
-      LinkedBlockingQueue respQueue = ctx.channel().attr(RESP_QUEUE).get();
+      LinkedBlockingQueue<Message> respQueue = ctx.channel().attr(RESP_QUEUE).get();
 
-      respQueue.offer(msg);
+      respQueue.offer((SubmitRespMessage) msg);
       logger.log(internalLevel, "current sender resp queue size:[{}]", respQueue.size());
       return;
     }

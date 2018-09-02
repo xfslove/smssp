@@ -8,7 +8,7 @@ import io.netty.buffer.ByteBuf;
  */
 public class SubmitRespMessage implements CmppMessage {
 
-  private final MessageHead head = new MessageHead(CmppConstants.CMPP_SUBMIT_RESP);
+  private final CmppHead head = new CmppHead(CmppConstants.CMPP_SUBMIT_RESP);
 
   /**
    * 信息标识，生成算法如下：
@@ -43,7 +43,7 @@ public class SubmitRespMessage implements CmppMessage {
   private int result;
 
   @Override
-  public MessageHead getHead() {
+  public CmppHead getHead() {
     return head;
   }
 

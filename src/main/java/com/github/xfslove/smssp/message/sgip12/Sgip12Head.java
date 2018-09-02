@@ -1,6 +1,6 @@
 package com.github.xfslove.smssp.message.sgip12;
 
-import java.io.Serializable;
+import com.github.xfslove.smssp.message.MessageHead;
 
 /**
  * sgip 头
@@ -8,13 +8,13 @@ import java.io.Serializable;
  * @author hanwen
  * created at 2018/8/28
  */
-public class MessageHead implements Serializable {
+public class Sgip12Head implements MessageHead {
 
   private final int commandId;
 
   private SequenceNumber sequenceNumber;
 
-  public MessageHead(int commandId) {
+  public Sgip12Head(int commandId) {
     this.commandId = commandId;
   }
 
@@ -24,6 +24,7 @@ public class MessageHead implements Serializable {
    *
    * @return 头长度 bytes
    */
+  @Override
   public final int getLength() {
     // include message length 4 bytes
     return 4 + 4 + getSequenceNumber().getLength();

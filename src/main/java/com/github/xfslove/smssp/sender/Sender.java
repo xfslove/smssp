@@ -1,14 +1,17 @@
 package com.github.xfslove.smssp.sender;
 
+import com.github.xfslove.smssp.message.Message;
+import com.github.xfslove.smssp.message.MessageProtocol;
+
 /**
  * @author hanwen
  * created at 2018/9/1
  */
-public interface Sender<REQ, RESP> {
+public interface Sender {
 
-  void connect(String host, int port);
+  void connect(MessageProtocol protocol, String host, int port);
 
-  RESP send(REQ message);
+  Message send(Message message);
 
   /**
    * 不要主动去调用

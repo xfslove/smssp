@@ -1,6 +1,7 @@
 package com.github.xfslove.smssp.netty4.handler.cmpp20.subscriber;
 
-import com.github.xfslove.smssp.message.SessionEvent;
+import com.github.xfslove.smssp.message.Message;
+import com.github.xfslove.smssp.netty4.SessionEvent;
 import com.github.xfslove.smssp.message.cmpp20.*;
 import com.github.xfslove.smssp.util.ByteUtil;
 import io.netty.channel.*;
@@ -119,7 +120,7 @@ public class SubscriberSessionHandler extends ChannelDuplexHandler {
       // 没有注册 session 收到消息
       logger.log(internalLevel, "{} received message when session not valid, fire SESSION_EVENT[NOT_VALID]", loginName, msg);
 
-      ctx.fireUserEventTriggered(SessionEvent.NOT_VALID(msg));
+      ctx.fireUserEventTriggered(SessionEvent.NOT_VALID((Message) msg));
       return;
     }
 

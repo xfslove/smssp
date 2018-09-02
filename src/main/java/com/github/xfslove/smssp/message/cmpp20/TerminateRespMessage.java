@@ -8,7 +8,7 @@ import io.netty.buffer.ByteBuf;
  */
 public class TerminateRespMessage implements CmppMessage {
 
-  private final MessageHead head = new MessageHead(CmppConstants.CMPP_TERMINATE_RESP);
+  private final CmppHead head = new CmppHead(CmppConstants.CMPP_TERMINATE_RESP);
 
   @Override
   public int getLength() {
@@ -16,7 +16,7 @@ public class TerminateRespMessage implements CmppMessage {
   }
 
   @Override
-  public MessageHead getHead() {
+  public CmppHead getHead() {
     return head;
   }
 

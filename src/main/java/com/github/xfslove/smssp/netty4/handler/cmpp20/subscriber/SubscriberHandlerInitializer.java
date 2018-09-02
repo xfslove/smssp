@@ -1,5 +1,6 @@
 package com.github.xfslove.smssp.netty4.handler.cmpp20.subscriber;
 
+import com.github.xfslove.smssp.message.Message;
 import com.github.xfslove.smssp.netty4.codec.MesssageLengthCodec;
 import com.github.xfslove.smssp.netty4.codec.cmpp20.MessageCodec;
 import io.netty.channel.Channel;
@@ -24,7 +25,7 @@ public class SubscriberHandlerInitializer extends ChannelInitializer<Channel> {
   private final InternalLogger logger;
   private final InternalLogLevel internalLevel;
 
-  private Consumer consumer;
+  private Consumer<Message> consumer;
 
   private int idleTime = 5 * 60;
 
@@ -32,7 +33,7 @@ public class SubscriberHandlerInitializer extends ChannelInitializer<Channel> {
 
   private String loginPassword;
 
-  public SubscriberHandlerInitializer(Consumer consumer, String loginName, String loginPassword) {
+  public SubscriberHandlerInitializer(Consumer<Message> consumer, String loginName, String loginPassword) {
     this.consumer = consumer;
     this.loginName = loginName;
     this.loginPassword = loginPassword;

@@ -13,7 +13,7 @@ public class ConnectMessage implements CmppMessage {
 
   public static final int VERSION_20 = 0x20;
 
-  private final MessageHead head = new MessageHead(CmppConstants.CMPP_CONNECT);
+  private final CmppHead head = new CmppHead(CmppConstants.CMPP_CONNECT);
 
   /**
    * 双方协商的版本号(高位4bit表示主版本号,低位4bit表示次版本号)
@@ -41,7 +41,7 @@ public class ConnectMessage implements CmppMessage {
   private int timestamp;
 
   @Override
-  public MessageHead getHead() {
+  public CmppHead getHead() {
     return head;
   }
 

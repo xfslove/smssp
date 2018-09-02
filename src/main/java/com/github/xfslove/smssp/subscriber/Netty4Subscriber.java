@@ -1,10 +1,10 @@
-package com.github.xfslove.smssp.subscriber.cmpp20.netty4;
+package com.github.xfslove.smssp.subscriber;
 
-import com.github.xfslove.smssp.netty4.handler.cmpp20.subscriber.SubscriberHandlerInitializer;
+import com.github.xfslove.smssp.message.MessageProtocol;
 import com.github.xfslove.smssp.message.cmpp20.CmppMessage;
-import com.github.xfslove.smssp.subscriber.Subscriber;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.PooledByteBufAllocator;
+import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -19,8 +19,8 @@ import java.util.function.Consumer;
  */
 public class Netty4Subscriber implements Subscriber<CmppMessage> {
 
-  private EventLoopGroup bossGroup = new NioEventLoopGroup(1, new DefaultThreadFactory("sgipSubscribeBoss", true));
-  private EventLoopGroup workGroup = new NioEventLoopGroup(Math.min(Runtime.getRuntime().availableProcessors() + 1, 32), new DefaultThreadFactory("sgipSubscribeWorker", true));
+  private EventLoopGroup bossGroup = new NioEventLoopGroup(1, new DefaultThreadFactory("SubscribeBoss", true));
+  private EventLoopGroup workGroup = new NioEventLoopGroup(Math.min(Runtime.getRuntime().availableProcessors() + 1, 32), new DefaultThreadFactory("SubscribeWorker", true));
 
   private ServerBootstrap bootstrap = new ServerBootstrap().group(bossGroup, workGroup)
       .channel(NioServerSocketChannel.class)
@@ -36,7 +36,8 @@ public class Netty4Subscriber implements Subscriber<CmppMessage> {
   /**
    * 默认什么都不做
    */
-  private Consumer consumer = m -> {};
+  private Consumer consumer = m -> {
+  };
 
   public Netty4Subscriber(String loginName, String loginPassword) {
     this.loginName = loginName;
@@ -44,8 +45,21 @@ public class Netty4Subscriber implements Subscriber<CmppMessage> {
   }
 
   @Override
-  public void bind(String host, int port) {
-    SubscriberHandlerInitializer initializer = new SubscriberHandlerInitializer(consumer, loginName, loginPassword);
+  public void bind(MessageProtocol protocol, String host, int port) {
+    ChannelInitializer initializer;
+
+    switch (protocol) {
+      case CMPP_20:
+        initializer = new com.github.xfslove.smssp.netty4.handler.cmpp20.subscriber.SubscriberHandlerInitializer(consumer, loginName, loginPassword);
+        break;
+      case SGIP_12:
+        initializer = new com.github.xfslove.smssp.netty4.handler.sgip12.subscriber.SubscriberHandlerInitializer(consumer, loginName, loginPassword);
+        break;
+      default:
+        throw new IllegalArgumentException("unsupported");
+    }
+
+
     bootstrap.childHandler(initializer);
     bootstrap.bind(host, port).addListener(listener -> {
 

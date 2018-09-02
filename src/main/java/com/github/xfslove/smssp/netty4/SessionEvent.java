@@ -1,4 +1,6 @@
-package com.github.xfslove.smssp.message;
+package com.github.xfslove.smssp.netty4;
+
+import com.github.xfslove.smssp.message.Message;
 
 /**
  * @author hanwen
@@ -9,15 +11,15 @@ public class SessionEvent {
   /**
    * session还为注册
    */
-  public static SessionEvent NOT_VALID(Object message) {
+  public static SessionEvent NOT_VALID(Message message) {
     return new SessionEvent("NOT_VALID", message);
   }
 
   private String state;
 
-  private Object message;
+  private Message message;
 
-  SessionEvent(String state, Object message) {
+  SessionEvent(String state, Message message) {
     this.state = state;
     this.message = message;
   }
@@ -26,7 +28,7 @@ public class SessionEvent {
     return state;
   }
 
-  public Object getMessage() {
+  public Message getMessage() {
     return message;
   }
 }

@@ -1,6 +1,8 @@
 package com.github.xfslove.smssp.message.cmpp20;
 
 import com.github.xfslove.smsj.sms.SmsPdu;
+import com.github.xfslove.smssp.message.Message;
+import com.github.xfslove.smssp.message.MessageHead;
 import io.netty.buffer.ByteBuf;
 
 import java.nio.charset.StandardCharsets;
@@ -11,7 +13,7 @@ import java.nio.charset.StandardCharsets;
  */
 public class DeliverMessage extends SmsPdu implements CmppMessage {
 
-  private final MessageHead head = new MessageHead(CmppConstants.CMPP_DELIVER);
+  private final CmppHead head = new CmppHead(CmppConstants.CMPP_DELIVER);
 
   /**
    * 信息标识
@@ -68,7 +70,7 @@ public class DeliverMessage extends SmsPdu implements CmppMessage {
   private String reserve;
 
   @Override
-  public MessageHead getHead() {
+  public CmppHead getHead() {
     return head;
   }
 
@@ -171,7 +173,11 @@ public class DeliverMessage extends SmsPdu implements CmppMessage {
     this.reserve = reserve;
   }
 
-  public static class Report {
+  public Report createReport() {
+    return new Report();
+  }
+
+  public class Report implements Message {
 
     /**
      * 信息标识
@@ -210,6 +216,32 @@ public class DeliverMessage extends SmsPdu implements CmppMessage {
      * 取自SMSC发送状态报告的消息体中的消息标识
      */
     private int smscSequence;
+
+    @Override
+    public MessageHead getHead() {
+      return DeliverMessage.this.getHead();
+    }
+
+    @Override
+    public int getLength() {
+      // no need implement
+      return -1;
+    }
+
+    @Override
+    public void write(ByteBuf out) {
+      // no need implement
+    }
+
+    @Override
+    public void read(ByteBuf in) {
+      setMsgId(MsgId.create(in.readLong()));
+      setStat(in.readCharSequence(7, StandardCharsets.ISO_8859_1).toString().trim());
+      setSubmitTime(in.readCharSequence(10, StandardCharsets.ISO_8859_1).toString().trim());
+      setDoneTime(in.readCharSequence(10, StandardCharsets.ISO_8859_1).toString().trim());
+      setDestTerminalId(in.readCharSequence(21, StandardCharsets.ISO_8859_1).toString().trim());
+      setSmscSequence(in.readInt());
+    }
 
     public MsgId getMsgId() {
       return msgId;

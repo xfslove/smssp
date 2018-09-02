@@ -1,9 +1,7 @@
-package com.github.xfslove.smssp.sender.cmpp20.netty4;
+package com.github.xfslove.smssp.sender;
 
-import com.github.xfslove.smssp.netty4.handler.cmpp20.sender.SenderPoolMessageHandler;
-import com.github.xfslove.smssp.message.cmpp20.SubmitMessage;
-import com.github.xfslove.smssp.message.cmpp20.SubmitRespMessage;
-import com.github.xfslove.smssp.sender.Sender;
+import com.github.xfslove.smssp.message.Message;
+import com.github.xfslove.smssp.message.MessageProtocol;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.Channel;
@@ -11,6 +9,7 @@ import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.pool.ChannelPool;
+import io.netty.channel.pool.ChannelPoolHandler;
 import io.netty.channel.pool.FixedChannelPool;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.util.concurrent.DefaultThreadFactory;
@@ -26,7 +25,7 @@ import static com.github.xfslove.smssp.netty4.handler.AttributeKeyConstants.RESP
  * @author hanwen
  * created at 2018/9/1
  */
-public class Netty4Sender implements Sender<SubmitMessage, SubmitRespMessage> {
+public class Netty4Sender implements Sender {
 
   private EventLoopGroup workGroup = new NioEventLoopGroup(Math.min(Runtime.getRuntime().availableProcessors() + 1, 32), new DefaultThreadFactory("sgipSendWorker", true));
 
@@ -49,15 +48,27 @@ public class Netty4Sender implements Sender<SubmitMessage, SubmitRespMessage> {
   }
 
   @Override
-  public void connect(String host, int port) {
+  public void connect(MessageProtocol protocol, String host, int port) {
     bootstrap.remoteAddress(host, port);
 
-    channelPool = new FixedChannelPool(
-        bootstrap, new SenderPoolMessageHandler(loginName, loginPassword), 2);
+    ChannelPoolHandler handler;
+
+    switch (protocol) {
+      case CMPP_20:
+        handler = new com.github.xfslove.smssp.netty4.handler.sgip12.sender.SenderPoolMessageHandler(loginName, loginPassword);
+        break;
+      case SGIP_12:
+        handler = new com.github.xfslove.smssp.netty4.handler.cmpp20.sender.SenderPoolMessageHandler(loginName, loginPassword);
+        break;
+      default:
+        throw new IllegalArgumentException("unsupported");
+    }
+
+    channelPool = new FixedChannelPool(bootstrap, handler, 2);
   }
 
   @Override
-  public SubmitRespMessage send(SubmitMessage message) {
+  public Message send(Message message) {
 
     Channel channel = null;
     try {
@@ -65,7 +76,7 @@ public class Netty4Sender implements Sender<SubmitMessage, SubmitRespMessage> {
       channel = future.getNow();
       channel.writeAndFlush(message);
 
-      BlockingQueue<SubmitRespMessage> queue = channel.attr(RESP_QUEUE).get();
+      BlockingQueue<Message> queue = channel.attr(RESP_QUEUE).get();
       return queue.poll(3000, TimeUnit.MILLISECONDS);
     } catch (InterruptedException e) {
       e.printStackTrace();

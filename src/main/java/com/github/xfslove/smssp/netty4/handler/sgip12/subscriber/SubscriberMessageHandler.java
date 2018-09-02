@@ -1,7 +1,11 @@
 package com.github.xfslove.smssp.netty4.handler.sgip12.subscriber;
 
-import com.github.xfslove.smssp.message.SessionEvent;
-import com.github.xfslove.smssp.message.sgip12.*;
+import com.github.xfslove.smssp.message.Message;
+import com.github.xfslove.smssp.message.sgip12.DeliverMessage;
+import com.github.xfslove.smssp.message.sgip12.DeliverRespMessage;
+import com.github.xfslove.smssp.message.sgip12.ReportMessage;
+import com.github.xfslove.smssp.message.sgip12.ReportRespMessage;
+import com.github.xfslove.smssp.netty4.SessionEvent;
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
@@ -22,12 +26,12 @@ import java.util.function.Consumer;
 @ChannelHandler.Sharable
 public class SubscriberMessageHandler extends ChannelDuplexHandler {
 
-  private Consumer<SgipMessage> consumer;
+  private Consumer<Message> consumer;
 
   private final InternalLogger logger;
   private final InternalLogLevel internalLevel;
 
-  public SubscriberMessageHandler(Consumer<SgipMessage> consumer, LogLevel level) {
+  public SubscriberMessageHandler(Consumer<Message> consumer, LogLevel level) {
     this.consumer = consumer;
     logger = InternalLoggerFactory.getInstance(getClass());
     internalLevel = level.toInternalLevel();
@@ -38,23 +42,23 @@ public class SubscriberMessageHandler extends ChannelDuplexHandler {
 
     if (msg instanceof DeliverMessage) {
 
-      consumer.accept((DeliverMessage) msg);
-
       DeliverRespMessage deliverResp = new DeliverRespMessage();
       deliverResp.setResult(0);
 
       ctx.writeAndFlush(deliverResp);
+
+      consumer.accept((DeliverMessage) msg);
       return;
     }
 
     if (msg instanceof ReportMessage) {
 
-      consumer.accept((ReportMessage) msg);
-
       ReportRespMessage reportResp = new ReportRespMessage();
       reportResp.setResult(0);
 
       ctx.writeAndFlush(reportResp);
+
+      consumer.accept((ReportMessage) msg);
       return;
     }
 
@@ -69,7 +73,7 @@ public class SubscriberMessageHandler extends ChannelDuplexHandler {
 
       SessionEvent sEvt = (SessionEvent) evt;
 
-      Object msg = sEvt.getMessage();
+      Message msg = sEvt.getMessage();
 
       if (msg instanceof DeliverMessage) {
 

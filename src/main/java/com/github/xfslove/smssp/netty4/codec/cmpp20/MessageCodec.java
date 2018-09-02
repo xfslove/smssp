@@ -17,7 +17,7 @@ public class MessageCodec extends ByteToMessageCodec<CmppMessage> {
 
   @Override
   protected void encode(ChannelHandlerContext ctx, CmppMessage msg, ByteBuf out) throws Exception {
-    MessageHead head = msg.getHead();
+    CmppHead head = msg.getHead();
     // 4 bytes
     out.writeInt(head.getLength() + msg.getLength());
     out.writeInt(head.getCommandId());

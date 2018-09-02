@@ -1,6 +1,6 @@
 package com.github.xfslove.smssp.message.cmpp20;
 
-import java.io.Serializable;
+import com.github.xfslove.smssp.message.MessageHead;
 
 /**
  * cmpp 头
@@ -8,11 +8,15 @@ import java.io.Serializable;
  * @author hanwen
  * created at 2018/8/28
  */
-public class MessageHead implements Serializable {
+public class CmppHead implements MessageHead {
 
   private final int commandId;
 
   private int sequenceId;
+
+  public CmppHead(int commandId) {
+    this.commandId = commandId;
+  }
 
   /**
    * 整个message长度
@@ -20,13 +24,10 @@ public class MessageHead implements Serializable {
    *
    * @return 头长度  bytes
    */
+  @Override
   public final int getLength() {
     // include message length 4 bytes
     return 4 + 4 + 4;
-  }
-
-  public MessageHead(int commandId) {
-    this.commandId = commandId;
   }
 
   public int getCommandId() {

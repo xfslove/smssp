@@ -8,10 +8,10 @@ import io.netty.buffer.ByteBuf;
  */
 public class ActiveTestMessage implements CmppMessage {
 
-  private final MessageHead head = new MessageHead(CmppConstants.CMPP_ACTIVE_TEST);
+  private final CmppHead head = new CmppHead(CmppConstants.CMPP_ACTIVE_TEST);
 
   @Override
-  public MessageHead getHead() {
+  public CmppHead getHead() {
     return head;
   }
 

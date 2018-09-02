@@ -1,5 +1,7 @@
 package com.github.xfslove.smssp.subscriber;
 
+import com.github.xfslove.smssp.message.MessageProtocol;
+
 import java.util.function.Consumer;
 
 /**
@@ -8,7 +10,7 @@ import java.util.function.Consumer;
  */
 public interface Subscriber<MSG> {
 
-  void bind(String host, int port);
+  void bind(MessageProtocol protocol, String host, int port);
 
   void handleMessage(Consumer<MSG> consumer);
 

@@ -17,7 +17,7 @@ public class MessageCodec extends ByteToMessageCodec<SgipMessage> {
 
   @Override
   protected void encode(ChannelHandlerContext ctx, SgipMessage msg, ByteBuf out) throws Exception {
-    MessageHead head = msg.getHead();
+    Sgip12Head head = msg.getHead();
     // 4 bytes
     out.writeInt(head.getLength() + msg.getLength());
     out.writeInt(head.getCommandId());

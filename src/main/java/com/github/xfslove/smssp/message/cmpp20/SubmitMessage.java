@@ -14,7 +14,7 @@ import java.util.List;
  */
 public class SubmitMessage extends SmsPdu implements CmppMessage {
 
-  private final MessageHead head = new MessageHead(CmppConstants.CMPP_SUBMIT);
+  private final CmppHead head = new CmppHead(CmppConstants.CMPP_SUBMIT);
 
   /**
    * 信息标识，由SP侧短信网关本身产生，本处填空
@@ -122,7 +122,7 @@ public class SubmitMessage extends SmsPdu implements CmppMessage {
   private String reserve;
 
   @Override
-  public MessageHead getHead() {
+  public CmppHead getHead() {
     return head;
   }
 
