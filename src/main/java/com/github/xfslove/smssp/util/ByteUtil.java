@@ -68,9 +68,9 @@ public class ByteUtil {
         return new String(bytes, StandardCharsets.ISO_8859_1);
       case UCS2:
         return new String(bytes, StandardCharsets.UTF_16BE);
-      // sgip, cmpp保留都用的gbk
+      // cmpp用的utf-8, sgip?
       case RESERVED:
-        return new String(bytes, Charset.forName("GBK"));
+        return new String(bytes, StandardCharsets.UTF_8);
       default:
         return null;
     }

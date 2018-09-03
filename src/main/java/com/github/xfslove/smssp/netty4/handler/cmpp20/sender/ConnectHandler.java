@@ -1,14 +1,13 @@
 package com.github.xfslove.smssp.netty4.handler.cmpp20.sender;
 
-import com.github.xfslove.smssp.message.cmpp20.*;
+import com.github.xfslove.smssp.message.cmpp20.ConnectMessage;
+import com.github.xfslove.smssp.message.cmpp20.ConnectRespMessage;
 import com.github.xfslove.smssp.util.ByteUtil;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.logging.LogLevel;
-import io.netty.handler.timeout.IdleState;
-import io.netty.handler.timeout.IdleStateEvent;
 import io.netty.util.internal.logging.InternalLogLevel;
 import io.netty.util.internal.logging.InternalLogger;
 import io.netty.util.internal.logging.InternalLoggerFactory;
@@ -20,13 +19,11 @@ import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
 /**
- * sp -> smg session管理handler
- *
  * @author hanwen
- * created at 2018/8/31
+ * created at 2018/9/3
  */
 @ChannelHandler.Sharable
-public class SenderSessionHandler extends ChannelDuplexHandler {
+public class ConnectHandler extends ChannelDuplexHandler {
 
   private final InternalLogger logger;
   private final InternalLogLevel internalLevel;
@@ -35,9 +32,10 @@ public class SenderSessionHandler extends ChannelDuplexHandler {
 
   private String loginPassword;
 
-  public SenderSessionHandler(String loginName, String loginPassword, LogLevel level) {
+  public ConnectHandler(String loginName, String loginPassword, LogLevel level) {
     this.loginName = loginName;
     this.loginPassword = loginPassword;
+
     logger = InternalLoggerFactory.getInstance(getClass());
     internalLevel = level.toInternalLevel();
   }
@@ -73,7 +71,7 @@ public class SenderSessionHandler extends ChannelDuplexHandler {
       int result = resp.getStatus();
 
       if (result == 0) {
-        // bind 成功
+        // connect 成功
         logger.log(internalLevel, "{} connect success", loginName);
 
       } else {
@@ -85,53 +83,6 @@ public class SenderSessionHandler extends ChannelDuplexHandler {
       return;
     }
 
-    // terminate
-    if (msg instanceof TerminateMessage) {
-      // 直接回复UnbindResp
-      channel.writeAndFlush(new TerminateRespMessage()).addListener(future -> {
-        if (future.isSuccess()) {
-          channel.close();
-          logger.log(internalLevel, "{} terminate success and channel closed", loginName);
-        }
-      });
-
-      return;
-    }
-
-    // activeTestResp
-    if (msg instanceof ActiveTestRespMessage) {
-      logger.log(internalLevel, "{} received active test resp message", loginName);
-    }
-
     ctx.fireChannelRead(msg);
-  }
-
-  @Override
-  public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
-
-    // 处理空闲链接
-    if (evt instanceof IdleStateEvent) {
-      IdleStateEvent iEvt = (IdleStateEvent) evt;
-      if (iEvt.state().equals(IdleState.ALL_IDLE)) {
-
-        // 发送unbind
-        ctx.channel().writeAndFlush(new ActiveTestMessage()).addListener(future -> {
-          if (future.isSuccess()) {
-            logger.log(internalLevel, "{} request active test when idle", loginName);
-          }
-        });
-
-        return;
-      }
-    }
-
-    ctx.fireUserEventTriggered(evt);
-  }
-
-  @Override
-  public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-
-    ctx.channel().close();
-    logger.log(internalLevel, "{} catch exception and channel closed, {}", loginName, cause);
   }
 }

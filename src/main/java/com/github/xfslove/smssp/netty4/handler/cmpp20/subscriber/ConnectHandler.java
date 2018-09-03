@@ -1,13 +1,15 @@
 package com.github.xfslove.smssp.netty4.handler.cmpp20.subscriber;
 
 import com.github.xfslove.smssp.message.Message;
-import com.github.xfslove.smssp.message.cmpp20.*;
+import com.github.xfslove.smssp.message.cmpp20.ConnectMessage;
+import com.github.xfslove.smssp.message.cmpp20.ConnectRespMessage;
 import com.github.xfslove.smssp.netty4.SessionEvent;
 import com.github.xfslove.smssp.util.ByteUtil;
-import io.netty.channel.*;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelDuplexHandler;
+import io.netty.channel.ChannelHandler;
+import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.logging.LogLevel;
-import io.netty.handler.timeout.IdleState;
-import io.netty.handler.timeout.IdleStateEvent;
 import io.netty.util.internal.logging.InternalLogLevel;
 import io.netty.util.internal.logging.InternalLogger;
 import io.netty.util.internal.logging.InternalLoggerFactory;
@@ -16,7 +18,6 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
-import java.util.concurrent.TimeUnit;
 
 import static com.github.xfslove.smssp.netty4.handler.AttributeKeyConstants.SESSION_VALID;
 
@@ -27,7 +28,7 @@ import static com.github.xfslove.smssp.netty4.handler.AttributeKeyConstants.SESS
  * created at 2018/9/2
  */
 @ChannelHandler.Sharable
-public class SubscriberSessionHandler extends ChannelDuplexHandler {
+public class ConnectHandler extends ChannelDuplexHandler {
 
   private final InternalLogger logger;
   private final InternalLogLevel internalLevel;
@@ -36,7 +37,7 @@ public class SubscriberSessionHandler extends ChannelDuplexHandler {
 
   private final String loginPassword;
 
-  public SubscriberSessionHandler(String loginName, String loginPassword, LogLevel level) {
+  public ConnectHandler(String loginName, String loginPassword, LogLevel level) {
     this.loginName = loginName;
     this.loginPassword = loginPassword;
     logger = InternalLoggerFactory.getInstance(getClass());
@@ -85,37 +86,6 @@ public class SubscriberSessionHandler extends ChannelDuplexHandler {
       return;
     }
 
-    // terminate
-    if (msg instanceof TerminateMessage) {
-      // 直接回复resp
-      channel.writeAndFlush(new TerminateRespMessage()).addListener(future -> {
-        if (future.isSuccess()) {
-          channel.close();
-          logger.log(internalLevel, "{} terminate success and channel closed", loginName);
-        }
-      });
-
-      return;
-    }
-
-    // terminateResp
-    if (msg instanceof TerminateRespMessage) {
-      logger.log(internalLevel, "{} received terminate resp message and close channel", loginName);
-      channel.close();
-      return;
-    }
-
-    // activeTest
-    if (msg instanceof ActiveTestMessage) {
-      channel.writeAndFlush(new ActiveTestRespMessage()).addListener(future -> {
-        if (future.isSuccess()) {
-          logger.log(internalLevel, "{} received active test message", loginName);
-        }
-      });
-
-      return;
-    }
-
     if (!Boolean.TRUE.equals(channel.attr(SESSION_VALID).get())) {
       // 没有注册 session 收到消息
       logger.log(internalLevel, "{} received message when session not valid, fire SESSION_EVENT[NOT_VALID]", loginName, msg);
@@ -133,47 +103,6 @@ public class SubscriberSessionHandler extends ChannelDuplexHandler {
     ctx.channel().attr(SESSION_VALID).set(false);
 
     ctx.fireChannelInactive();
-  }
-
-  @Override
-  public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
-
-    // 处理空闲链接
-    if (evt instanceof IdleStateEvent) {
-      IdleStateEvent iEvt = (IdleStateEvent) evt;
-      if (iEvt.state().equals(IdleState.ALL_IDLE)) {
-
-        // 发送terminate
-        ctx.channel().writeAndFlush(new TerminateMessage()).addListener((ChannelFutureListener) future -> {
-          if (future.isSuccess()) {
-
-            ctx.executor().schedule(() -> {
-              ctx.channel().close();
-              logger.log(internalLevel, "{} channel closed due to not received resp", loginName);
-            }, 500, TimeUnit.MILLISECONDS);
-
-            logger.log(internalLevel, "{} request terminate when idle and delay 500ms close channel if no resp", loginName);
-          }
-        });
-
-        return;
-      }
-    }
-
-    ctx.fireUserEventTriggered(evt);
-  }
-
-  @Override
-  public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-
-    if (!Boolean.TRUE.equals(ctx.channel().attr(SESSION_VALID).get())) {
-      ctx.channel().close();
-      logger.log(internalLevel, "{} catch exception when login and channel closed, {}", loginName, cause);
-
-      return;
-    }
-
-    ctx.fireExceptionCaught(cause);
   }
 
   private void connectRespError(ChannelHandlerContext ctx, int result) {

@@ -25,15 +25,19 @@ import java.util.function.Consumer;
  * created at 2018/8/31
  */
 @ChannelHandler.Sharable
-public class SubscriberMessageHandler extends ChannelDuplexHandler {
-
-  private Consumer<Message> consumer;
+public class DeliverHandler extends ChannelDuplexHandler {
 
   private final InternalLogger logger;
   private final InternalLogLevel internalLevel;
 
-  public SubscriberMessageHandler(Consumer<Message> consumer, LogLevel level) {
+  private Consumer<Message> consumer;
+
+  private String loginName;
+
+  public DeliverHandler(String loginName, Consumer<Message> consumer, LogLevel level) {
+    this.loginName = loginName;
     this.consumer = consumer;
+
     logger = InternalLoggerFactory.getInstance(getClass());
     internalLevel = level.toInternalLevel();
   }
@@ -66,8 +70,7 @@ public class SubscriberMessageHandler extends ChannelDuplexHandler {
       return;
     }
 
-    logger.log(internalLevel, "received unknown cmpp message {}, drop it", msg);
-    ReferenceCountUtil.release(msg);
+    ctx.fireChannelRead(msg);
   }
 
   @Override
@@ -88,17 +91,13 @@ public class SubscriberMessageHandler extends ChannelDuplexHandler {
 
         ctx.writeAndFlush(deliverResp).addListener(listener -> {
           ctx.channel().close();
-          logger.log(internalLevel, "discard[NOT_VALID] deliver message {}, channel closed", msg);
+          logger.log(internalLevel, "{} discard[NOT_VALID] deliver message {}, channel closed", loginName, msg);
         });
 
         return;
       }
 
-      logger.log(internalLevel, "received unknown cmpp message {}, drop it", msg);
-      ReferenceCountUtil.release(msg);
-      return;
     }
-
     ctx.fireUserEventTriggered(evt);
 
   }
