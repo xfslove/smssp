@@ -1,6 +1,5 @@
 package com.github.xfslove.smssp.netty4.handler.cmpp20.mix;
 
-import com.github.xfslove.smssp.message.Message;
 import com.github.xfslove.smssp.netty4.codec.MesssageLengthCodec;
 import com.github.xfslove.smssp.netty4.codec.cmpp20.MessageCodec;
 import com.github.xfslove.smssp.netty4.handler.ExceptionHandler;
@@ -8,6 +7,7 @@ import com.github.xfslove.smssp.netty4.handler.cmpp20.ActiveTestHandler;
 import com.github.xfslove.smssp.netty4.handler.cmpp20.TerminateHandler;
 import com.github.xfslove.smssp.netty4.handler.cmpp20.sender.ConnectHandler;
 import com.github.xfslove.smssp.netty4.handler.cmpp20.sender.SubmitHandler;
+import com.github.xfslove.smssp.netty4.handler.cmpp20.subscriber.DeliverConsumer;
 import com.github.xfslove.smssp.netty4.handler.cmpp20.subscriber.DeliverHandler;
 import io.netty.channel.Channel;
 import io.netty.channel.pool.ChannelPoolHandler;
@@ -16,7 +16,6 @@ import io.netty.handler.logging.LoggingHandler;
 import io.netty.handler.timeout.IdleStateHandler;
 
 import java.util.concurrent.TimeUnit;
-import java.util.function.Consumer;
 
 /**
  * @author hanwen
@@ -34,7 +33,7 @@ public class PoolHandler implements ChannelPoolHandler {
 
   private String loginPassword;
 
-  private Consumer<Message> consumer = System.out::println;
+  private DeliverConsumer consumer;
 
   public PoolHandler(String loginName, String loginPassword) {
     this.loginName = loginName;
@@ -77,7 +76,7 @@ public class PoolHandler implements ChannelPoolHandler {
     this.windowSize = windowSize;
   }
 
-  public void setConsumer(Consumer<Message> consumer) {
+  public void setConsumer(DeliverConsumer consumer) {
     this.consumer = consumer;
   }
 }

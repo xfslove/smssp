@@ -10,6 +10,8 @@ import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.logging.LogLevel;
+import io.netty.util.concurrent.Future;
+import io.netty.util.concurrent.GenericFutureListener;
 import io.netty.util.internal.logging.InternalLogLevel;
 import io.netty.util.internal.logging.InternalLogger;
 import io.netty.util.internal.logging.InternalLoggerFactory;
@@ -46,7 +48,7 @@ public class ConnectHandler extends ChannelDuplexHandler {
 
   @Override
   public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-    Channel channel = ctx.channel();
+    final Channel channel = ctx.channel();
 
     // connect
     if (msg instanceof ConnectMessage) {
@@ -76,10 +78,13 @@ public class ConnectHandler extends ChannelDuplexHandler {
       }
 
       // connect 成功
-      channel.writeAndFlush(resp).addListener(future -> {
-        if (future.isSuccess()) {
-          logger.log(internalLevel, "{} connect success", loginName);
-          channel.attr(SESSION_VALID).set(true);
+      channel.writeAndFlush(resp).addListener(new GenericFutureListener<Future<? super Void>>() {
+        @Override
+        public void operationComplete(Future<? super Void> future) throws Exception {
+          if (future.isSuccess()) {
+            logger.log(internalLevel, "{} connect success", loginName);
+            channel.attr(SESSION_VALID).set(true);
+          }
         }
       });
 
@@ -105,13 +110,17 @@ public class ConnectHandler extends ChannelDuplexHandler {
     ctx.fireChannelInactive();
   }
 
-  private void connectRespError(ChannelHandlerContext ctx, int result) {
+  private void connectRespError(ChannelHandlerContext ctx, final int result) {
     ConnectRespMessage resp = new ConnectRespMessage();
     resp.setStatus(result);
-    ctx.channel().writeAndFlush(resp).addListener(future -> {
-      if (future.isSuccess()) {
-        ctx.channel().close();
-        logger.log(internalLevel, "{} connect failure[result:{}] and channel closed", loginName, result);
+    final Channel channel = ctx.channel();
+    channel.writeAndFlush(resp).addListener(new GenericFutureListener<Future<? super Void>>() {
+      @Override
+      public void operationComplete(Future<? super Void> future) throws Exception {
+        if (future.isSuccess()) {
+          channel.close();
+          logger.log(internalLevel, "{} connect failure[result:{}] and channel closed", loginName, result);
+        }
       }
     });
   }

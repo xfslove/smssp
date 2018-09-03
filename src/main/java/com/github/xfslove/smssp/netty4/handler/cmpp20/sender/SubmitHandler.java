@@ -8,7 +8,6 @@ import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.logging.LogLevel;
 import io.netty.util.Attribute;
-import io.netty.util.ReferenceCountUtil;
 import io.netty.util.internal.logging.InternalLogLevel;
 import io.netty.util.internal.logging.InternalLogger;
 import io.netty.util.internal.logging.InternalLoggerFactory;
@@ -46,7 +45,7 @@ public class SubmitHandler extends ChannelDuplexHandler {
     // 接受resp的queue
     Attribute<LinkedBlockingQueue<Message>> respQueue = channel.attr(RESP_QUEUE);
     if (respQueue.get() == null) {
-      respQueue.set(new LinkedBlockingQueue<>(windowSize));
+      respQueue.set(new LinkedBlockingQueue<Message>(windowSize));
     }
 
     logger.log(internalLevel, "{} initialized sender req & resp queue", loginName);
@@ -62,5 +61,7 @@ public class SubmitHandler extends ChannelDuplexHandler {
       logger.log(internalLevel, "{} current sender resp queue size:[{}]", loginName, respQueue.size());
       return;
     }
+
+    ctx.fireChannelRead(msg);
   }
 }

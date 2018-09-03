@@ -1,6 +1,5 @@
 package com.github.xfslove.smssp.netty4.handler.cmpp20.subscriber;
 
-import com.github.xfslove.smssp.message.Message;
 import com.github.xfslove.smssp.netty4.codec.MesssageLengthCodec;
 import com.github.xfslove.smssp.netty4.codec.cmpp20.MessageCodec;
 import com.github.xfslove.smssp.netty4.handler.ExceptionHandler;
@@ -13,7 +12,6 @@ import io.netty.handler.logging.LoggingHandler;
 import io.netty.handler.timeout.IdleStateHandler;
 
 import java.util.concurrent.TimeUnit;
-import java.util.function.Consumer;
 
 /**
  * @author hanwen
@@ -23,7 +21,7 @@ public class HandlerInitializer extends ChannelInitializer<Channel> {
 
   private LogLevel logLevel = LogLevel.INFO;
 
-  private Consumer<Message> consumer = System.out::println;
+  private DeliverConsumer consumer;
 
   private int idleCheckInterval = 5 * 60;
 
@@ -55,7 +53,7 @@ public class HandlerInitializer extends ChannelInitializer<Channel> {
     this.idleCheckInterval = idleCheckInterval;
   }
 
-  public void setConsumer(Consumer<Message> consumer) {
+  public void setConsumer(DeliverConsumer consumer) {
     this.consumer = consumer;
   }
 }

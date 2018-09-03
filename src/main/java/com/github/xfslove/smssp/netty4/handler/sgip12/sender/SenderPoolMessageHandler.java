@@ -76,7 +76,7 @@ public class SenderPoolMessageHandler extends ChannelDuplexHandler implements Ch
     // 接受resp的queue
     Attribute<LinkedBlockingQueue<Message>> respQueue = channel.attr(RESP_QUEUE);
     if (respQueue.get() == null) {
-      respQueue.set(new LinkedBlockingQueue<>(windowSize));
+      respQueue.set(new LinkedBlockingQueue<Message>(windowSize));
     }
 
     logger.log(internalLevel, "initialized sender req & resp queue");

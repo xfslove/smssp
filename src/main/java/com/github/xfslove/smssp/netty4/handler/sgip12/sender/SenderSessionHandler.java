@@ -11,6 +11,8 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.timeout.IdleState;
 import io.netty.handler.timeout.IdleStateEvent;
+import io.netty.util.concurrent.Future;
+import io.netty.util.concurrent.GenericFutureListener;
 import io.netty.util.internal.logging.InternalLogLevel;
 import io.netty.util.internal.logging.InternalLogger;
 import io.netty.util.internal.logging.InternalLoggerFactory;
@@ -55,7 +57,7 @@ public class SenderSessionHandler extends ChannelDuplexHandler {
 
   @Override
   public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-    Channel channel = ctx.channel();
+    final Channel channel = ctx.channel();
 
     // 获取bindResp
     if (msg instanceof BindRespMessage) {
@@ -79,10 +81,13 @@ public class SenderSessionHandler extends ChannelDuplexHandler {
     // unbind
     if (msg instanceof UnBindMessage) {
       // 直接回复UnbindResp
-      channel.writeAndFlush(new UnBindRespMessage()).addListener(future -> {
-        if (future.isSuccess()) {
-          channel.close();
-          logger.log(internalLevel, "{} unbind success and channel closed", loginName);
+      channel.writeAndFlush(new UnBindRespMessage()).addListener(new GenericFutureListener<Future<? super Void>>() {
+        @Override
+        public void operationComplete(Future<? super Void> future) throws Exception {
+          if (future.isSuccess()) {
+            channel.close();
+            logger.log(internalLevel, "{} unbind success and channel closed", loginName);
+          }
         }
       });
 
@@ -100,7 +105,7 @@ public class SenderSessionHandler extends ChannelDuplexHandler {
   }
 
   @Override
-  public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
+  public void userEventTriggered(final ChannelHandlerContext ctx, Object evt) throws Exception {
 
     // 处理空闲链接
     if (evt instanceof IdleStateEvent) {
@@ -108,15 +113,21 @@ public class SenderSessionHandler extends ChannelDuplexHandler {
       if (iEvt.state().equals(IdleState.ALL_IDLE)) {
 
         // 发送unbind
-        ctx.channel().writeAndFlush(new UnBindMessage()).addListener(future -> {
-          if (future.isSuccess()) {
+        ctx.channel().writeAndFlush(new UnBindMessage()).addListener(new GenericFutureListener<Future<? super Void>>() {
+          @Override
+          public void operationComplete(Future<? super Void> future) throws Exception {
+            if (future.isSuccess()) {
 
-            ctx.executor().schedule(() -> {
-              ctx.channel().close();
-              logger.log(internalLevel, "{} channel closed due to not received resp", loginName);
-            }, 500, TimeUnit.MILLISECONDS);
+              ctx.executor().schedule(new Runnable() {
+                @Override
+                public void run() {
+                  ctx.channel().close();
+                  logger.log(internalLevel, "{} channel closed due to not received resp", loginName);
+                }
+              }, 500, TimeUnit.MILLISECONDS);
 
-            logger.log(internalLevel, "{} request unbind when idle and delay 500ms close channel if no resp", loginName);
+              logger.log(internalLevel, "{} request unbind when idle and delay 500ms close channel if no resp", loginName);
+            }
           }
         });
 

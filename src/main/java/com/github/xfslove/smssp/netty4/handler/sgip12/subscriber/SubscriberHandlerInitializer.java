@@ -1,6 +1,5 @@
 package com.github.xfslove.smssp.netty4.handler.sgip12.subscriber;
 
-import com.github.xfslove.smssp.message.Message;
 import com.github.xfslove.smssp.netty4.codec.MesssageLengthCodec;
 import com.github.xfslove.smssp.netty4.codec.sgip12.MessageCodec;
 import io.netty.channel.Channel;
@@ -13,7 +12,6 @@ import io.netty.util.internal.logging.InternalLogger;
 import io.netty.util.internal.logging.InternalLoggerFactory;
 
 import java.util.concurrent.TimeUnit;
-import java.util.function.Consumer;
 
 /**
  * @author hanwen
@@ -25,7 +23,7 @@ public class SubscriberHandlerInitializer extends ChannelInitializer<Channel> {
   private final InternalLogger logger;
   private final InternalLogLevel internalLevel;
 
-  private Consumer<Message> consumer;
+  private DeliverConsumer consumer;
 
   private int idleCheckInterval = 5 * 60;
 
@@ -33,7 +31,7 @@ public class SubscriberHandlerInitializer extends ChannelInitializer<Channel> {
 
   private String loginPassword;
 
-  public SubscriberHandlerInitializer(Consumer<Message> consumer, String loginName, String loginPassword) {
+  public SubscriberHandlerInitializer(DeliverConsumer consumer, String loginName, String loginPassword) {
     this.consumer = consumer;
     this.loginName = loginName;
     this.loginPassword = loginPassword;

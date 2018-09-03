@@ -11,11 +11,12 @@ import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.logging.LogLevel;
 import io.netty.util.ReferenceCountUtil;
+import io.netty.util.concurrent.Future;
+import io.netty.util.concurrent.GenericFutureListener;
 import io.netty.util.internal.logging.InternalLogLevel;
 import io.netty.util.internal.logging.InternalLogger;
 import io.netty.util.internal.logging.InternalLoggerFactory;
 
-import java.util.function.Consumer;
 
 /**
  * todo concatmessage holder
@@ -30,11 +31,11 @@ public class DeliverHandler extends ChannelDuplexHandler {
   private final InternalLogger logger;
   private final InternalLogLevel internalLevel;
 
-  private Consumer<Message> consumer;
+  private DeliverConsumer consumer;
 
   private String loginName;
 
-  public DeliverHandler(String loginName, Consumer<Message> consumer, LogLevel level) {
+  public DeliverHandler(String loginName, DeliverConsumer consumer, LogLevel level) {
     this.loginName = loginName;
     this.consumer = consumer;
 
@@ -60,13 +61,13 @@ public class DeliverHandler extends ChannelDuplexHandler {
         ByteBuf in = Unpooled.wrappedBuffer(deliver.getUdBytes());
         DeliverMessage.Report report = deliver.createReport();
         report.read(in);
-        consumer.accept(report);
+        consumer.apply(report);
 
         ReferenceCountUtil.release(in);
         return;
       }
 
-      consumer.accept(deliver);
+      consumer.apply(deliver);
       return;
     }
 
@@ -74,13 +75,13 @@ public class DeliverHandler extends ChannelDuplexHandler {
   }
 
   @Override
-  public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
+  public void userEventTriggered(final ChannelHandlerContext ctx, Object evt) throws Exception {
 
     if (evt instanceof SessionEvent) {
 
       SessionEvent sEvt = (SessionEvent) evt;
 
-      Message msg = sEvt.getMessage();
+      final Message msg = sEvt.getMessage();
 
       if (msg instanceof DeliverMessage) {
 
@@ -89,9 +90,12 @@ public class DeliverHandler extends ChannelDuplexHandler {
         deliverResp.setMsgId(((DeliverMessage) msg).getMsgId());
         deliverResp.setResult(9);
 
-        ctx.writeAndFlush(deliverResp).addListener(listener -> {
-          ctx.channel().close();
-          logger.log(internalLevel, "{} discard[NOT_VALID] deliver message {}, channel closed", loginName, msg);
+        ctx.writeAndFlush(deliverResp).addListener(new GenericFutureListener<Future<? super Void>>() {
+          @Override
+          public void operationComplete(Future<? super Void> listener) throws Exception {
+            ctx.channel().close();
+            logger.log(internalLevel, "{} discard[NOT_VALID] deliver message {}, channel closed", loginName, msg);
+          }
         });
 
         return;

@@ -10,6 +10,8 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.timeout.IdleState;
 import io.netty.handler.timeout.IdleStateEvent;
+import io.netty.util.concurrent.Future;
+import io.netty.util.concurrent.GenericFutureListener;
 import io.netty.util.internal.logging.InternalLogLevel;
 import io.netty.util.internal.logging.InternalLogger;
 import io.netty.util.internal.logging.InternalLoggerFactory;
@@ -43,9 +45,12 @@ public class ActiveTestHandler extends ChannelDuplexHandler {
 
     // activeTest
     if (msg instanceof ActiveTestMessage) {
-      channel.writeAndFlush(new ActiveTestRespMessage()).addListener(future -> {
-        if (future.isSuccess()) {
-          logger.log(internalLevel, "{} received active test message", loginName);
+      channel.writeAndFlush(new ActiveTestRespMessage()).addListener(new GenericFutureListener<Future<? super Void>>() {
+        @Override
+        public void operationComplete(Future<? super Void> future) throws Exception {
+          if (future.isSuccess()) {
+            logger.log(internalLevel, "{} received active test message", loginName);
+          }
         }
       });
 
@@ -62,7 +67,7 @@ public class ActiveTestHandler extends ChannelDuplexHandler {
   }
 
   @Override
-  public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
+  public void userEventTriggered(final ChannelHandlerContext ctx, Object evt) throws Exception {
 
     // 处理空闲链接
     if (evt instanceof IdleStateEvent) {
@@ -71,9 +76,12 @@ public class ActiveTestHandler extends ChannelDuplexHandler {
 
         if (keepalive) {
           // 发送active test
-          ctx.channel().writeAndFlush(new ActiveTestMessage()).addListener(future -> {
-            if (future.isSuccess()) {
-              logger.log(internalLevel, "{} request active test when idle", loginName);
+          ctx.channel().writeAndFlush(new ActiveTestMessage()).addListener(new GenericFutureListener<Future<? super Void>>() {
+            @Override
+            public void operationComplete(Future<? super Void> future) throws Exception {
+              if (future.isSuccess()) {
+                logger.log(internalLevel, "{} request active test when idle", loginName);
+              }
             }
           });
 
@@ -81,14 +89,20 @@ public class ActiveTestHandler extends ChannelDuplexHandler {
         }
       } else {
 
-        ctx.channel().writeAndFlush(new TerminateMessage()).addListener(future -> {
-          if (future.isSuccess()) {
-            ctx.executor().schedule(() -> {
-              ctx.channel().close();
-              logger.log(internalLevel, "{} channel closed due to not received resp", loginName);
-            }, 500, TimeUnit.MILLISECONDS);
+        ctx.channel().writeAndFlush(new TerminateMessage()).addListener(new GenericFutureListener<Future<? super Void>>() {
+          @Override
+          public void operationComplete(Future<? super Void> future) throws Exception {
+            if (future.isSuccess()) {
+              ctx.executor().schedule(new Runnable() {
+                @Override
+                public void run() {
+                  ctx.channel().close();
+                  logger.log(internalLevel, "{} channel closed due to not received resp", loginName);
+                }
+              }, 500, TimeUnit.MILLISECONDS);
 
-            logger.log(internalLevel, "{} request terminate when idle and delay 500ms close channel if no resp", loginName);
+              logger.log(internalLevel, "{} request terminate when idle and delay 500ms close channel if no resp", loginName);
+            }
           }
         });
 
