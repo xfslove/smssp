@@ -12,7 +12,7 @@ public class CmppHead implements MessageHead {
 
   private final int commandId;
 
-  private int sequenceId;
+  private int sequenceId = 1;
 
   public CmppHead(int commandId) {
     this.commandId = commandId;

@@ -60,10 +60,10 @@ public class Netty4Sender implements Sender {
 
     switch (protocol) {
       case CMPP_20:
-        handler = new com.github.xfslove.smssp.netty4.handler.sgip12.sender.SenderPoolMessageHandler(loginName, loginPassword);
+        handler = new com.github.xfslove.smssp.netty4.handler.cmpp20.sender.SenderPoolMessageHandler(loginName, loginPassword);
         break;
       case SGIP_12:
-        handler = new com.github.xfslove.smssp.netty4.handler.cmpp20.sender.SenderPoolMessageHandler(loginName, loginPassword);
+        handler = new com.github.xfslove.smssp.netty4.handler.sgip12.sender.SenderPoolMessageHandler(loginName, loginPassword);
         break;
       default:
         throw new IllegalArgumentException("unsupported");

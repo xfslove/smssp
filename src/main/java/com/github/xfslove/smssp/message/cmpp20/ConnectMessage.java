@@ -11,7 +11,7 @@ import java.nio.charset.StandardCharsets;
  */
 public class ConnectMessage implements CmppMessage {
 
-  public static final int VERSION_20 = 0x20;
+  public static final int VERSION_20 = 0x02;
 
   private final CmppHead head = new CmppHead(CmppConstants.CMPP_CONNECT);
 
