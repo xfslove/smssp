@@ -40,6 +40,12 @@ public class MessageCodec extends ByteToMessageCodec<CmppMessage> {
       case CmppConstants.CMPP_CONNECT_RESP:
         message = new ConnectRespMessage();
         break;
+      case CmppConstants.CMPP_ACTIVE_TEST:
+        message = new ActiveTestMessage();
+        break;
+      case CmppConstants.CMPP_ACTIVE_TEST_RESP:
+        message = new ActiveTestRespMessage();
+        break;
       case CmppConstants.CMPP_SUBMIT_RESP:
         message = new SubmitRespMessage();
         break;

@@ -1,3 +1,5 @@
 spring:
   application:
     name: smssp
+server:
+  port: 9001

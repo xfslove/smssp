@@ -64,7 +64,7 @@ public class Netty4Subscriber implements Subscriber {
 
 
     bootstrap.childHandler(initializer);
-    bootstrap.bind(host, port).syncUninterruptibly()
+    bootstrap.bind(port).syncUninterruptibly()
         .addListener(listener -> {
           if (listener.isSuccess()) {
             LOGGER.info("netty subscriber started, listen at {}:{}", host, port);

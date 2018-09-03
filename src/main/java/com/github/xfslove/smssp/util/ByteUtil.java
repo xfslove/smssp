@@ -22,7 +22,7 @@ public class ByteUtil {
    * @return 定长字符串
    */
   public static byte[] getStringOctetBytes(String origin, int length, Charset charset) {
-    return getOctetBytes(origin.getBytes(charset), length);
+    return getOctetBytes(origin == null ? null : origin.getBytes(charset), length);
   }
 
   public static byte[] getOctetBytes(byte[] origin, int length) {

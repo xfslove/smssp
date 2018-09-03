@@ -21,7 +21,7 @@ import java.util.function.Consumer;
  */
 public class SubscriberHandlerInitializer extends ChannelInitializer<Channel> {
 
-  private final LogLevel logLevel = LogLevel.DEBUG;
+  private final LogLevel logLevel = LogLevel.INFO;
   private final InternalLogger logger;
   private final InternalLogLevel internalLevel;
 
@@ -43,7 +43,7 @@ public class SubscriberHandlerInitializer extends ChannelInitializer<Channel> {
 
   @Override
   protected void initChannel(Channel channel) throws Exception {
-    channel.pipeline().addLast("cmppSocketLogging", new LoggingHandler(LogLevel.DEBUG));
+    channel.pipeline().addLast("cmppSocketLogging", new LoggingHandler(LogLevel.INFO));
     channel.pipeline().addLast("cmppIdleState", new IdleStateHandler(0, 0, idleCheckInterval, TimeUnit.SECONDS));
     channel.pipeline().addLast("cmppMessageLengthCodec", new MesssageLengthCodec(true));
     channel.pipeline().addLast("cmppMessageCodec", new MessageCodec());

@@ -19,7 +19,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.TimeUnit;
 
 import static com.github.xfslove.smssp.netty4.handler.AttributeKeyConstants.RESP_QUEUE;
 
@@ -82,7 +81,7 @@ public class Netty4Sender implements Sender {
       channel.writeAndFlush(message);
 
       BlockingQueue<Message> queue = channel.attr(RESP_QUEUE).get();
-      return queue.poll(3000, TimeUnit.MILLISECONDS);
+      return queue.take();
     } catch (InterruptedException e) {
       LOGGER.error(ExceptionUtils.getStackTrace(e));
       return null;

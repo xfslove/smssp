@@ -24,6 +24,10 @@ public class MsgId implements Serializable {
 
   private final int sequenceId;
 
+  public MsgId() {
+    this(0,0,0,0,0,0,0);
+  }
+
   public MsgId(int gateId, int month, int day, int hour, int minute, int second, int sequenceId) {
     this.gateId = gateId;
     this.month = month;

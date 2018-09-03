@@ -30,7 +30,7 @@ import static com.github.xfslove.smssp.netty4.handler.AttributeKeyConstants.RESP
 @ChannelHandler.Sharable
 public class SenderPoolMessageHandler extends ChannelDuplexHandler implements ChannelPoolHandler {
 
-  private final LogLevel level = LogLevel.DEBUG;
+  private final LogLevel level = LogLevel.INFO;
   private final InternalLogger logger;
   private final InternalLogLevel internalLevel;
 
@@ -63,7 +63,7 @@ public class SenderPoolMessageHandler extends ChannelDuplexHandler implements Ch
   @Override
   public void channelCreated(Channel channel) throws Exception {
 
-    channel.pipeline().addLast("sgipSocketLogging", new LoggingHandler(LogLevel.DEBUG));
+    channel.pipeline().addLast("sgipSocketLogging", new LoggingHandler(LogLevel.INFO));
     channel.pipeline().addLast("sgipIdleState", new IdleStateHandler(0, 0, idleCheckInterval, TimeUnit.SECONDS));
     channel.pipeline().addLast("sgipMessageLengthCodec", new MesssageLengthCodec(true));
     channel.pipeline().addLast("sgipMessageCodec", new MessageCodec());
