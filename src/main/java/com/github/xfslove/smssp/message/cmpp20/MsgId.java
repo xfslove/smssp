@@ -24,10 +24,6 @@ public class MsgId implements Serializable {
 
   private final int sequenceId;
 
-  public MsgId() {
-    this(0,0,0,0,0,0,0);
-  }
-
   public MsgId(int gateId, int month, int day, int hour, int minute, int second, int sequenceId) {
     this.gateId = gateId;
     this.month = month;
@@ -77,6 +73,11 @@ public class MsgId implements Serializable {
   public byte[] getBytes() {
     // 64 bits
     byte[] bytes = new byte[8];
+    ByteBuffer.wrap(bytes).putLong(getMsgId());
+    return bytes;
+  }
+
+  public long getMsgId() {
     long result = 0;
     result |= (long) getMonth() << 60;
     result |= (long) getDay() << 55;
@@ -85,8 +86,7 @@ public class MsgId implements Serializable {
     result |= (long) getSecond() << 38;
     result |= (long) getGateId() << 16;
     result |= getSequenceId() & 0xffff;
-    ByteBuffer.wrap(bytes).putLong(result);
-    return bytes;
+    return result;
   }
 
   public static MsgId create(long msgId) {
@@ -121,9 +121,15 @@ public class MsgId implements Serializable {
 
   @Override
   public String toString() {
-    byte[] bytes = getBytes();
     return "MsgId{" +
-        "msgId=" + ByteBuffer.wrap(bytes).getLong() +
+        "gateId=" + gateId +
+        ", month=" + month +
+        ", day=" + day +
+        ", hour=" + hour +
+        ", minute=" + minute +
+        ", second=" + second +
+        ", sequenceId=" + sequenceId +
+        ", msgId=" + getMsgId() +
         '}';
   }
 }

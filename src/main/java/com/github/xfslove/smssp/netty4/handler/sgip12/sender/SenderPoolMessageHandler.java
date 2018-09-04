@@ -21,7 +21,7 @@ import io.netty.util.internal.logging.InternalLoggerFactory;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
-import static com.github.xfslove.smssp.netty4.handler.AttributeKeyConstants.RESP_QUEUE;
+import static com.github.xfslove.smssp.netty4.handler.AttributeKeyConstants.MSG_QUEUE;
 
 /**
  * @author hanwen
@@ -36,7 +36,6 @@ public class SenderPoolMessageHandler extends ChannelDuplexHandler implements Ch
 
   private int idleCheckInterval = 5 * 60;
 
-  // todo
   private int windowSize = 32;
 
   private String loginName;
@@ -74,7 +73,7 @@ public class SenderPoolMessageHandler extends ChannelDuplexHandler implements Ch
     logger.log(internalLevel, "initialized sender pipeline[sgipSocketLogging, sgipIdleState, sgipMessageLengthCodec, sgipMessageCodec, sgipMessageLogging, sgipSessionHandler, sgipMessageHandler]");
 
     // 接受resp的queue
-    Attribute<LinkedBlockingQueue<Message>> respQueue = channel.attr(RESP_QUEUE);
+    Attribute<LinkedBlockingQueue<Message>> respQueue = channel.attr(MSG_QUEUE);
     if (respQueue.get() == null) {
       respQueue.set(new LinkedBlockingQueue<Message>(windowSize));
     }
@@ -87,7 +86,7 @@ public class SenderPoolMessageHandler extends ChannelDuplexHandler implements Ch
 
     // sender会接受submitResp
     if (msg instanceof SubmitRespMessage) {
-      LinkedBlockingQueue<Message> respQueue = ctx.channel().attr(RESP_QUEUE).get();
+      LinkedBlockingQueue<Message> respQueue = ctx.channel().attr(MSG_QUEUE).get();
 
       respQueue.offer((SubmitRespMessage) msg);
       logger.log(internalLevel, "current sender resp queue size:[{}]", respQueue.size());

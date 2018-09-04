@@ -25,7 +25,7 @@ public class SubmitRespMessage implements CmppMessage {
    * <p>
    * （SP根据请求和应答消息的Sequence_Id一致性就可得到CMPP_Submit消息的Msg_Id）
    */
-  private MsgId msgId = new MsgId();
+  private MsgId msgId;
 
   /**
    * 结果

@@ -33,7 +33,7 @@ public class DeliverMessage extends SmsPdu implements CmppMessage {
    * 序列号：bit16~bit1，顺序增加，步长为1，循环使用。
    * 各部分如不能填满，左补零，右对齐
    */
-  private MsgId msgId = new MsgId();
+  private MsgId msgId;
 
   /**
    * 目的号码

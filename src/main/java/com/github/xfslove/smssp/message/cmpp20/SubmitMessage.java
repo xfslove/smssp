@@ -19,7 +19,7 @@ public class SubmitMessage extends SmsPdu implements CmppMessage {
   /**
    * 信息标识，由SP侧短信网关本身产生，本处填空
    */
-  private MsgId msgId = new MsgId();
+  private MsgId msgId;
 
   /**
    * 相同Msg_Id的信息总条数，从1开始

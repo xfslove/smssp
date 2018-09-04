@@ -1,4 +1,4 @@
-package com.github.xfslove.smssp.netty4.handler.cmpp20.sender;
+package com.github.xfslove.smssp.netty4.handler.cmpp20.subscribe;
 
 import com.github.xfslove.smssp.netty4.codec.MesssageLengthCodec;
 import com.github.xfslove.smssp.netty4.codec.cmpp20.MessageCodec;
@@ -6,7 +6,7 @@ import com.github.xfslove.smssp.netty4.handler.ExceptionHandler;
 import com.github.xfslove.smssp.netty4.handler.cmpp20.ActiveTestHandler;
 import com.github.xfslove.smssp.netty4.handler.cmpp20.TerminateHandler;
 import io.netty.channel.Channel;
-import io.netty.channel.pool.ChannelPoolHandler;
+import io.netty.channel.ChannelInitializer;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 import io.netty.handler.timeout.IdleStateHandler;
@@ -17,39 +17,25 @@ import java.util.concurrent.TimeUnit;
  * @author hanwen
  * created at 2018/9/1
  */
-public class PoolInitializer implements ChannelPoolHandler {
+public class HandlerInitializer extends ChannelInitializer<Channel> {
 
-  private final LogLevel logLevel = LogLevel.INFO;
+  private LogLevel logLevel = LogLevel.INFO;
+
+  private DeliverConsumer consumer;
 
   private int idleCheckInterval = 5 * 60;
-
-  /**
-   * todo
-   */
-  private int windowSize = 32;
 
   private String loginName;
 
   private String loginPassword;
 
-  public PoolInitializer(String loginName, String loginPassword) {
+  public HandlerInitializer(String loginName, String loginPassword) {
     this.loginName = loginName;
     this.loginPassword = loginPassword;
   }
 
   @Override
-  public void channelReleased(Channel channel) throws Exception {
-    // nothing
-  }
-
-  @Override
-  public void channelAcquired(Channel channel) throws Exception {
-    // nothing
-  }
-
-  @Override
-  public void channelCreated(Channel channel) throws Exception {
-
+  protected void initChannel(Channel channel) throws Exception {
     channel.pipeline().addLast("cmppSocketLogging", new LoggingHandler(logLevel));
     channel.pipeline().addLast("cmppIdleState", new IdleStateHandler(0, 0, idleCheckInterval, TimeUnit.SECONDS));
     channel.pipeline().addLast("cmppMessageLengthCodec", new MesssageLengthCodec(true));
@@ -59,7 +45,7 @@ public class PoolInitializer implements ChannelPoolHandler {
     channel.pipeline().addLast("cmppConnectHandler", new ConnectHandler(loginName, loginPassword, logLevel));
     channel.pipeline().addLast("cmppActiveTestHandler", new ActiveTestHandler(loginName, true, logLevel));
     channel.pipeline().addLast("cmppTerminateHandler", new TerminateHandler(loginName, logLevel));
-    channel.pipeline().addLast("cmppSubmitHandler", new SubmitHandler(loginName, windowSize, logLevel));
+    channel.pipeline().addLast("cmppDeliverHandler", new DeliverHandler(loginName, consumer, logLevel));
     channel.pipeline().addLast("cmppException", new ExceptionHandler(loginName, logLevel));
   }
 
@@ -67,7 +53,7 @@ public class PoolInitializer implements ChannelPoolHandler {
     this.idleCheckInterval = idleCheckInterval;
   }
 
-  public void setWindowSize(int windowSize) {
-    this.windowSize = windowSize;
+  public void setConsumer(DeliverConsumer consumer) {
+    this.consumer = consumer;
   }
 }

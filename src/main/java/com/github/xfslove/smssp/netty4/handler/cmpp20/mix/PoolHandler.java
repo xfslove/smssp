@@ -5,10 +5,11 @@ import com.github.xfslove.smssp.netty4.codec.cmpp20.MessageCodec;
 import com.github.xfslove.smssp.netty4.handler.ExceptionHandler;
 import com.github.xfslove.smssp.netty4.handler.cmpp20.ActiveTestHandler;
 import com.github.xfslove.smssp.netty4.handler.cmpp20.TerminateHandler;
-import com.github.xfslove.smssp.netty4.handler.cmpp20.sender.ConnectHandler;
-import com.github.xfslove.smssp.netty4.handler.cmpp20.sender.SubmitHandler;
-import com.github.xfslove.smssp.netty4.handler.cmpp20.subscriber.DeliverConsumer;
-import com.github.xfslove.smssp.netty4.handler.cmpp20.subscriber.DeliverHandler;
+import com.github.xfslove.smssp.netty4.handler.cmpp20.send.ConnectHandler;
+import com.github.xfslove.smssp.netty4.handler.cmpp20.send.SubmitBiConsumer;
+import com.github.xfslove.smssp.netty4.handler.cmpp20.send.SubmitHandler;
+import com.github.xfslove.smssp.netty4.handler.cmpp20.subscribe.DeliverConsumer;
+import com.github.xfslove.smssp.netty4.handler.cmpp20.subscribe.DeliverHandler;
 import io.netty.channel.Channel;
 import io.netty.channel.pool.ChannelPoolHandler;
 import io.netty.handler.logging.LogLevel;
@@ -33,11 +34,15 @@ public class PoolHandler implements ChannelPoolHandler {
 
   private String loginPassword;
 
-  private DeliverConsumer consumer;
+  private DeliverConsumer deliverConsumer;
 
-  public PoolHandler(String loginName, String loginPassword) {
+  private SubmitBiConsumer submitBiConsumer;
+
+  public PoolHandler(String loginName, String loginPassword, DeliverConsumer deliverConsumer, SubmitBiConsumer submitBiConsumer) {
     this.loginName = loginName;
     this.loginPassword = loginPassword;
+    this.deliverConsumer = deliverConsumer;
+    this.submitBiConsumer = submitBiConsumer;
   }
 
   @Override
@@ -62,8 +67,8 @@ public class PoolHandler implements ChannelPoolHandler {
     channel.pipeline().addLast("cmppConnectHandler", new ConnectHandler(loginName, loginPassword, logLevel));
     channel.pipeline().addLast("cmppActiveTestHandler", new ActiveTestHandler(loginName, true, logLevel));
     channel.pipeline().addLast("cmppTerminateHandler", new TerminateHandler(loginName, logLevel));
-    channel.pipeline().addLast("cmppSubmitHandler", new SubmitHandler(loginName, windowSize, logLevel));
-    channel.pipeline().addLast("cmppDeliverHandler", new DeliverHandler(loginName, consumer, logLevel));
+    channel.pipeline().addLast("cmppSubmitHandler", new SubmitHandler(loginName, submitBiConsumer, windowSize, logLevel));
+    channel.pipeline().addLast("cmppDeliverHandler", new DeliverHandler(loginName, deliverConsumer, logLevel));
     channel.pipeline().addLast("cmppException", new ExceptionHandler(loginName, logLevel));
 
   }
@@ -74,9 +79,5 @@ public class PoolHandler implements ChannelPoolHandler {
 
   public void setWindowSize(int windowSize) {
     this.windowSize = windowSize;
-  }
-
-  public void setConsumer(DeliverConsumer consumer) {
-    this.consumer = consumer;
   }
 }

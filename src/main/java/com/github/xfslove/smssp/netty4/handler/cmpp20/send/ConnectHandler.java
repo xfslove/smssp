@@ -1,4 +1,4 @@
-package com.github.xfslove.smssp.netty4.handler.cmpp20.sender;
+package com.github.xfslove.smssp.netty4.handler.cmpp20.send;
 
 import com.github.xfslove.smssp.message.cmpp20.ConnectMessage;
 import com.github.xfslove.smssp.message.cmpp20.ConnectRespMessage;
@@ -55,7 +55,7 @@ public class ConnectHandler extends ChannelDuplexHandler {
     connect.setAuthenticatorSource(authenticationBytes);
 
     ctx.channel().writeAndFlush(connect);
-    logger.log(internalLevel, "send connect request");
+    logger.log(internalLevel, "{} send connect request", loginName);
 
     ctx.fireChannelActive();
   }

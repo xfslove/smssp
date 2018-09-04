@@ -1,4 +1,4 @@
-package com.github.xfslove.smssp.netty4.handler.cmpp20.subscriber;
+package com.github.xfslove.smssp.netty4.handler.cmpp20.subscribe;
 
 import com.github.xfslove.smssp.message.Message;
 import com.github.xfslove.smssp.message.cmpp20.DeliverMessage;
