@@ -12,6 +12,10 @@ public class DefaultSequenceGenerator implements SequenceGenerator {
 
   @Override
   public int next() {
-    return seq.getAndIncrement();
+    int next = seq.getAndIncrement();
+    if (next == 0) {
+      next = seq.getAndIncrement();
+    }
+    return next;
   }
 }
