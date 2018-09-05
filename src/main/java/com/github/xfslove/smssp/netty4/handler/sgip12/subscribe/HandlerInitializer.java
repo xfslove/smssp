@@ -1,6 +1,6 @@
 package com.github.xfslove.smssp.netty4.handler.sgip12.subscribe;
 
-import com.github.xfslove.smssp.message.seq.SequenceGenerator;
+import com.github.xfslove.smssp.message.sequence.SequenceGenerator;
 import com.github.xfslove.smssp.netty4.codec.MesssageLengthCodec;
 import com.github.xfslove.smssp.netty4.codec.sgip12.MessageCodec;
 import com.github.xfslove.smssp.netty4.handler.ExceptionHandler;

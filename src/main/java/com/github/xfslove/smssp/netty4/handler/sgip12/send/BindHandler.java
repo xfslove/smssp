@@ -1,6 +1,6 @@
 package com.github.xfslove.smssp.netty4.handler.sgip12.send;
 
-import com.github.xfslove.smssp.message.seq.SequenceGenerator;
+import com.github.xfslove.smssp.message.sequence.SequenceGenerator;
 import com.github.xfslove.smssp.message.sgip12.BindMessage;
 import com.github.xfslove.smssp.message.sgip12.BindRespMessage;
 import com.github.xfslove.smssp.message.sgip12.SequenceNumber;

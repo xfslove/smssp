@@ -2,7 +2,7 @@ package com.github.xfslove.smssp.netty4.handler.cmpp20;
 
 import com.github.xfslove.smssp.message.cmpp20.ActiveTestMessage;
 import com.github.xfslove.smssp.message.cmpp20.ActiveTestRespMessage;
-import com.github.xfslove.smssp.message.seq.SequenceGenerator;
+import com.github.xfslove.smssp.message.sequence.SequenceGenerator;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandler;
