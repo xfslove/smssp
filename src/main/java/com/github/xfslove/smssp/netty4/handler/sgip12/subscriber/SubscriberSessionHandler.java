@@ -5,7 +5,7 @@ import com.github.xfslove.smssp.message.sgip12.BindMessage;
 import com.github.xfslove.smssp.message.sgip12.BindRespMessage;
 import com.github.xfslove.smssp.message.sgip12.UnBindMessage;
 import com.github.xfslove.smssp.message.sgip12.UnBindRespMessage;
-import com.github.xfslove.smssp.netty4.SessionEvent;
+import com.github.xfslove.smssp.netty4.handler.SessionEvent;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandler;
@@ -21,7 +21,7 @@ import io.netty.util.internal.logging.InternalLoggerFactory;
 
 import java.util.concurrent.TimeUnit;
 
-import static com.github.xfslove.smssp.netty4.handler.AttributeKeyConstants.SESSION_VALID;
+import static com.github.xfslove.smssp.netty4.handler.sgip12.AttributeKeyConstants.SESSION_VALID;
 
 /**
  * smg -> sp 链接session管理handler

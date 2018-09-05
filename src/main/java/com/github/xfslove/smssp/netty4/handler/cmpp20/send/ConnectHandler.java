@@ -2,6 +2,7 @@ package com.github.xfslove.smssp.netty4.handler.cmpp20.send;
 
 import com.github.xfslove.smssp.message.cmpp20.ConnectMessage;
 import com.github.xfslove.smssp.message.cmpp20.ConnectRespMessage;
+import com.github.xfslove.smssp.message.seq.SequenceGenerator;
 import com.github.xfslove.smssp.util.ByteUtil;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelDuplexHandler;
@@ -32,7 +33,10 @@ public class ConnectHandler extends ChannelDuplexHandler {
 
   private String loginPassword;
 
-  public ConnectHandler(String loginName, String loginPassword, LogLevel level) {
+  private SequenceGenerator sequenceGenerator;
+
+  public ConnectHandler(SequenceGenerator sequenceGenerator, String loginName, String loginPassword, LogLevel level) {
+    this.sequenceGenerator = sequenceGenerator;
     this.loginName = loginName;
     this.loginPassword = loginPassword;
 
@@ -45,6 +49,7 @@ public class ConnectHandler extends ChannelDuplexHandler {
 
     // 发送connect请求
     ConnectMessage connect = new ConnectMessage();
+    connect.getHead().setSequenceId(sequenceGenerator.next());
 
     connect.setTimestamp(Integer.valueOf(DateFormatUtils.format(new Date(), "MMddHHmmss")));
     connect.setSourceAddr(loginName);

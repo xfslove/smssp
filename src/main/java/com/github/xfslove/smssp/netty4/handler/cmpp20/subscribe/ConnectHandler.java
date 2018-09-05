@@ -3,13 +3,14 @@ package com.github.xfslove.smssp.netty4.handler.cmpp20.subscribe;
 import com.github.xfslove.smssp.message.Message;
 import com.github.xfslove.smssp.message.cmpp20.ConnectMessage;
 import com.github.xfslove.smssp.message.cmpp20.ConnectRespMessage;
-import com.github.xfslove.smssp.netty4.SessionEvent;
+import com.github.xfslove.smssp.netty4.handler.SessionEvent;
 import com.github.xfslove.smssp.util.ByteUtil;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.logging.LogLevel;
+import io.netty.util.AttributeKey;
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.GenericFutureListener;
 import io.netty.util.internal.logging.InternalLogLevel;
@@ -21,8 +22,6 @@ import org.apache.commons.lang3.StringUtils;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
-import static com.github.xfslove.smssp.netty4.handler.AttributeKeyConstants.SESSION_VALID;
-
 /**
  * smg -> sp 链接session管理handler
  *
@@ -31,6 +30,8 @@ import static com.github.xfslove.smssp.netty4.handler.AttributeKeyConstants.SESS
  */
 @ChannelHandler.Sharable
 public class ConnectHandler extends ChannelDuplexHandler {
+
+  private static final AttributeKey<Boolean> SESSION_VALID = AttributeKey.valueOf("sessionValid");
 
   private final InternalLogger logger;
   private final InternalLogLevel internalLevel;
@@ -52,10 +53,12 @@ public class ConnectHandler extends ChannelDuplexHandler {
 
     // connect
     if (msg instanceof ConnectMessage) {
+      ConnectMessage connect = (ConnectMessage) msg;
+
       ConnectRespMessage resp = new ConnectRespMessage();
+      resp.getHead().setSequenceId(connect.getHead().getSequenceId());
       resp.setVersion(ConnectMessage.VERSION_20);
 
-      ConnectMessage connect = (ConnectMessage) msg;
 
       byte[] sourceBytes = loginName.getBytes(StandardCharsets.ISO_8859_1);
       byte[] secretBytes = loginPassword.getBytes(StandardCharsets.ISO_8859_1);
@@ -66,14 +69,32 @@ public class ConnectHandler extends ChannelDuplexHandler {
           !Arrays.equals(authenticatorSource, connect.getAuthenticatorSource())) {
 
         // 认证错误
-        connectRespError(ctx, 3);
+        resp.setStatus(3);
+        channel.writeAndFlush(resp).addListener(new GenericFutureListener<Future<? super Void>>() {
+          @Override
+          public void operationComplete(Future<? super Void> future) throws Exception {
+            if (future.isSuccess()) {
+              channel.close();
+              logger.log(internalLevel, "{} connect failure[result:{}] and close channel", loginName, 3);
+            }
+          }
+        });
         return;
       }
 
       if (connect.getVersion() != ConnectMessage.VERSION_20) {
 
         // 版本太高
-        connectRespError(ctx, 4);
+        resp.setStatus(4);
+        channel.writeAndFlush(resp).addListener(new GenericFutureListener<Future<? super Void>>() {
+          @Override
+          public void operationComplete(Future<? super Void> future) throws Exception {
+            if (future.isSuccess()) {
+              channel.close();
+              logger.log(internalLevel, "{} connect failure[result:{}] and close channel", loginName, 3);
+            }
+          }
+        });
         return;
       }
 
@@ -108,20 +129,5 @@ public class ConnectHandler extends ChannelDuplexHandler {
     ctx.channel().attr(SESSION_VALID).set(false);
 
     ctx.fireChannelInactive();
-  }
-
-  private void connectRespError(ChannelHandlerContext ctx, final int result) {
-    ConnectRespMessage resp = new ConnectRespMessage();
-    resp.setStatus(result);
-    final Channel channel = ctx.channel();
-    channel.writeAndFlush(resp).addListener(new GenericFutureListener<Future<? super Void>>() {
-      @Override
-      public void operationComplete(Future<? super Void> future) throws Exception {
-        if (future.isSuccess()) {
-          channel.close();
-          logger.log(internalLevel, "{} connect failure[result:{}] and channel closed", loginName, result);
-        }
-      }
-    });
   }
 }

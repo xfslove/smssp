@@ -2,7 +2,7 @@ package com.github.xfslove.smssp.netty4.handler.cmpp20;
 
 import com.github.xfslove.smssp.message.cmpp20.ActiveTestMessage;
 import com.github.xfslove.smssp.message.cmpp20.ActiveTestRespMessage;
-import com.github.xfslove.smssp.message.cmpp20.TerminateMessage;
+import com.github.xfslove.smssp.message.seq.SequenceGenerator;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandler;
@@ -16,8 +16,6 @@ import io.netty.util.internal.logging.InternalLogLevel;
 import io.netty.util.internal.logging.InternalLogger;
 import io.netty.util.internal.logging.InternalLoggerFactory;
 
-import java.util.concurrent.TimeUnit;
-
 /**
  * @author hanwen
  * created at 2018/9/3
@@ -28,12 +26,15 @@ public class ActiveTestHandler extends ChannelDuplexHandler {
   private final InternalLogger logger;
   private final InternalLogLevel internalLevel;
 
-  private String loginName;
-  private boolean keepalive;
+  private SequenceGenerator sequenceGenerator;
 
-  public ActiveTestHandler(String loginName, boolean keepalive, LogLevel level) {
+  private String loginName;
+  private boolean keepAlive;
+
+  public ActiveTestHandler(SequenceGenerator sequenceGenerator, String loginName, boolean keepAlive, LogLevel level) {
+    this.sequenceGenerator = sequenceGenerator;
     this.loginName = loginName;
-    this.keepalive = keepalive;
+    this.keepAlive = keepAlive;
 
     logger = InternalLoggerFactory.getInstance(getClass());
     internalLevel = level.toInternalLevel();
@@ -45,7 +46,13 @@ public class ActiveTestHandler extends ChannelDuplexHandler {
 
     // activeTest
     if (msg instanceof ActiveTestMessage) {
-      channel.writeAndFlush(new ActiveTestRespMessage()).addListener(new GenericFutureListener<Future<? super Void>>() {
+      ActiveTestMessage active = (ActiveTestMessage) msg;
+
+      ActiveTestRespMessage resp = new ActiveTestRespMessage();
+      resp.getHead().setSequenceId(active.getHead().getSequenceId());
+
+
+      channel.writeAndFlush(resp).addListener(new GenericFutureListener<Future<? super Void>>() {
         @Override
         public void operationComplete(Future<? super Void> future) throws Exception {
           if (future.isSuccess()) {
@@ -74,9 +81,12 @@ public class ActiveTestHandler extends ChannelDuplexHandler {
       IdleStateEvent iEvt = (IdleStateEvent) evt;
       if (iEvt.state().equals(IdleState.ALL_IDLE)) {
 
-        if (keepalive) {
+        if (keepAlive) {
           // 发送active test
-          ctx.channel().writeAndFlush(new ActiveTestMessage()).addListener(new GenericFutureListener<Future<? super Void>>() {
+          ActiveTestMessage active = new ActiveTestMessage();
+          active.getHead().setSequenceId(sequenceGenerator.next());
+
+          ctx.channel().writeAndFlush(active).addListener(new GenericFutureListener<Future<? super Void>>() {
             @Override
             public void operationComplete(Future<? super Void> future) throws Exception {
               if (future.isSuccess()) {
@@ -87,29 +97,9 @@ public class ActiveTestHandler extends ChannelDuplexHandler {
 
           return;
         }
-      } else {
-
-        ctx.channel().writeAndFlush(new TerminateMessage()).addListener(new GenericFutureListener<Future<? super Void>>() {
-          @Override
-          public void operationComplete(Future<? super Void> future) throws Exception {
-            if (future.isSuccess()) {
-              ctx.executor().schedule(new Runnable() {
-                @Override
-                public void run() {
-                  ctx.channel().close();
-                  logger.log(internalLevel, "{} channel closed due to not received resp", loginName);
-                }
-              }, 500, TimeUnit.MILLISECONDS);
-
-              logger.log(internalLevel, "{} request terminate when idle and delay 500ms close channel if no resp", loginName);
-            }
-          }
-        });
-
-        return;
       }
-    }
 
-    ctx.fireUserEventTriggered(evt);
+      ctx.fireUserEventTriggered(evt);
+    }
   }
 }

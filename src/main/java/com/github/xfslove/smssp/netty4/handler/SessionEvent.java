@@ -1,4 +1,4 @@
-package com.github.xfslove.smssp.netty4;
+package com.github.xfslove.smssp.netty4.handler;
 
 import com.github.xfslove.smssp.message.Message;
 

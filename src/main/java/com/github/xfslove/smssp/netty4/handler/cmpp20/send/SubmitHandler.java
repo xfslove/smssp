@@ -1,20 +1,19 @@
 package com.github.xfslove.smssp.netty4.handler.cmpp20.send;
 
-import com.github.xfslove.smssp.message.Message;
 import com.github.xfslove.smssp.message.cmpp20.SubmitMessage;
 import com.github.xfslove.smssp.message.cmpp20.SubmitRespMessage;
+import com.github.xfslove.smssp.message.seq.SequenceGenerator;
 import io.netty.channel.*;
 import io.netty.handler.logging.LogLevel;
 import io.netty.util.Attribute;
+import io.netty.util.AttributeKey;
 import io.netty.util.ReferenceCountUtil;
 import io.netty.util.internal.logging.InternalLogLevel;
 import io.netty.util.internal.logging.InternalLogger;
 import io.netty.util.internal.logging.InternalLoggerFactory;
 
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.TimeUnit;
-
-import static com.github.xfslove.smssp.netty4.handler.AttributeKeyConstants.MSG_QUEUE;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author hanwen
@@ -23,6 +22,8 @@ import static com.github.xfslove.smssp.netty4.handler.AttributeKeyConstants.MSG_
 @ChannelHandler.Sharable
 public class SubmitHandler extends ChannelDuplexHandler {
 
+  private static final AttributeKey<Map<Integer, SubmitMessage>> SUBMIT_HOLDER = AttributeKey.valueOf("submitHolder");
+
   private final InternalLogger logger;
   private final InternalLogLevel internalLevel;
 
@@ -30,9 +31,12 @@ public class SubmitHandler extends ChannelDuplexHandler {
 
   private int windowSize;
 
+  private SequenceGenerator sequenceGenerator;
+
   private SubmitBiConsumer submitBiConsumer;
 
-  public SubmitHandler(String loginName, SubmitBiConsumer submitBiConsumer, int windowSize, LogLevel level) {
+  public SubmitHandler(SequenceGenerator sequenceGenerator, SubmitBiConsumer submitBiConsumer, String loginName, int windowSize, LogLevel level) {
+    this.sequenceGenerator = sequenceGenerator;
     this.loginName = loginName;
     this.windowSize = windowSize;
 
@@ -45,13 +49,13 @@ public class SubmitHandler extends ChannelDuplexHandler {
   public void channelActive(ChannelHandlerContext ctx) throws Exception {
     Channel channel = ctx.channel();
 
-    // 接受resp的queue
-    Attribute<LinkedBlockingQueue<Message>> respQueue = channel.attr(MSG_QUEUE);
-    if (respQueue.get() == null) {
-      respQueue.set(new LinkedBlockingQueue<Message>(windowSize));
+    // init msg holder
+    Attribute<Map<Integer, SubmitMessage>> holder = channel.attr(SUBMIT_HOLDER);
+    if (holder.get() == null) {
+      holder.set(new HashMap<Integer, SubmitMessage>(windowSize));
     }
 
-    logger.log(internalLevel, "{} initialized send req & resp queue", loginName);
+    logger.log(internalLevel, "{} initialized submit msg holder", loginName);
   }
 
   @Override
@@ -59,10 +63,11 @@ public class SubmitHandler extends ChannelDuplexHandler {
 
     // sender会接受submitResp
     if (msg instanceof SubmitRespMessage) {
-      LinkedBlockingQueue<Message> msgQueue = ctx.channel().attr(MSG_QUEUE).get();
+      SubmitRespMessage resp = (SubmitRespMessage) msg;
 
-      // blocking poll
-      SubmitMessage submit = (SubmitMessage) msgQueue.poll(1, TimeUnit.SECONDS);
+      Map<Integer, SubmitMessage> msgHolder = ctx.channel().attr(SUBMIT_HOLDER).get();
+
+      SubmitMessage submit = msgHolder.get((resp.getHead().getSequenceId()));
       if (submit == null) {
         // drop it
         logger.log(internalLevel, "{} drop received unrelated submit resp message {}", loginName, msg);
@@ -70,7 +75,7 @@ public class SubmitHandler extends ChannelDuplexHandler {
         return;
       }
 
-      submitBiConsumer.apply(submit, (SubmitRespMessage) msg);
+      submitBiConsumer.apply(submit, resp);
       return;
     }
 
@@ -80,20 +85,23 @@ public class SubmitHandler extends ChannelDuplexHandler {
   @Override
   public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) throws Exception {
 
-    // submit的时候把消息放到当前channel的queue
+    // submit的时候把消息放到当前channel中
     if (msg instanceof SubmitMessage) {
-      LinkedBlockingQueue<Message> msgQueue = ctx.channel().attr(MSG_QUEUE).get();
+      SubmitMessage submit = (SubmitMessage) msg;
+      // rewrite sequenceId
+      submit.getHead().setSequenceId(sequenceGenerator.next());
 
-      // blocking offer
-      boolean offer = msgQueue.offer((SubmitMessage) msg, 1, TimeUnit.SECONDS);
-      if (!offer) {
+      Map<Integer, SubmitMessage> msgHolder = ctx.channel().attr(SUBMIT_HOLDER).get();
+
+      if (msgHolder.size() == windowSize) {
         // drop it
         logger.log(internalLevel, "{} drop request message {}, ratio up to limitation:[{}]", loginName, msg, windowSize);
         ReferenceCountUtil.release(msg);
         return;
       }
 
-      logger.log(internalLevel, "{} current send request queue size:[{}]", loginName, msgQueue.size());
+      msgHolder.put(submit.getHead().getSequenceId(), submit);
+      logger.log(internalLevel, "{} current send request queue size:[{}]", loginName, msgHolder.size());
     }
 
     ctx.write(msg, promise);

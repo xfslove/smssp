@@ -3,7 +3,7 @@ package com.github.xfslove.smssp.netty4.handler.cmpp20.subscribe;
 import com.github.xfslove.smssp.message.Message;
 import com.github.xfslove.smssp.message.cmpp20.DeliverMessage;
 import com.github.xfslove.smssp.message.cmpp20.DeliverRespMessage;
-import com.github.xfslove.smssp.netty4.SessionEvent;
+import com.github.xfslove.smssp.netty4.handler.SessionEvent;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelDuplexHandler;
@@ -35,7 +35,7 @@ public class DeliverHandler extends ChannelDuplexHandler {
 
   private String loginName;
 
-  public DeliverHandler(String loginName, DeliverConsumer consumer, LogLevel level) {
+  public DeliverHandler(DeliverConsumer consumer, String loginName, LogLevel level) {
     this.loginName = loginName;
     this.consumer = consumer;
 
@@ -51,6 +51,7 @@ public class DeliverHandler extends ChannelDuplexHandler {
       DeliverMessage deliver = (DeliverMessage) msg;
 
       DeliverRespMessage deliverResp = new DeliverRespMessage();
+      deliverResp.getHead().setSequenceId(deliver.getHead().getSequenceId());
       deliverResp.setMsgId(deliver.getMsgId());
       deliverResp.setResult(0);
 
@@ -84,10 +85,12 @@ public class DeliverHandler extends ChannelDuplexHandler {
       final Message msg = sEvt.getMessage();
 
       if (msg instanceof DeliverMessage) {
+        DeliverMessage deliver = (DeliverMessage) msg;
 
         // 需要先登录
         DeliverRespMessage deliverResp = new DeliverRespMessage();
-        deliverResp.setMsgId(((DeliverMessage) msg).getMsgId());
+        deliverResp.getHead().setSequenceId(deliver.getHead().getSequenceId());
+        deliverResp.setMsgId(deliver.getMsgId());
         deliverResp.setResult(9);
 
         ctx.writeAndFlush(deliverResp).addListener(new GenericFutureListener<Future<? super Void>>() {

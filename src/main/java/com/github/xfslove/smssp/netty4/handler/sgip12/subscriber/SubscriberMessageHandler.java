@@ -5,7 +5,7 @@ import com.github.xfslove.smssp.message.sgip12.DeliverMessage;
 import com.github.xfslove.smssp.message.sgip12.DeliverRespMessage;
 import com.github.xfslove.smssp.message.sgip12.ReportMessage;
 import com.github.xfslove.smssp.message.sgip12.ReportRespMessage;
-import com.github.xfslove.smssp.netty4.SessionEvent;
+import com.github.xfslove.smssp.netty4.handler.SessionEvent;
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;

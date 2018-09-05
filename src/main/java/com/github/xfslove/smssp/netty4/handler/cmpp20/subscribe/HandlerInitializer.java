@@ -1,5 +1,6 @@
 package com.github.xfslove.smssp.netty4.handler.cmpp20.subscribe;
 
+import com.github.xfslove.smssp.message.seq.SequenceGenerator;
 import com.github.xfslove.smssp.netty4.codec.MesssageLengthCodec;
 import com.github.xfslove.smssp.netty4.codec.cmpp20.MessageCodec;
 import com.github.xfslove.smssp.netty4.handler.ExceptionHandler;
@@ -21,17 +22,21 @@ public class HandlerInitializer extends ChannelInitializer<Channel> {
 
   private LogLevel logLevel = LogLevel.INFO;
 
-  private DeliverConsumer consumer;
-
   private int idleCheckInterval = 5 * 60;
 
   private String loginName;
 
   private String loginPassword;
 
-  public HandlerInitializer(String loginName, String loginPassword) {
+  private DeliverConsumer deliverConsumer;
+
+  private SequenceGenerator sequenceGenerator;
+
+  public HandlerInitializer(String loginName, String loginPassword, DeliverConsumer deliverConsumer, SequenceGenerator sequenceGenerator) {
     this.loginName = loginName;
     this.loginPassword = loginPassword;
+    this.deliverConsumer = deliverConsumer;
+    this.sequenceGenerator = sequenceGenerator;
   }
 
   @Override
@@ -43,17 +48,13 @@ public class HandlerInitializer extends ChannelInitializer<Channel> {
     channel.pipeline().addLast("cmppMessageLogging", new LoggingHandler(logLevel));
 
     channel.pipeline().addLast("cmppConnectHandler", new ConnectHandler(loginName, loginPassword, logLevel));
-    channel.pipeline().addLast("cmppActiveTestHandler", new ActiveTestHandler(loginName, true, logLevel));
-    channel.pipeline().addLast("cmppTerminateHandler", new TerminateHandler(loginName, logLevel));
-    channel.pipeline().addLast("cmppDeliverHandler", new DeliverHandler(loginName, consumer, logLevel));
+    channel.pipeline().addLast("cmppActiveTestHandler", new ActiveTestHandler(sequenceGenerator, loginName, true, logLevel));
+    channel.pipeline().addLast("cmppTerminateHandler", new TerminateHandler(sequenceGenerator, loginName, logLevel));
+    channel.pipeline().addLast("cmppDeliverHandler", new DeliverHandler(deliverConsumer, loginName, logLevel));
     channel.pipeline().addLast("cmppException", new ExceptionHandler(loginName, logLevel));
   }
 
   public void setIdleCheckInterval(int idleCheckInterval) {
     this.idleCheckInterval = idleCheckInterval;
-  }
-
-  public void setConsumer(DeliverConsumer consumer) {
-    this.consumer = consumer;
   }
 }

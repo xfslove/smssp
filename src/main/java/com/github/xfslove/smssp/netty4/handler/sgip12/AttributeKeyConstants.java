@@ -1,4 +1,4 @@
-package com.github.xfslove.smssp.netty4.handler;
+package com.github.xfslove.smssp.netty4.handler.sgip12;
 
 import com.github.xfslove.smssp.message.Message;
 import io.netty.util.AttributeKey;

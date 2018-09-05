@@ -21,7 +21,7 @@ import io.netty.util.internal.logging.InternalLoggerFactory;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
-import static com.github.xfslove.smssp.netty4.handler.AttributeKeyConstants.MSG_QUEUE;
+import static com.github.xfslove.smssp.netty4.handler.sgip12.AttributeKeyConstants.MSG_QUEUE;
 
 /**
  * @author hanwen

@@ -1,5 +1,6 @@
 package com.github.xfslove.smssp.netty4.handler.cmpp20.send;
 
+import com.github.xfslove.smssp.message.seq.SequenceGenerator;
 import com.github.xfslove.smssp.netty4.codec.MesssageLengthCodec;
 import com.github.xfslove.smssp.netty4.codec.cmpp20.MessageCodec;
 import com.github.xfslove.smssp.netty4.handler.ExceptionHandler;
@@ -31,10 +32,13 @@ public class PoolInitializer implements ChannelPoolHandler {
 
   private SubmitBiConsumer submitBiConsumer;
 
-  public PoolInitializer(String loginName, String loginPassword, SubmitBiConsumer submitBiConsumer) {
+  private SequenceGenerator sequenceGenerator;
+
+  public PoolInitializer(String loginName, String loginPassword, SubmitBiConsumer submitBiConsumer, SequenceGenerator sequenceGenerator) {
     this.loginName = loginName;
     this.loginPassword = loginPassword;
     this.submitBiConsumer = submitBiConsumer;
+    this.sequenceGenerator = sequenceGenerator;
   }
 
   @Override
@@ -56,10 +60,10 @@ public class PoolInitializer implements ChannelPoolHandler {
     channel.pipeline().addLast("cmppMessageCodec", new MessageCodec());
     channel.pipeline().addLast("cmppMessageLogging", new LoggingHandler(logLevel));
 
-    channel.pipeline().addLast("cmppConnectHandler", new ConnectHandler(loginName, loginPassword, logLevel));
-    channel.pipeline().addLast("cmppActiveTestHandler", new ActiveTestHandler(loginName, true, logLevel));
-    channel.pipeline().addLast("cmppTerminateHandler", new TerminateHandler(loginName, logLevel));
-    channel.pipeline().addLast("cmppSubmitHandler", new SubmitHandler(loginName, submitBiConsumer, windowSize, logLevel));
+    channel.pipeline().addLast("cmppConnectHandler", new ConnectHandler(sequenceGenerator, loginName, loginPassword, logLevel));
+    channel.pipeline().addLast("cmppActiveTestHandler", new ActiveTestHandler(sequenceGenerator, loginName, true, logLevel));
+    channel.pipeline().addLast("cmppTerminateHandler", new TerminateHandler(sequenceGenerator, loginName, logLevel));
+    channel.pipeline().addLast("cmppSubmitHandler", new SubmitHandler(sequenceGenerator, submitBiConsumer, loginName, windowSize, logLevel));
     channel.pipeline().addLast("cmppException", new ExceptionHandler(loginName, logLevel));
   }
 
