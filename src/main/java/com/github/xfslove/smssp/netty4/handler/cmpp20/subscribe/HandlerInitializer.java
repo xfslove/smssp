@@ -48,9 +48,9 @@ public class HandlerInitializer extends ChannelInitializer<Channel> {
     channel.pipeline().addLast("cmppMessageLogging", new LoggingHandler(logLevel));
 
     channel.pipeline().addLast("cmppConnectHandler", new ConnectHandler(loginName, loginPassword, logLevel));
-    channel.pipeline().addLast("cmppActiveTestHandler", new ActiveTestHandler(sequenceGenerator, loginName, true, logLevel));
-    channel.pipeline().addLast("cmppTerminateHandler", new TerminateHandler(sequenceGenerator, loginName, logLevel));
-    channel.pipeline().addLast("cmppDeliverHandler", new DeliverHandler(deliverConsumer, loginName, logLevel));
+    channel.pipeline().addLast("cmppActiveTestHandler", new ActiveTestHandler(loginName, sequenceGenerator, true, logLevel));
+    channel.pipeline().addLast("cmppTerminateHandler", new TerminateHandler(loginName, sequenceGenerator, logLevel));
+    channel.pipeline().addLast("cmppDeliverHandler", new DeliverHandler(loginName, deliverConsumer, logLevel));
     channel.pipeline().addLast("cmppException", new ExceptionHandler(loginName, logLevel));
   }
 

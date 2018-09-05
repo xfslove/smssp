@@ -68,11 +68,11 @@ public class PoolInitializer implements ChannelPoolHandler {
     channel.pipeline().addLast("cmppMessageCodec", new MessageCodec());
     channel.pipeline().addLast("cmppMessageLogging", new LoggingHandler(logLevel));
 
-    channel.pipeline().addLast("cmppConnectHandler", new ConnectHandler(sequenceGenerator, loginName, loginPassword, logLevel));
-    channel.pipeline().addLast("cmppActiveTestHandler", new ActiveTestHandler(sequenceGenerator, loginName, true, logLevel));
-    channel.pipeline().addLast("cmppTerminateHandler", new TerminateHandler(sequenceGenerator, loginName, logLevel));
-    channel.pipeline().addLast("cmppSubmitHandler", new SubmitHandler(sequenceGenerator, submitBiConsumer, loginName, windowSize, logLevel));
-    channel.pipeline().addLast("cmppDeliverHandler", new DeliverHandler(deliverConsumer, loginName, logLevel));
+    channel.pipeline().addLast("cmppConnectHandler", new ConnectHandler(loginName, loginPassword, sequenceGenerator, logLevel));
+    channel.pipeline().addLast("cmppActiveTestHandler", new ActiveTestHandler(loginName, sequenceGenerator, true, logLevel));
+    channel.pipeline().addLast("cmppTerminateHandler", new TerminateHandler(loginName, sequenceGenerator, logLevel));
+    channel.pipeline().addLast("cmppSubmitHandler", new SubmitHandler(loginName, sequenceGenerator, submitBiConsumer, windowSize, logLevel));
+    channel.pipeline().addLast("cmppDeliverHandler", new DeliverHandler(loginName, deliverConsumer, logLevel));
     channel.pipeline().addLast("cmppException", new ExceptionHandler(loginName, logLevel));
 
   }

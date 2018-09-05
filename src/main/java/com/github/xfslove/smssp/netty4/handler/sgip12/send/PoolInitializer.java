@@ -1,12 +1,12 @@
-package com.github.xfslove.smssp.netty4.handler.cmpp20.send;
+package com.github.xfslove.smssp.netty4.handler.sgip12.send;
 
 import com.github.xfslove.smssp.message.seq.SequenceGenerator;
 import com.github.xfslove.smssp.netty4.codec.MesssageLengthCodec;
-import com.github.xfslove.smssp.netty4.codec.cmpp20.MessageCodec;
+import com.github.xfslove.smssp.netty4.codec.sgip12.MessageCodec;
 import com.github.xfslove.smssp.netty4.handler.ExceptionHandler;
-import com.github.xfslove.smssp.netty4.handler.cmpp20.ActiveTestHandler;
-import com.github.xfslove.smssp.netty4.handler.cmpp20.TerminateHandler;
+import com.github.xfslove.smssp.netty4.handler.sgip12.UnBindHandler;
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelHandler;
 import io.netty.channel.pool.ChannelPoolHandler;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
@@ -18,6 +18,7 @@ import java.util.concurrent.TimeUnit;
  * @author hanwen
  * created at 2018/9/1
  */
+@ChannelHandler.Sharable
 public class PoolInitializer implements ChannelPoolHandler {
 
   private final LogLevel logLevel = LogLevel.INFO;
@@ -25,6 +26,8 @@ public class PoolInitializer implements ChannelPoolHandler {
   private int idleCheckInterval = 5 * 60;
 
   private int windowSize = 32;
+
+  private int nodeId;
 
   private String loginName;
 
@@ -34,7 +37,8 @@ public class PoolInitializer implements ChannelPoolHandler {
 
   private SequenceGenerator sequenceGenerator;
 
-  public PoolInitializer(String loginName, String loginPassword, SubmitBiConsumer submitBiConsumer, SequenceGenerator sequenceGenerator) {
+  public PoolInitializer(int nodeId, String loginName, String loginPassword, SubmitBiConsumer submitBiConsumer, SequenceGenerator sequenceGenerator) {
+    this.nodeId = nodeId;
     this.loginName = loginName;
     this.loginPassword = loginPassword;
     this.submitBiConsumer = submitBiConsumer;
@@ -54,17 +58,16 @@ public class PoolInitializer implements ChannelPoolHandler {
   @Override
   public void channelCreated(Channel channel) throws Exception {
 
-    channel.pipeline().addLast("cmppSocketLogging", new LoggingHandler(logLevel));
-    channel.pipeline().addLast("cmppIdleState", new IdleStateHandler(0, 0, idleCheckInterval, TimeUnit.SECONDS));
-    channel.pipeline().addLast("cmppMessageLengthCodec", new MesssageLengthCodec(true));
-    channel.pipeline().addLast("cmppMessageCodec", new MessageCodec());
-    channel.pipeline().addLast("cmppMessageLogging", new LoggingHandler(logLevel));
+    channel.pipeline().addLast("sgipSocketLogging", new LoggingHandler(LogLevel.INFO));
+    channel.pipeline().addLast("sgipIdleState", new IdleStateHandler(0, 0, idleCheckInterval, TimeUnit.SECONDS));
+    channel.pipeline().addLast("sgipMessageLengthCodec", new MesssageLengthCodec(true));
+    channel.pipeline().addLast("sgipMessageCodec", new MessageCodec());
+    channel.pipeline().addLast("sgipMessageLogging", new LoggingHandler(logLevel));
 
-    channel.pipeline().addLast("cmppConnectHandler", new ConnectHandler(loginName, loginPassword, sequenceGenerator, logLevel));
-    channel.pipeline().addLast("cmppActiveTestHandler", new ActiveTestHandler(loginName, sequenceGenerator, true, logLevel));
-    channel.pipeline().addLast("cmppTerminateHandler", new TerminateHandler(loginName, sequenceGenerator, logLevel));
-    channel.pipeline().addLast("cmppSubmitHandler", new SubmitHandler(loginName, sequenceGenerator, submitBiConsumer, windowSize, logLevel));
-    channel.pipeline().addLast("cmppException", new ExceptionHandler(loginName, logLevel));
+    channel.pipeline().addLast("sgipBindHandler", new BindHandler(nodeId, loginName, loginPassword, sequenceGenerator, logLevel));
+    channel.pipeline().addLast("sgipUnBindHandler", new UnBindHandler(nodeId, loginName, sequenceGenerator, logLevel));
+    channel.pipeline().addLast("sgipSubmitHandler", new SubmitHandler(nodeId, loginName, submitBiConsumer, sequenceGenerator, windowSize, logLevel));
+    channel.pipeline().addLast("sgipException", new ExceptionHandler(loginName, logLevel));
   }
 
   public void setIdleCheckInterval(int idleCheckInterval) {

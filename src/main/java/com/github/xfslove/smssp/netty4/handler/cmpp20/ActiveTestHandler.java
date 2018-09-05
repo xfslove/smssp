@@ -31,7 +31,7 @@ public class ActiveTestHandler extends ChannelDuplexHandler {
   private String loginName;
   private boolean keepAlive;
 
-  public ActiveTestHandler(SequenceGenerator sequenceGenerator, String loginName, boolean keepAlive, LogLevel level) {
+  public ActiveTestHandler(String loginName, SequenceGenerator sequenceGenerator, boolean keepAlive, LogLevel level) {
     this.sequenceGenerator = sequenceGenerator;
     this.loginName = loginName;
     this.keepAlive = keepAlive;

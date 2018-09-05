@@ -31,7 +31,7 @@ public class TerminateHandler extends ChannelDuplexHandler {
   private SequenceGenerator sequenceGenerator;
   private String loginName;
 
-  public TerminateHandler(SequenceGenerator sequenceGenerator, String loginName, LogLevel level) {
+  public TerminateHandler(String loginName, SequenceGenerator sequenceGenerator, LogLevel level) {
     this.sequenceGenerator = sequenceGenerator;
     this.loginName = loginName;
 

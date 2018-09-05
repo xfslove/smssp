@@ -1,7 +1,7 @@
-package com.github.xfslove.smssp.netty4.handler.sgip12.sender;
+package com.github.xfslove.smssp.netty4.handler.sgip12;
 
-import com.github.xfslove.smssp.message.sgip12.BindMessage;
-import com.github.xfslove.smssp.message.sgip12.BindRespMessage;
+import com.github.xfslove.smssp.message.seq.SequenceGenerator;
+import com.github.xfslove.smssp.message.sgip12.SequenceNumber;
 import com.github.xfslove.smssp.message.sgip12.UnBindMessage;
 import com.github.xfslove.smssp.message.sgip12.UnBindRespMessage;
 import io.netty.channel.Channel;
@@ -16,7 +16,9 @@ import io.netty.util.concurrent.GenericFutureListener;
 import io.netty.util.internal.logging.InternalLogLevel;
 import io.netty.util.internal.logging.InternalLogger;
 import io.netty.util.internal.logging.InternalLoggerFactory;
+import org.apache.commons.lang3.time.DateFormatUtils;
 
+import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -26,62 +28,38 @@ import java.util.concurrent.TimeUnit;
  * created at 2018/8/31
  */
 @ChannelHandler.Sharable
-public class SenderSessionHandler extends ChannelDuplexHandler {
+public class UnBindHandler extends ChannelDuplexHandler {
 
   private final InternalLogger logger;
   private final InternalLogLevel internalLevel;
 
+  private SequenceGenerator sequenceGenerator;
+
+  private int nodeId;
+
   private String loginName;
 
-  private String loginPassword;
-
-  public SenderSessionHandler(String loginName, String loginPassword, LogLevel level) {
+  public UnBindHandler(int nodeId, String loginName, SequenceGenerator sequenceGenerator, LogLevel level) {
+    this.nodeId = nodeId;
     this.loginName = loginName;
-    this.loginPassword = loginPassword;
+    this.sequenceGenerator = sequenceGenerator;
     logger = InternalLoggerFactory.getInstance(getClass());
     internalLevel = level.toInternalLevel();
-  }
-
-  @Override
-  public void channelActive(ChannelHandlerContext ctx) throws Exception {
-
-    // 发送bind请求
-    BindMessage bind = new BindMessage();
-    bind.setLoginName(loginName);
-    bind.setLoginPassword(loginPassword);
-    ctx.channel().writeAndFlush(bind);
-    logger.log(internalLevel, "{} send bind request", loginName);
-
-    ctx.fireChannelActive();
   }
 
   @Override
   public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
     final Channel channel = ctx.channel();
 
-    // 获取bindResp
-    if (msg instanceof BindRespMessage) {
-      BindRespMessage bindResp = (BindRespMessage) msg;
-
-      int result = bindResp.getResult();
-
-      if (result == 0) {
-        // bind 成功
-        logger.log(internalLevel, "{} bind success", loginName);
-
-      } else {
-
-        channel.close();
-        logger.log(internalLevel, "{} bind failure[result:{}]", loginName, result);
-      }
-
-      return;
-    }
-
     // unbind
     if (msg instanceof UnBindMessage) {
+      UnBindMessage unbind = (UnBindMessage) msg;
+
       // 直接回复UnbindResp
-      channel.writeAndFlush(new UnBindRespMessage()).addListener(new GenericFutureListener<Future<? super Void>>() {
+      UnBindRespMessage resp = new UnBindRespMessage();
+      resp.getHead().setSequenceNumber(unbind.getHead().getSequenceNumber());
+
+      channel.writeAndFlush(resp).addListener(new GenericFutureListener<Future<? super Void>>() {
         @Override
         public void operationComplete(Future<? super Void> future) throws Exception {
           if (future.isSuccess()) {
@@ -113,7 +91,10 @@ public class SenderSessionHandler extends ChannelDuplexHandler {
       if (iEvt.state().equals(IdleState.ALL_IDLE)) {
 
         // 发送unbind
-        ctx.channel().writeAndFlush(new UnBindMessage()).addListener(new GenericFutureListener<Future<? super Void>>() {
+        UnBindMessage unbind = new UnBindMessage();
+        unbind.getHead().setSequenceNumber(SequenceNumber.create(nodeId, Integer.valueOf(DateFormatUtils.format(new Date(), "MMddHHmmss")), sequenceGenerator.next()));
+
+        ctx.channel().writeAndFlush(unbind).addListener(new GenericFutureListener<Future<? super Void>>() {
           @Override
           public void operationComplete(Future<? super Void> future) throws Exception {
             if (future.isSuccess()) {
@@ -136,12 +117,5 @@ public class SenderSessionHandler extends ChannelDuplexHandler {
     }
 
     ctx.fireUserEventTriggered(evt);
-  }
-
-  @Override
-  public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-
-    ctx.channel().close();
-    logger.log(internalLevel, "{} catch exception and channel closed, {}", loginName, cause);
   }
 }

@@ -35,7 +35,7 @@ public class DeliverHandler extends ChannelDuplexHandler {
 
   private String loginName;
 
-  public DeliverHandler(DeliverConsumer consumer, String loginName, LogLevel level) {
+  public DeliverHandler(String loginName, DeliverConsumer consumer, LogLevel level) {
     this.loginName = loginName;
     this.consumer = consumer;
 

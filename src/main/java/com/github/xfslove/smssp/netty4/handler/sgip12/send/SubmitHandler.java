@@ -1,8 +1,9 @@
-package com.github.xfslove.smssp.netty4.handler.cmpp20.send;
+package com.github.xfslove.smssp.netty4.handler.sgip12.send;
 
-import com.github.xfslove.smssp.message.cmpp20.SubmitMessage;
-import com.github.xfslove.smssp.message.cmpp20.SubmitRespMessage;
 import com.github.xfslove.smssp.message.seq.SequenceGenerator;
+import com.github.xfslove.smssp.message.sgip12.SequenceNumber;
+import com.github.xfslove.smssp.message.sgip12.SubmitMessage;
+import com.github.xfslove.smssp.message.sgip12.SubmitRespMessage;
 import io.netty.channel.*;
 import io.netty.handler.logging.LogLevel;
 import io.netty.util.Attribute;
@@ -11,34 +12,39 @@ import io.netty.util.ReferenceCountUtil;
 import io.netty.util.internal.logging.InternalLogLevel;
 import io.netty.util.internal.logging.InternalLogger;
 import io.netty.util.internal.logging.InternalLoggerFactory;
+import org.apache.commons.lang3.time.DateFormatUtils;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
 /**
  * @author hanwen
- * created at 2018/9/3
+ * created at 2018/9/1
  */
 @ChannelHandler.Sharable
 public class SubmitHandler extends ChannelDuplexHandler {
 
-  private static final AttributeKey<Map<Integer, SubmitMessage>> SUBMIT_HOLDER = AttributeKey.valueOf("submitHolder");
+  private static final AttributeKey<Map<SequenceNumber, SubmitMessage>> SUBMIT_HOLDER = AttributeKey.valueOf("submitHolder");
 
   private final InternalLogger logger;
   private final InternalLogLevel internalLevel;
 
-  private String loginName;
-
   private int windowSize;
 
-  private SequenceGenerator sequenceGenerator;
+  private int nodeId;
+
+  private String loginName;
 
   private SubmitBiConsumer submitBiConsumer;
 
-  public SubmitHandler(String loginName, SequenceGenerator sequenceGenerator, SubmitBiConsumer submitBiConsumer, int windowSize, LogLevel level) {
+  private SequenceGenerator sequenceGenerator;
+
+  public SubmitHandler(int nodeId, String loginName, SubmitBiConsumer submitBiConsumer, SequenceGenerator sequenceGenerator, int windowSize, LogLevel level) {
+    this.nodeId = nodeId;
     this.loginName = loginName;
-    this.sequenceGenerator = sequenceGenerator;
     this.submitBiConsumer = submitBiConsumer;
+    this.sequenceGenerator = sequenceGenerator;
     this.windowSize = windowSize;
     logger = InternalLoggerFactory.getInstance(getClass());
     internalLevel = level.toInternalLevel();
@@ -49,9 +55,9 @@ public class SubmitHandler extends ChannelDuplexHandler {
     Channel channel = ctx.channel();
 
     // init msg holder
-    Attribute<Map<Integer, SubmitMessage>> holder = channel.attr(SUBMIT_HOLDER);
+    Attribute<Map<SequenceNumber, SubmitMessage>> holder = channel.attr(SUBMIT_HOLDER);
     if (holder.get() == null) {
-      holder.set(new HashMap<Integer, SubmitMessage>(windowSize));
+      holder.set(new HashMap<SequenceNumber, SubmitMessage>(windowSize));
     }
 
     logger.log(internalLevel, "{} initialized submit msg holder", loginName);
@@ -66,9 +72,9 @@ public class SubmitHandler extends ChannelDuplexHandler {
     if (msg instanceof SubmitRespMessage) {
       SubmitRespMessage resp = (SubmitRespMessage) msg;
 
-      Map<Integer, SubmitMessage> msgHolder = ctx.channel().attr(SUBMIT_HOLDER).get();
+      Map<SequenceNumber, SubmitMessage> msgHolder = ctx.channel().attr(SUBMIT_HOLDER).get();
 
-      SubmitMessage submit = msgHolder.get((resp.getHead().getSequenceId()));
+      SubmitMessage submit = msgHolder.get((resp.getHead().getSequenceNumber()));
       if (submit == null) {
         // drop it
         logger.log(internalLevel, "{} drop received unrelated submit resp message {}", loginName, msg);
@@ -81,6 +87,7 @@ public class SubmitHandler extends ChannelDuplexHandler {
     }
 
     ctx.fireChannelRead(msg);
+
   }
 
   @Override
@@ -89,10 +96,10 @@ public class SubmitHandler extends ChannelDuplexHandler {
     // submit的时候把消息放到当前channel中
     if (msg instanceof SubmitMessage) {
       SubmitMessage submit = (SubmitMessage) msg;
-      // rewrite sequenceId
-      submit.getHead().setSequenceId(sequenceGenerator.next());
+      // rewrite sequenceNumber
+      submit.getHead().setSequenceNumber(SequenceNumber.create(nodeId, Integer.valueOf(DateFormatUtils.format(new Date(), "MMddHHmmss")), sequenceGenerator.next()));
 
-      Map<Integer, SubmitMessage> msgHolder = ctx.channel().attr(SUBMIT_HOLDER).get();
+      Map<SequenceNumber, SubmitMessage> msgHolder = ctx.channel().attr(SUBMIT_HOLDER).get();
 
       if (msgHolder.size() == windowSize) {
         // drop it
@@ -101,10 +108,11 @@ public class SubmitHandler extends ChannelDuplexHandler {
         return;
       }
 
-      msgHolder.put(submit.getHead().getSequenceId(), submit);
+      msgHolder.put(submit.getHead().getSequenceNumber(), submit);
       logger.log(internalLevel, "{} current send request queue size:[{}]", loginName, msgHolder.size());
     }
 
     ctx.write(msg, promise);
+
   }
 }
