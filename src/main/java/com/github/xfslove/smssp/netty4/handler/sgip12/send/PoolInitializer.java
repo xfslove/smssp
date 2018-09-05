@@ -25,8 +25,6 @@ public class PoolInitializer implements ChannelPoolHandler {
 
   private int idleCheckInterval = 5 * 60;
 
-  private int windowSize = 32;
-
   private int nodeId;
 
   private String loginName;
@@ -66,15 +64,7 @@ public class PoolInitializer implements ChannelPoolHandler {
 
     channel.pipeline().addLast("sgipBindHandler", new BindHandler(nodeId, loginName, loginPassword, sequenceGenerator, logLevel));
     channel.pipeline().addLast("sgipUnBindHandler", new UnBindHandler(nodeId, loginName, sequenceGenerator, logLevel));
-    channel.pipeline().addLast("sgipSubmitHandler", new SubmitHandler(nodeId, loginName, submitBiConsumer, sequenceGenerator, windowSize, logLevel));
+    channel.pipeline().addLast("sgipSubmitHandler", new SubmitHandler(nodeId, loginName, submitBiConsumer, sequenceGenerator, logLevel));
     channel.pipeline().addLast("sgipException", new ExceptionHandler(loginName, logLevel));
-  }
-
-  public void setIdleCheckInterval(int idleCheckInterval) {
-    this.idleCheckInterval = idleCheckInterval;
-  }
-
-  public void setWindowSize(int windowSize) {
-    this.windowSize = windowSize;
   }
 }

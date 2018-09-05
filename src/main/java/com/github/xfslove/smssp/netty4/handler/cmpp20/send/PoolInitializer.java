@@ -24,8 +24,6 @@ public class PoolInitializer implements ChannelPoolHandler {
 
   private int idleCheckInterval = 5 * 60;
 
-  private int windowSize = 32;
-
   private String loginName;
 
   private String loginPassword;
@@ -63,15 +61,7 @@ public class PoolInitializer implements ChannelPoolHandler {
     channel.pipeline().addLast("cmppConnectHandler", new ConnectHandler(loginName, loginPassword, sequenceGenerator, logLevel));
     channel.pipeline().addLast("cmppActiveTestHandler", new ActiveTestHandler(loginName, sequenceGenerator, true, logLevel));
     channel.pipeline().addLast("cmppTerminateHandler", new TerminateHandler(loginName, sequenceGenerator, logLevel));
-    channel.pipeline().addLast("cmppSubmitHandler", new SubmitHandler(loginName, sequenceGenerator, submitBiConsumer, windowSize, logLevel));
+    channel.pipeline().addLast("cmppSubmitHandler", new SubmitHandler(loginName, sequenceGenerator, submitBiConsumer, logLevel));
     channel.pipeline().addLast("cmppException", new ExceptionHandler(loginName, logLevel));
-  }
-
-  public void setIdleCheckInterval(int idleCheckInterval) {
-    this.idleCheckInterval = idleCheckInterval;
-  }
-
-  public void setWindowSize(int windowSize) {
-    this.windowSize = windowSize;
   }
 }

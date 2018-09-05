@@ -7,7 +7,6 @@ import io.netty.channel.*;
 import io.netty.handler.logging.LogLevel;
 import io.netty.util.Attribute;
 import io.netty.util.AttributeKey;
-import io.netty.util.ReferenceCountUtil;
 import io.netty.util.internal.logging.InternalLogLevel;
 import io.netty.util.internal.logging.InternalLogger;
 import io.netty.util.internal.logging.InternalLoggerFactory;
@@ -29,17 +28,14 @@ public class SubmitHandler extends ChannelDuplexHandler {
 
   private String loginName;
 
-  private int windowSize;
-
   private SequenceGenerator sequenceGenerator;
 
-  private SubmitBiConsumer submitBiConsumer;
+  private SubmitBiConsumer biConsumer;
 
-  public SubmitHandler(String loginName, SequenceGenerator sequenceGenerator, SubmitBiConsumer submitBiConsumer, int windowSize, LogLevel level) {
+  public SubmitHandler(String loginName, SequenceGenerator sequenceGenerator, SubmitBiConsumer biConsumer, LogLevel level) {
     this.loginName = loginName;
     this.sequenceGenerator = sequenceGenerator;
-    this.submitBiConsumer = submitBiConsumer;
-    this.windowSize = windowSize;
+    this.biConsumer = biConsumer;
     logger = InternalLoggerFactory.getInstance(getClass());
     internalLevel = level.toInternalLevel();
   }
@@ -51,7 +47,7 @@ public class SubmitHandler extends ChannelDuplexHandler {
     // init msg holder
     Attribute<Map<Integer, SubmitMessage>> holder = channel.attr(SUBMIT_HOLDER);
     if (holder.get() == null) {
-      holder.set(new HashMap<Integer, SubmitMessage>(windowSize));
+      holder.set(new HashMap<Integer, SubmitMessage>(16));
     }
 
     logger.log(internalLevel, "{} initialized submit msg holder", loginName);
@@ -62,21 +58,16 @@ public class SubmitHandler extends ChannelDuplexHandler {
   @Override
   public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
 
-    // sender会接受submitResp
+    // submitResp
     if (msg instanceof SubmitRespMessage) {
       SubmitRespMessage resp = (SubmitRespMessage) msg;
 
       Map<Integer, SubmitMessage> msgHolder = ctx.channel().attr(SUBMIT_HOLDER).get();
 
       SubmitMessage submit = msgHolder.get((resp.getHead().getSequenceId()));
-      if (submit == null) {
-        // drop it
-        logger.log(internalLevel, "{} drop received unrelated submit resp message {}", loginName, msg);
-        ReferenceCountUtil.release(msg);
-        return;
-      }
 
-      submitBiConsumer.apply(submit, resp);
+      msgHolder.remove(resp.getHead().getSequenceId());
+      biConsumer.apply(submit, resp);
       return;
     }
 
@@ -93,13 +84,6 @@ public class SubmitHandler extends ChannelDuplexHandler {
       submit.getHead().setSequenceId(sequenceGenerator.next());
 
       Map<Integer, SubmitMessage> msgHolder = ctx.channel().attr(SUBMIT_HOLDER).get();
-
-      if (msgHolder.size() == windowSize) {
-        // drop it
-        logger.log(internalLevel, "{} drop request message {}, ratio up to limitation:[{}]", loginName, msg, windowSize);
-        ReferenceCountUtil.release(msg);
-        return;
-      }
 
       msgHolder.put(submit.getHead().getSequenceId(), submit);
       logger.log(internalLevel, "{} current send request queue size:[{}]", loginName, msgHolder.size());
