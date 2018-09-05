@@ -140,6 +140,7 @@ public class DeliverMessage extends SmsPdu implements SgipMessage {
   public String toString() {
     return "DeliverMessage{" +
         "head=" + head +
+        ", dcs=" + getDcs().getValue() +
         ", userDataHeader='" + ByteUtil.getString(getUdhBytes(), getDcs().getAlphabet()) + '\'' +
         ", userData='" + ByteUtil.getString(getUdBytes(), getDcs().getAlphabet()) + '\'' +
         ", spNumber='" + spNumber + '\'' +

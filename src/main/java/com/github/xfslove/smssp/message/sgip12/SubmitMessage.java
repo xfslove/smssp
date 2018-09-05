@@ -343,6 +343,7 @@ public class SubmitMessage extends SmsPdu implements SgipMessage {
   public String toString() {
     return "SubmitMessage{" +
         "head=" + head +
+        ", dcs=" + getDcs().getValue() +
         ", userDataHeader='" + ByteUtil.getString(getUdhBytes(), getDcs().getAlphabet()) + '\'' +
         ", userData='" + ByteUtil.getString(getUdBytes(), getDcs().getAlphabet()) + '\'' +
         ", spNumber='" + spNumber + '\'' +

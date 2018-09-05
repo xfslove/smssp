@@ -332,6 +332,7 @@ public class DeliverMessage extends SmsPdu implements CmppMessage {
     return "DeliverMessage{" +
         "head=" + head +
         ", msgId=" + msgId +
+        ", dcs=" + getDcs().getValue() +
         ", userDataHeader='" + ByteUtil.getString(getUdhBytes(), getDcs().getAlphabet()) + '\'' +
         ", userData='" + ByteUtil.getString(getUdBytes(), getDcs().getAlphabet()) + '\'' +
         ", destId='" + destId + '\'' +
