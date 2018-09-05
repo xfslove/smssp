@@ -19,7 +19,6 @@ import io.netty.util.internal.logging.InternalLoggerFactory;
 
 
 /**
- * todo concatmessage holder
  * smg -&gt; sp 消息的handler
  *
  * @author hanwen

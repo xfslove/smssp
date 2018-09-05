@@ -24,6 +24,9 @@ import java.util.Map;
 @ChannelHandler.Sharable
 public class SubmitHandler extends ChannelDuplexHandler {
 
+  /**
+   * todo 负载有点问题
+   */
   private static final AttributeKey<Map<SequenceNumber, SubmitMessage>> SUBMIT_HOLDER = AttributeKey.valueOf("submitHolder");
 
   private final InternalLogger logger;
