@@ -29,4 +29,11 @@ public class ActiveTestMessage implements CmppMessage {
   public void read(ByteBuf in) {
     // nothing
   }
+
+  @Override
+  public String toString() {
+    return "ActiveTestMessage{" +
+        "head=" + head +
+        '}';
+  }
 }

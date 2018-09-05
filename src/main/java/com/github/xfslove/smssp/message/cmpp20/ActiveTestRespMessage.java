@@ -43,4 +43,12 @@ public class ActiveTestRespMessage implements CmppMessage {
   public void setReserve(int reserve) {
     this.reserve = reserve;
   }
+
+  @Override
+  public String toString() {
+    return "ActiveTestRespMessage{" +
+        "head=" + head +
+        ", reserve=" + reserve +
+        '}';
+  }
 }
