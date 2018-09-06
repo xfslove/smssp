@@ -13,7 +13,7 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public class DefaultFuture implements ResponseFuture {
 
-  private static final Map<String, DefaultFuture> FUTURES = new ConcurrentHashMap<>(16);
+  private static final Map<String, DefaultFuture> FUTURES = new ConcurrentHashMap<>(512);
 
   private Request request;
   private Response response;
