@@ -1,6 +1,7 @@
 package com.github.xfslove.smssp.netty4.handler.sgip12.send;
 
-import com.github.xfslove.smssp.message.sequence.SequenceGenerator;
+import com.github.xfslove.smssp.client.ResponseConsumer;
+import com.github.xfslove.smssp.message.sequence.Sequence;
 import com.github.xfslove.smssp.netty4.codec.MesssageLengthCodec;
 import com.github.xfslove.smssp.netty4.codec.sgip12.MessageCodec;
 import com.github.xfslove.smssp.netty4.handler.ExceptionHandler;
@@ -31,16 +32,16 @@ public class PoolInitializer implements ChannelPoolHandler {
 
   private String loginPassword;
 
-  private SubmitBiConsumer submitBiConsumer;
+  private ResponseConsumer consumer;
 
-  private SequenceGenerator sequenceGenerator;
+  private Sequence sequence;
 
-  public PoolInitializer(int nodeId, String loginName, String loginPassword, SubmitBiConsumer submitBiConsumer, SequenceGenerator sequenceGenerator) {
+  public PoolInitializer(int nodeId, String loginName, String loginPassword, ResponseConsumer consumer, Sequence sequence) {
     this.nodeId = nodeId;
     this.loginName = loginName;
     this.loginPassword = loginPassword;
-    this.submitBiConsumer = submitBiConsumer;
-    this.sequenceGenerator = sequenceGenerator;
+    this.consumer = consumer;
+    this.sequence = sequence;
   }
 
   @Override
@@ -62,9 +63,9 @@ public class PoolInitializer implements ChannelPoolHandler {
     channel.pipeline().addLast("sgipMessageCodec", new MessageCodec());
     channel.pipeline().addLast("sgipMessageLogging", new LoggingHandler(logLevel));
 
-    channel.pipeline().addLast("sgipBindHandler", new BindHandler(nodeId, loginName, loginPassword, sequenceGenerator, logLevel));
-    channel.pipeline().addLast("sgipUnBindHandler", new UnBindHandler(nodeId, loginName, sequenceGenerator, logLevel));
-    channel.pipeline().addLast("sgipSubmitHandler", new SubmitHandler(nodeId, loginName, submitBiConsumer, sequenceGenerator, logLevel));
+    channel.pipeline().addLast("sgipBindHandler", new BindHandler(nodeId, loginName, loginPassword, sequence, logLevel));
+    channel.pipeline().addLast("sgipUnBindHandler", new UnBindHandler(nodeId, loginName, sequence, logLevel));
+    channel.pipeline().addLast("sgipSubmitHandler", new SubmitHandler(nodeId, loginName, consumer, sequence, logLevel));
     channel.pipeline().addLast("sgipException", new ExceptionHandler(loginName, logLevel));
   }
 }

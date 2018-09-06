@@ -1,6 +1,6 @@
 package com.github.xfslove.smssp.netty4.handler.sgip12;
 
-import com.github.xfslove.smssp.message.sequence.SequenceGenerator;
+import com.github.xfslove.smssp.message.sequence.Sequence;
 import com.github.xfslove.smssp.message.sgip12.SequenceNumber;
 import com.github.xfslove.smssp.message.sgip12.UnBindMessage;
 import com.github.xfslove.smssp.message.sgip12.UnBindRespMessage;
@@ -33,16 +33,16 @@ public class UnBindHandler extends ChannelDuplexHandler {
   private final InternalLogger logger;
   private final InternalLogLevel internalLevel;
 
-  private SequenceGenerator sequenceGenerator;
+  private Sequence sequence;
 
   private int nodeId;
 
   private String loginName;
 
-  public UnBindHandler(int nodeId, String loginName, SequenceGenerator sequenceGenerator, LogLevel level) {
+  public UnBindHandler(int nodeId, String loginName, Sequence sequence, LogLevel level) {
     this.nodeId = nodeId;
     this.loginName = loginName;
-    this.sequenceGenerator = sequenceGenerator;
+    this.sequence = sequence;
     logger = InternalLoggerFactory.getInstance(getClass());
     internalLevel = level.toInternalLevel();
   }
@@ -92,7 +92,7 @@ public class UnBindHandler extends ChannelDuplexHandler {
 
         // 发送unbind
         UnBindMessage unbind = new UnBindMessage();
-        unbind.getHead().setSequenceNumber(SequenceNumber.create(nodeId, Integer.valueOf(DateFormatUtils.format(new Date(), "MMddHHmmss")), sequenceGenerator.next()));
+        unbind.getHead().setSequenceNumber(SequenceNumber.create(nodeId, Integer.valueOf(DateFormatUtils.format(new Date(), "MMddHHmmss")), sequence.next()));
 
         ctx.channel().writeAndFlush(unbind).addListener(new GenericFutureListener<Future<? super Void>>() {
           @Override

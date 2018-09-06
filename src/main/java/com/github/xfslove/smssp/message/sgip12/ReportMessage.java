@@ -10,7 +10,7 @@ import java.nio.charset.StandardCharsets;
  */
 public class ReportMessage implements SgipMessage {
 
-  private final Sgip12Head head = new Sgip12Head(SgipConstants.COMMAND_ID_REPORT);
+  private final SgipHead head = new SgipHead(SgipConstants.COMMAND_ID_REPORT);
 
   /**
    * 该命令所涉及的Submit或deliver命令的序列号
@@ -48,7 +48,7 @@ public class ReportMessage implements SgipMessage {
   private String reserve;
 
   @Override
-  public Sgip12Head getHead() {
+  public SgipHead getHead() {
     return head;
   }
 

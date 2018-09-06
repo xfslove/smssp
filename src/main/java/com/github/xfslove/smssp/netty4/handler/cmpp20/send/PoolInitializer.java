@@ -1,6 +1,7 @@
 package com.github.xfslove.smssp.netty4.handler.cmpp20.send;
 
-import com.github.xfslove.smssp.message.sequence.SequenceGenerator;
+import com.github.xfslove.smssp.client.ResponseConsumer;
+import com.github.xfslove.smssp.message.sequence.Sequence;
 import com.github.xfslove.smssp.netty4.codec.MesssageLengthCodec;
 import com.github.xfslove.smssp.netty4.codec.cmpp20.MessageCodec;
 import com.github.xfslove.smssp.netty4.handler.ExceptionHandler;
@@ -28,15 +29,15 @@ public class PoolInitializer implements ChannelPoolHandler {
 
   private String loginPassword;
 
-  private SubmitBiConsumer submitBiConsumer;
+  private ResponseConsumer consumer;
 
-  private SequenceGenerator sequenceGenerator;
+  private Sequence sequence;
 
-  public PoolInitializer(String loginName, String loginPassword, SubmitBiConsumer submitBiConsumer, SequenceGenerator sequenceGenerator) {
+  public PoolInitializer(String loginName, String loginPassword, ResponseConsumer consumer, Sequence sequence) {
     this.loginName = loginName;
     this.loginPassword = loginPassword;
-    this.submitBiConsumer = submitBiConsumer;
-    this.sequenceGenerator = sequenceGenerator;
+    this.consumer = consumer;
+    this.sequence = sequence;
   }
 
   @Override
@@ -58,10 +59,10 @@ public class PoolInitializer implements ChannelPoolHandler {
     channel.pipeline().addLast("cmppMessageCodec", new MessageCodec());
     channel.pipeline().addLast("cmppMessageLogging", new LoggingHandler(logLevel));
 
-    channel.pipeline().addLast("cmppConnectHandler", new ConnectHandler(loginName, loginPassword, sequenceGenerator, logLevel));
-    channel.pipeline().addLast("cmppActiveTestHandler", new ActiveTestHandler(loginName, sequenceGenerator, true, logLevel));
-    channel.pipeline().addLast("cmppTerminateHandler", new TerminateHandler(loginName, sequenceGenerator, logLevel));
-    channel.pipeline().addLast("cmppSubmitHandler", new SubmitHandler(loginName, sequenceGenerator, submitBiConsumer, logLevel));
+    channel.pipeline().addLast("cmppConnectHandler", new ConnectHandler(loginName, loginPassword, sequence, logLevel));
+    channel.pipeline().addLast("cmppActiveTestHandler", new ActiveTestHandler(loginName, sequence, true, logLevel));
+    channel.pipeline().addLast("cmppTerminateHandler", new TerminateHandler(loginName, sequence, logLevel));
+    channel.pipeline().addLast("cmppSubmitHandler", new SubmitHandler(loginName, sequence, consumer, logLevel));
     channel.pipeline().addLast("cmppException", new ExceptionHandler(loginName, logLevel));
   }
 }

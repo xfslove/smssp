@@ -41,6 +41,12 @@ public class SequenceNumber implements Serializable {
     return sequenceId;
   }
 
+  public String stringId() {
+    // nodeId:32bits, sequenceId:32bits
+    return String.format("%1$010d%2$010d%3$010d",
+        nodeId, timestamp, sequenceId);
+  }
+
   public byte[] getBytes() {
     byte[] bytes = new byte[12];
     ByteBuffer.wrap(bytes).putInt(getNodeId()).putInt(getTimestamp()).putInt(getSequenceId());
@@ -69,7 +75,10 @@ public class SequenceNumber implements Serializable {
   @Override
   public String toString() {
     return "SequenceNumber{" +
-        "sequenceId=" + nodeId + "" + timestamp + "" + sequenceId +
+        "nodeId=" + nodeId +
+        ", timestamp=" + timestamp +
+        ", sequenceId=" + sequenceId +
+        ", stringId=" + stringId() +
         '}';
   }
 }

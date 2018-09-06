@@ -8,5 +8,5 @@ import com.github.xfslove.smssp.message.Message;
  */
 public interface SgipMessage extends Message {
 
-  Sgip12Head getHead();
+  SgipHead getHead();
 }

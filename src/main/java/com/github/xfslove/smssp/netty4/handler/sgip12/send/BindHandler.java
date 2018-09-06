@@ -1,6 +1,6 @@
 package com.github.xfslove.smssp.netty4.handler.sgip12.send;
 
-import com.github.xfslove.smssp.message.sequence.SequenceGenerator;
+import com.github.xfslove.smssp.message.sequence.Sequence;
 import com.github.xfslove.smssp.message.sgip12.BindMessage;
 import com.github.xfslove.smssp.message.sgip12.BindRespMessage;
 import com.github.xfslove.smssp.message.sgip12.SequenceNumber;
@@ -28,7 +28,7 @@ public class BindHandler extends ChannelDuplexHandler {
   private final InternalLogger logger;
   private final InternalLogLevel internalLevel;
 
-  private SequenceGenerator sequenceGenerator;
+  private Sequence sequence;
 
   private int nodeId;
 
@@ -36,11 +36,11 @@ public class BindHandler extends ChannelDuplexHandler {
 
   private String loginPassword;
 
-  public BindHandler(int nodeId, String loginName, String loginPassword, SequenceGenerator sequenceGenerator, LogLevel level) {
+  public BindHandler(int nodeId, String loginName, String loginPassword, Sequence sequence, LogLevel level) {
     this.nodeId = nodeId;
     this.loginName = loginName;
     this.loginPassword = loginPassword;
-    this.sequenceGenerator = sequenceGenerator;
+    this.sequence = sequence;
     logger = InternalLoggerFactory.getInstance(getClass());
     internalLevel = level.toInternalLevel();
   }
@@ -50,7 +50,7 @@ public class BindHandler extends ChannelDuplexHandler {
 
     // 发送bind请求
     BindMessage bind = new BindMessage();
-    bind.getHead().setSequenceNumber(SequenceNumber.create(nodeId, Integer.valueOf(DateFormatUtils.format(new Date(), "MMddHHmmss")), sequenceGenerator.next()));
+    bind.getHead().setSequenceNumber(SequenceNumber.create(nodeId, Integer.valueOf(DateFormatUtils.format(new Date(), "MMddHHmmss")), sequence.next()));
 
     bind.setLoginName(loginName);
     bind.setLoginPassword(loginPassword);

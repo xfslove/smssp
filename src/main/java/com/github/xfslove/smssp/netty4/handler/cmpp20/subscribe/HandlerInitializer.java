@@ -1,6 +1,6 @@
 package com.github.xfslove.smssp.netty4.handler.cmpp20.subscribe;
 
-import com.github.xfslove.smssp.message.sequence.SequenceGenerator;
+import com.github.xfslove.smssp.message.sequence.Sequence;
 import com.github.xfslove.smssp.netty4.codec.MesssageLengthCodec;
 import com.github.xfslove.smssp.netty4.codec.cmpp20.MessageCodec;
 import com.github.xfslove.smssp.netty4.handler.ExceptionHandler;
@@ -30,13 +30,13 @@ public class HandlerInitializer extends ChannelInitializer<Channel> {
 
   private DeliverConsumer deliverConsumer;
 
-  private SequenceGenerator sequenceGenerator;
+  private Sequence sequence;
 
-  public HandlerInitializer(String loginName, String loginPassword, DeliverConsumer deliverConsumer, SequenceGenerator sequenceGenerator) {
+  public HandlerInitializer(String loginName, String loginPassword, DeliverConsumer deliverConsumer, Sequence sequence) {
     this.loginName = loginName;
     this.loginPassword = loginPassword;
     this.deliverConsumer = deliverConsumer;
-    this.sequenceGenerator = sequenceGenerator;
+    this.sequence = sequence;
   }
 
   @Override
@@ -48,8 +48,8 @@ public class HandlerInitializer extends ChannelInitializer<Channel> {
     channel.pipeline().addLast("cmppMessageLogging", new LoggingHandler(logLevel));
 
     channel.pipeline().addLast("cmppConnectHandler", new ConnectHandler(loginName, loginPassword, logLevel));
-    channel.pipeline().addLast("cmppActiveTestHandler", new ActiveTestHandler(loginName, sequenceGenerator, true, logLevel));
-    channel.pipeline().addLast("cmppTerminateHandler", new TerminateHandler(loginName, sequenceGenerator, logLevel));
+    channel.pipeline().addLast("cmppActiveTestHandler", new ActiveTestHandler(loginName, sequence, true, logLevel));
+    channel.pipeline().addLast("cmppTerminateHandler", new TerminateHandler(loginName, sequence, logLevel));
     channel.pipeline().addLast("cmppDeliverHandler", new DeliverHandler(loginName, deliverConsumer, logLevel));
     channel.pipeline().addLast("cmppException", new ExceptionHandler(loginName, logLevel));
   }

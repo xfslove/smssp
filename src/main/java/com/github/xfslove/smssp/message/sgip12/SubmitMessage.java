@@ -1,6 +1,7 @@
 package com.github.xfslove.smssp.message.sgip12;
 
 import com.github.xfslove.smsj.sms.SmsPdu;
+import com.github.xfslove.smssp.client.Request;
 import com.github.xfslove.smssp.util.ByteUtil;
 import io.netty.buffer.ByteBuf;
 
@@ -12,9 +13,9 @@ import java.util.List;
  * @author hanwen
  * created at 2018/8/28
  */
-public class SubmitMessage extends SmsPdu implements SgipMessage {
+public class SubmitMessage extends SmsPdu implements SgipMessage, Request {
 
-  private final Sgip12Head head = new Sgip12Head(SgipConstants.COMMAND_ID_SUBMIT);
+  private final SgipHead head = new SgipHead(SgipConstants.COMMAND_ID_SUBMIT);
 
   /**
    * SP的接入号码
@@ -134,7 +135,12 @@ public class SubmitMessage extends SmsPdu implements SgipMessage {
   private String reserve;
 
   @Override
-  public Sgip12Head getHead() {
+  public String getId() {
+    return getHead().getSequenceNumber().stringId();
+  }
+
+  @Override
+  public SgipHead getHead() {
     return head;
   }
 

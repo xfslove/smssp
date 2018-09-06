@@ -2,7 +2,7 @@ package com.github.xfslove.smssp.netty4.handler.cmpp20;
 
 import com.github.xfslove.smssp.message.cmpp20.TerminateMessage;
 import com.github.xfslove.smssp.message.cmpp20.TerminateRespMessage;
-import com.github.xfslove.smssp.message.sequence.SequenceGenerator;
+import com.github.xfslove.smssp.message.sequence.Sequence;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandler;
@@ -28,11 +28,11 @@ public class TerminateHandler extends ChannelDuplexHandler {
   private final InternalLogger logger;
   private final InternalLogLevel internalLevel;
 
-  private SequenceGenerator sequenceGenerator;
+  private Sequence sequence;
   private String loginName;
 
-  public TerminateHandler(String loginName, SequenceGenerator sequenceGenerator, LogLevel level) {
-    this.sequenceGenerator = sequenceGenerator;
+  public TerminateHandler(String loginName, Sequence sequence, LogLevel level) {
+    this.sequence = sequence;
     this.loginName = loginName;
 
     logger = InternalLoggerFactory.getInstance(getClass());
@@ -81,7 +81,7 @@ public class TerminateHandler extends ChannelDuplexHandler {
       if (iEvt.state().equals(IdleState.ALL_IDLE)) {
 
         TerminateMessage terminate = new TerminateMessage();
-        terminate.getHead().setSequenceId(sequenceGenerator.next());
+        terminate.getHead().setSequenceId(sequence.next());
 
         ctx.channel().writeAndFlush(terminate).addListener(new GenericFutureListener<Future<? super Void>>() {
           @Override

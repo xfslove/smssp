@@ -8,7 +8,7 @@ import com.github.xfslove.smssp.message.cmpp20.DeliverMessage;
  */
 public interface DeliverConsumer {
 
-  void apply(DeliverMessage deliver);
+  boolean apply(DeliverMessage deliver);
 
-  void apply(DeliverMessage.Report report);
+  boolean apply(DeliverMessage.Report report);
 }

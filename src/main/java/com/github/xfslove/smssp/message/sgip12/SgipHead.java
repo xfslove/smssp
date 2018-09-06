@@ -8,13 +8,13 @@ import com.github.xfslove.smssp.message.MessageHead;
  * @author hanwen
  * created at 2018/8/28
  */
-public class Sgip12Head implements MessageHead {
+public class SgipHead implements MessageHead {
 
   private final int commandId;
 
   private SequenceNumber sequenceNumber;
 
-  public Sgip12Head(int commandId) {
+  public SgipHead(int commandId) {
     this.commandId = commandId;
   }
 

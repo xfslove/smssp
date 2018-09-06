@@ -1,12 +1,13 @@
 package com.github.xfslove.smssp.message.cmpp20;
 
+import com.github.xfslove.smssp.client.Response;
 import io.netty.buffer.ByteBuf;
 
 /**
  * @author hanwen
  * created at 2018/8/28
  */
-public class SubmitRespMessage implements CmppMessage {
+public class SubmitRespMessage implements CmppMessage, Response {
 
   private final CmppHead head = new CmppHead(CmppConstants.CMPP_SUBMIT_RESP);
 
@@ -41,6 +42,11 @@ public class SubmitRespMessage implements CmppMessage {
    * 9~ ：其他错误码参考http://baijiahao.baidu.com/s?id=1554746383651964&wfr=spider&for=pc
    */
   private int result;
+
+  @Override
+  public String getId() {
+    return String.valueOf(getHead().getSequenceId());
+  }
 
   @Override
   public CmppHead getHead() {

@@ -10,7 +10,7 @@ import java.util.Objects;
  */
 public class MsgId implements Serializable {
 
-  private final int gateId;
+  private final int nodeId;
 
   private final int month;
 
@@ -24,8 +24,8 @@ public class MsgId implements Serializable {
 
   private final int sequenceId;
 
-  public MsgId(int gateId, int month, int day, int hour, int minute, int second, int sequenceId) {
-    this.gateId = gateId;
+  public MsgId(int nodeId, int month, int day, int hour, int minute, int second, int sequenceId) {
+    this.nodeId = nodeId;
     this.month = month;
     this.day = day;
     this.hour = hour;
@@ -35,15 +35,14 @@ public class MsgId implements Serializable {
   }
 
   /**
-   *
    * @return msgId长度 bytes
    */
   public final int getLength() {
     return 8;
   }
 
-  public int getGateId() {
-    return gateId;
+  public int getNodeId() {
+    return nodeId;
   }
 
   public int getMonth() {
@@ -70,23 +69,25 @@ public class MsgId implements Serializable {
     return sequenceId;
   }
 
-  public byte[] getBytes() {
-    // 64 bits
-    byte[] bytes = new byte[8];
-    ByteBuffer.wrap(bytes).putLong(getMsgId());
-    return bytes;
+  public String stringId() {
+    // nodeId:7bits,sequenceId:16bits
+    return String.format("%1$02d%2$02d%3$02d%4$02d%5$02d%6$07d%7$05d",
+        month, day, hour, minute, second, nodeId, sequenceId);
   }
 
-  public long getMsgId() {
+  public byte[] getBytes() {
+    // 64 bits
     long result = 0;
     result |= (long) getMonth() << 60;
     result |= (long) getDay() << 55;
     result |= (long) getHour() << 50;
     result |= (long) getMinute() << 44;
     result |= (long) getSecond() << 38;
-    result |= (long) getGateId() << 16;
+    result |= (long) getNodeId() << 16;
     result |= getSequenceId() & 0xffff;
-    return result;
+    byte[] bytes = new byte[8];
+    ByteBuffer.wrap(bytes).putLong(result);
+    return bytes;
   }
 
   public static MsgId create(long msgId) {
@@ -105,7 +106,7 @@ public class MsgId implements Serializable {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
     MsgId msgId = (MsgId) o;
-    return gateId == msgId.gateId &&
+    return nodeId == msgId.nodeId &&
         month == msgId.month &&
         day == msgId.day &&
         hour == msgId.hour &&
@@ -116,20 +117,20 @@ public class MsgId implements Serializable {
 
   @Override
   public int hashCode() {
-    return Objects.hash(gateId, month, day, hour, minute, second, sequenceId);
+    return Objects.hash(nodeId, month, day, hour, minute, second, sequenceId);
   }
 
   @Override
   public String toString() {
     return "MsgId{" +
-        "gateId=" + gateId +
+        "nodeId=" + nodeId +
         ", month=" + month +
         ", day=" + day +
         ", hour=" + hour +
         ", minute=" + minute +
         ", second=" + second +
         ", sequenceId=" + sequenceId +
-        ", msgId=" + getMsgId() +
+        ", stringId=" + stringId() +
         '}';
   }
 }

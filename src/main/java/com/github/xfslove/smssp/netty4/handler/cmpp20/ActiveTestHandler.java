@@ -2,7 +2,7 @@ package com.github.xfslove.smssp.netty4.handler.cmpp20;
 
 import com.github.xfslove.smssp.message.cmpp20.ActiveTestMessage;
 import com.github.xfslove.smssp.message.cmpp20.ActiveTestRespMessage;
-import com.github.xfslove.smssp.message.sequence.SequenceGenerator;
+import com.github.xfslove.smssp.message.sequence.Sequence;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandler;
@@ -26,13 +26,13 @@ public class ActiveTestHandler extends ChannelDuplexHandler {
   private final InternalLogger logger;
   private final InternalLogLevel internalLevel;
 
-  private SequenceGenerator sequenceGenerator;
+  private Sequence sequence;
 
   private String loginName;
   private boolean keepAlive;
 
-  public ActiveTestHandler(String loginName, SequenceGenerator sequenceGenerator, boolean keepAlive, LogLevel level) {
-    this.sequenceGenerator = sequenceGenerator;
+  public ActiveTestHandler(String loginName, Sequence sequence, boolean keepAlive, LogLevel level) {
+    this.sequence = sequence;
     this.loginName = loginName;
     this.keepAlive = keepAlive;
 
@@ -84,7 +84,7 @@ public class ActiveTestHandler extends ChannelDuplexHandler {
         if (keepAlive) {
           // 发送active test
           ActiveTestMessage active = new ActiveTestMessage();
-          active.getHead().setSequenceId(sequenceGenerator.next());
+          active.getHead().setSequenceId(sequence.next());
 
           ctx.channel().writeAndFlush(active).addListener(new GenericFutureListener<Future<? super Void>>() {
             @Override

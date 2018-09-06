@@ -1,6 +1,7 @@
 package com.github.xfslove.smssp.message.cmpp20;
 
 import com.github.xfslove.smsj.sms.SmsPdu;
+import com.github.xfslove.smssp.client.Request;
 import com.github.xfslove.smssp.util.ByteUtil;
 import io.netty.buffer.ByteBuf;
 
@@ -12,7 +13,7 @@ import java.util.List;
  * @author hanwen
  * created at 2018/8/28
  */
-public class SubmitMessage extends SmsPdu implements CmppMessage {
+public class SubmitMessage extends SmsPdu implements CmppMessage, Request {
 
   private final CmppHead head = new CmppHead(CmppConstants.CMPP_SUBMIT);
 
@@ -121,6 +122,11 @@ public class SubmitMessage extends SmsPdu implements CmppMessage {
    * 保留
    */
   private String reserve;
+
+  @Override
+  public String getId() {
+    return String.valueOf(getHead().getSequenceId());
+  }
 
   @Override
   public CmppHead getHead() {
