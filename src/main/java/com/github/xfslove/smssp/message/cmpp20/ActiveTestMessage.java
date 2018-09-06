@@ -1,5 +1,6 @@
 package com.github.xfslove.smssp.message.cmpp20;
 
+import com.github.xfslove.smssp.message.sequence.Sequence;
 import io.netty.buffer.ByteBuf;
 
 /**
@@ -8,7 +9,15 @@ import io.netty.buffer.ByteBuf;
  */
 public class ActiveTestMessage implements CmppMessage {
 
-  private final CmppHead head = new CmppHead(CmppConstants.CMPP_ACTIVE_TEST);
+  private final CmppHead head;
+
+  public ActiveTestMessage(int sequenceId) {
+    head = new CmppHead(CmppConstants.CMPP_ACTIVE_TEST, sequenceId);
+  }
+
+  public ActiveTestMessage(Sequence sequence) {
+    head = new CmppHead(CmppConstants.CMPP_ACTIVE_TEST, (int) sequence.next());
+  }
 
   @Override
   public CmppHead getHead() {

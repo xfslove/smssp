@@ -2,6 +2,7 @@ package com.github.xfslove.smssp.message.cmpp20;
 
 import com.github.xfslove.smsj.sms.SmsPdu;
 import com.github.xfslove.smssp.client.Request;
+import com.github.xfslove.smssp.message.sequence.Sequence;
 import com.github.xfslove.smssp.util.ByteUtil;
 import io.netty.buffer.ByteBuf;
 
@@ -15,7 +16,7 @@ import java.util.List;
  */
 public class SubmitMessage extends SmsPdu implements CmppMessage, Request {
 
-  private final CmppHead head = new CmppHead(CmppConstants.CMPP_SUBMIT);
+  private final CmppHead head;
 
   /**
    * 信息标识，由SP侧短信网关本身产生，本处填空
@@ -122,6 +123,14 @@ public class SubmitMessage extends SmsPdu implements CmppMessage, Request {
    * 保留
    */
   private String reserve;
+
+  public SubmitMessage(int sequenceId) {
+    head = new CmppHead(CmppConstants.CMPP_SUBMIT, sequenceId);
+  }
+
+  public SubmitMessage(Sequence sequence) {
+    head = new CmppHead(CmppConstants.CMPP_SUBMIT, (int) sequence.next());
+  }
 
   @Override
   public String getId() {

@@ -4,6 +4,7 @@ import com.github.xfslove.smsj.sms.SmsPdu;
 import com.github.xfslove.smsj.sms.dcs.SmsDcs;
 import com.github.xfslove.smsj.sms.ud.SmsUdhElement;
 import com.github.xfslove.smsj.sms.ud.SmsUdhUtil;
+import com.github.xfslove.smssp.message.sequence.Sequence;
 import com.github.xfslove.smssp.util.ByteUtil;
 import io.netty.buffer.ByteBuf;
 
@@ -15,7 +16,7 @@ import java.nio.charset.StandardCharsets;
  */
 public class DeliverMessage extends SmsPdu implements SgipMessage {
 
-  private final SgipHead head = new SgipHead(SgipConstants.COMMAND_ID_DELIVER);
+  private final SgipHead head;
 
   /**
    * SP的接入号码
@@ -43,6 +44,14 @@ public class DeliverMessage extends SmsPdu implements SgipMessage {
    * 保留，扩展用
    */
   private String reserve;
+
+  public DeliverMessage(SequenceNumber sequenceNumber) {
+    this.head = new SgipHead(SgipConstants.COMMAND_ID_DELIVER, sequenceNumber);
+  }
+
+  public DeliverMessage(Sequence sequence) {
+    this.head = new SgipHead(SgipConstants.COMMAND_ID_DELIVER, (SequenceNumber) sequence.next());
+  }
 
   @Override
   public SgipHead getHead() {

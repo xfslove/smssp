@@ -1,4 +1,4 @@
-package com.github.xfslove.smssp.netty4.handler.sgip12.send;
+package com.github.xfslove.smssp.netty4.handler.sgip12.client;
 
 import com.github.xfslove.smssp.message.sgip12.SubmitRespMessage;
 

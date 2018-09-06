@@ -1,5 +1,6 @@
 package com.github.xfslove.smssp.message.sgip12;
 
+import com.github.xfslove.smssp.message.sequence.Sequence;
 import io.netty.buffer.ByteBuf;
 
 /**
@@ -8,7 +9,15 @@ import io.netty.buffer.ByteBuf;
  */
 public class UnBindRespMessage implements SgipMessage {
 
-  private final SgipHead head = new SgipHead(SgipConstants.COMMAND_ID_UNBIND_RESP);
+  private final SgipHead head;
+
+  public UnBindRespMessage(SequenceNumber sequenceNumber) {
+    this.head = new SgipHead(SgipConstants.COMMAND_ID_UNBIND_RESP, sequenceNumber);
+  }
+
+  public UnBindRespMessage(Sequence sequence) {
+    this.head = new SgipHead(SgipConstants.COMMAND_ID_UNBIND_RESP, (SequenceNumber) sequence.next());
+  }
 
   @Override
   public SgipHead getHead() {

@@ -1,5 +1,6 @@
 package com.github.xfslove.smssp.message.cmpp20;
 
+import com.github.xfslove.smssp.message.sequence.Sequence;
 import com.github.xfslove.smssp.util.ByteUtil;
 import io.netty.buffer.ByteBuf;
 
@@ -13,7 +14,7 @@ public class ConnectMessage implements CmppMessage {
 
   public static final int VERSION_20 = 0x20;
 
-  private final CmppHead head = new CmppHead(CmppConstants.CMPP_CONNECT);
+  private final CmppHead head;
 
   /**
    * 双方协商的版本号(高位4bit表示主版本号,低位4bit表示次版本号)
@@ -39,6 +40,14 @@ public class ConnectMessage implements CmppMessage {
    * 时间戳的明文,由客户端产生,格式为MMDDHHMMSS，即月日时分秒，10位数字的整型，右对齐
    */
   private int timestamp;
+
+  public ConnectMessage(int sequenceId) {
+    head = new CmppHead(CmppConstants.CMPP_CONNECT, sequenceId);
+  }
+
+  public ConnectMessage(Sequence sequence) {
+    head = new CmppHead(CmppConstants.CMPP_CONNECT, (int) sequence.next());
+  }
 
   @Override
   public CmppHead getHead() {

@@ -2,6 +2,7 @@ package com.github.xfslove.smssp.message.sgip12;
 
 import com.github.xfslove.smsj.sms.SmsPdu;
 import com.github.xfslove.smssp.client.Request;
+import com.github.xfslove.smssp.message.sequence.Sequence;
 import com.github.xfslove.smssp.util.ByteUtil;
 import io.netty.buffer.ByteBuf;
 
@@ -15,7 +16,7 @@ import java.util.List;
  */
 public class SubmitMessage extends SmsPdu implements SgipMessage, Request {
 
-  private final SgipHead head = new SgipHead(SgipConstants.COMMAND_ID_SUBMIT);
+  private final SgipHead head;
 
   /**
    * SP的接入号码
@@ -133,6 +134,14 @@ public class SubmitMessage extends SmsPdu implements SgipMessage, Request {
    * 保留，扩展用
    */
   private String reserve;
+
+  public SubmitMessage(SequenceNumber sequenceNumber) {
+    this.head = new SgipHead(SgipConstants.COMMAND_ID_SUBMIT, sequenceNumber);
+  }
+
+  public SubmitMessage(Sequence sequence) {
+    this.head = new SgipHead(SgipConstants.COMMAND_ID_SUBMIT, (SequenceNumber) sequence.next());
+  }
 
   @Override
   public String getId() {

@@ -33,41 +33,39 @@ public class MessageCodec extends ByteToMessageCodec<SgipMessage> {
     // 4 bytes
     int messageLength = in.readInt();
     int commandId = in.readInt();
-
-    SgipMessage message;
-
-    switch (commandId) {
-      case SgipConstants.COMMAND_ID_BIND:
-        message = new BindMessage();
-        break;
-      case SgipConstants.COMMAND_ID_BIND_RESP:
-        message = new BindRespMessage();
-        break;
-      case SgipConstants.COMMAND_ID_SUBMIT_RESP:
-        message = new SubmitRespMessage();
-        break;
-      case SgipConstants.COMMAND_ID_DELIVER:
-        message = new DeliverMessage();
-        break;
-      case SgipConstants.COMMAND_ID_REPORT:
-        message = new ReportMessage();
-        break;
-      case SgipConstants.COMMAND_ID_UNBIND:
-        message = new UnBindMessage();
-        break;
-      case SgipConstants.COMMAND_ID_UNBIND_RESP:
-        message = new UnBindRespMessage();
-        break;
-      default:
-        throw new IllegalArgumentException("unsupported commandId: " + commandId);
-    }
-
     // 4 bytes
     int nodeId = in.readInt();
     int timestamp = in.readInt();
     int sequenceId = in.readInt();
     SequenceNumber sequenceNumber = SequenceNumber.create(nodeId, timestamp, sequenceId);
-    message.getHead().setSequenceNumber(sequenceNumber);
+
+    SgipMessage message;
+
+    switch (commandId) {
+      case SgipConstants.COMMAND_ID_BIND:
+        message = new BindMessage(sequenceNumber);
+        break;
+      case SgipConstants.COMMAND_ID_BIND_RESP:
+        message = new BindRespMessage(sequenceNumber);
+        break;
+      case SgipConstants.COMMAND_ID_SUBMIT_RESP:
+        message = new SubmitRespMessage(sequenceNumber);
+        break;
+      case SgipConstants.COMMAND_ID_DELIVER:
+        message = new DeliverMessage(sequenceNumber);
+        break;
+      case SgipConstants.COMMAND_ID_REPORT:
+        message = new ReportMessage(sequenceNumber);
+        break;
+      case SgipConstants.COMMAND_ID_UNBIND:
+        message = new UnBindMessage(sequenceNumber);
+        break;
+      case SgipConstants.COMMAND_ID_UNBIND_RESP:
+        message = new UnBindRespMessage(sequenceNumber);
+        break;
+      default:
+        throw new IllegalArgumentException("unsupported commandId: " + commandId);
+    }
 
     message.read(in);
 

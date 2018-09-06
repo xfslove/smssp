@@ -12,10 +12,11 @@ public class SgipHead implements MessageHead {
 
   private final int commandId;
 
-  private SequenceNumber sequenceNumber;
+  private final SequenceNumber sequenceNumber;
 
-  public SgipHead(int commandId) {
+  public SgipHead(int commandId, SequenceNumber sequenceNumber) {
     this.commandId = commandId;
+    this.sequenceNumber = sequenceNumber;
   }
 
   /**
@@ -36,10 +37,6 @@ public class SgipHead implements MessageHead {
 
   public SequenceNumber getSequenceNumber() {
     return sequenceNumber;
-  }
-
-  public void setSequenceNumber(SequenceNumber sequenceNumber) {
-    this.sequenceNumber = sequenceNumber;
   }
 
   @Override

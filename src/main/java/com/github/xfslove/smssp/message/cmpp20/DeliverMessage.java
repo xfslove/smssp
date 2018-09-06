@@ -6,6 +6,7 @@ import com.github.xfslove.smsj.sms.ud.SmsUdhElement;
 import com.github.xfslove.smsj.sms.ud.SmsUdhUtil;
 import com.github.xfslove.smssp.message.Message;
 import com.github.xfslove.smssp.message.MessageHead;
+import com.github.xfslove.smssp.message.sequence.Sequence;
 import com.github.xfslove.smssp.util.ByteUtil;
 import io.netty.buffer.ByteBuf;
 
@@ -17,7 +18,7 @@ import java.nio.charset.StandardCharsets;
  */
 public class DeliverMessage extends SmsPdu implements CmppMessage {
 
-  private final CmppHead head = new CmppHead(CmppConstants.CMPP_DELIVER);
+  private final CmppHead head;
 
   /**
    * 信息标识
@@ -72,6 +73,14 @@ public class DeliverMessage extends SmsPdu implements CmppMessage {
    * 保留
    */
   private String reserve;
+
+  public DeliverMessage(int sequenceId) {
+    head = new CmppHead(CmppConstants.CMPP_DELIVER, sequenceId);
+  }
+
+  public DeliverMessage(Sequence sequence) {
+    head = new CmppHead(CmppConstants.CMPP_DELIVER, (int) sequence.next());
+  }
 
   @Override
   public CmppHead getHead() {

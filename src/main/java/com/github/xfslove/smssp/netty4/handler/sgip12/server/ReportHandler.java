@@ -1,4 +1,4 @@
-package com.github.xfslove.smssp.netty4.handler.sgip12.subscribe;
+package com.github.xfslove.smssp.netty4.handler.sgip12.server;
 
 import com.github.xfslove.smssp.message.Message;
 import com.github.xfslove.smssp.message.sgip12.ReportMessage;
@@ -40,9 +40,8 @@ public class ReportHandler extends ChannelDuplexHandler {
     if (msg instanceof ReportMessage) {
       ReportMessage report = (ReportMessage) msg;
 
-      ReportRespMessage reportResp = new ReportRespMessage();
+      ReportRespMessage reportResp = new ReportRespMessage(report.getHead().getSequenceNumber());
       reportResp.setResult(0);
-      reportResp.getHead().setSequenceNumber(report.getHead().getSequenceNumber());
 
       ctx.writeAndFlush(reportResp);
 
@@ -66,8 +65,7 @@ public class ReportHandler extends ChannelDuplexHandler {
         ReportMessage report = (ReportMessage) msg;
 
         // 需要先登录
-        ReportRespMessage reportResp = new ReportRespMessage();
-        reportResp.getHead().setSequenceNumber(report.getHead().getSequenceNumber());
+        ReportRespMessage reportResp = new ReportRespMessage(report.getHead().getSequenceNumber());
         reportResp.setResult(1);
 
         ctx.writeAndFlush(reportResp).addListener(new GenericFutureListener<Future<? super Void>>() {

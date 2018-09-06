@@ -7,10 +7,10 @@ import com.github.xfslove.smssp.netty4.codec.cmpp20.MessageCodec;
 import com.github.xfslove.smssp.netty4.handler.ExceptionHandler;
 import com.github.xfslove.smssp.netty4.handler.cmpp20.ActiveTestHandler;
 import com.github.xfslove.smssp.netty4.handler.cmpp20.TerminateHandler;
-import com.github.xfslove.smssp.netty4.handler.cmpp20.send.ConnectHandler;
-import com.github.xfslove.smssp.netty4.handler.cmpp20.send.SubmitHandler;
-import com.github.xfslove.smssp.netty4.handler.cmpp20.subscribe.DeliverConsumer;
-import com.github.xfslove.smssp.netty4.handler.cmpp20.subscribe.DeliverHandler;
+import com.github.xfslove.smssp.netty4.handler.cmpp20.client.ConnectHandler;
+import com.github.xfslove.smssp.netty4.handler.cmpp20.client.SubmitHandler;
+import com.github.xfslove.smssp.netty4.handler.cmpp20.server.DeliverConsumer;
+import com.github.xfslove.smssp.netty4.handler.cmpp20.server.DeliverHandler;
 import io.netty.channel.Channel;
 import io.netty.channel.pool.ChannelPoolHandler;
 import io.netty.handler.logging.LogLevel;
@@ -69,7 +69,7 @@ public class PoolInitializer implements ChannelPoolHandler {
     channel.pipeline().addLast("cmppConnectHandler", new ConnectHandler(loginName, loginPassword, sequence, logLevel));
     channel.pipeline().addLast("cmppActiveTestHandler", new ActiveTestHandler(loginName, sequence, true, logLevel));
     channel.pipeline().addLast("cmppTerminateHandler", new TerminateHandler(loginName, sequence, logLevel));
-    channel.pipeline().addLast("cmppSubmitHandler", new SubmitHandler(loginName, sequence, consumer, logLevel));
+    channel.pipeline().addLast("cmppSubmitHandler", new SubmitHandler(loginName, consumer, logLevel));
     channel.pipeline().addLast("cmppDeliverHandler", new DeliverHandler(loginName, deliverConsumer, logLevel));
     channel.pipeline().addLast("cmppException", new ExceptionHandler(loginName, logLevel));
 

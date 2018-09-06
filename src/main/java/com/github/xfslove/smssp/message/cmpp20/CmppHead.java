@@ -12,10 +12,11 @@ public class CmppHead implements MessageHead {
 
   private final int commandId;
 
-  private int sequenceId = 1;
+  private final int sequenceId;
 
-  public CmppHead(int commandId) {
+  public CmppHead(int commandId, int sequenceId) {
     this.commandId = commandId;
+    this.sequenceId = sequenceId;
   }
 
   /**
@@ -36,10 +37,6 @@ public class CmppHead implements MessageHead {
 
   public int getSequenceId() {
     return sequenceId;
-  }
-
-  public void setSequenceId(int sequenceId) {
-    this.sequenceId = sequenceId;
   }
 
   @Override

@@ -1,9 +1,10 @@
-package com.github.xfslove.smssp.netty4.handler.sgip12.subscribe;
+package com.github.xfslove.smssp.netty4.handler.cmpp20.server;
 
 import com.github.xfslove.smssp.message.Message;
-import com.github.xfslove.smssp.message.sgip12.BindMessage;
-import com.github.xfslove.smssp.message.sgip12.BindRespMessage;
+import com.github.xfslove.smssp.message.cmpp20.ConnectMessage;
+import com.github.xfslove.smssp.message.cmpp20.ConnectRespMessage;
 import com.github.xfslove.smssp.netty4.handler.SessionEvent;
+import com.github.xfslove.smssp.util.ByteUtil;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandler;
@@ -15,15 +16,20 @@ import io.netty.util.concurrent.GenericFutureListener;
 import io.netty.util.internal.logging.InternalLogLevel;
 import io.netty.util.internal.logging.InternalLogger;
 import io.netty.util.internal.logging.InternalLoggerFactory;
+import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.lang3.StringUtils;
+
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 
 /**
  * smg -> sp 链接session管理handler
  *
  * @author hanwen
- * created at 2018/8/31
+ * created at 2018/9/2
  */
 @ChannelHandler.Sharable
-public class BindHandler extends ChannelDuplexHandler {
+public class ConnectHandler extends ChannelDuplexHandler {
 
   private static final AttributeKey<Boolean> SESSION_VALID = AttributeKey.valueOf("sessionValid");
 
@@ -34,7 +40,7 @@ public class BindHandler extends ChannelDuplexHandler {
 
   private final String loginPassword;
 
-  public BindHandler(String loginName, String loginPassword, LogLevel level) {
+  public ConnectHandler(String loginName, String loginPassword, LogLevel level) {
     this.loginName = loginName;
     this.loginPassword = loginPassword;
     logger = InternalLoggerFactory.getInstance(getClass());
@@ -42,68 +48,61 @@ public class BindHandler extends ChannelDuplexHandler {
   }
 
   @Override
-  public void channelRead(final ChannelHandlerContext ctx, Object msg) throws Exception {
+  public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
     final Channel channel = ctx.channel();
 
-    // bind 请求
-    if (msg instanceof BindMessage) {
-      BindMessage bind = (BindMessage) msg;
+    // connect
+    if (msg instanceof ConnectMessage) {
+      ConnectMessage connect = (ConnectMessage) msg;
 
-      BindRespMessage bindResp = new BindRespMessage();
-      bindResp.getHead().setSequenceNumber(bind.getHead().getSequenceNumber());
+      ConnectRespMessage resp = new ConnectRespMessage(connect.getHead().getSequenceId());
+      resp.setVersion(ConnectMessage.VERSION_20);
 
-      if (Boolean.TRUE.equals(ctx.channel().attr(SESSION_VALID).get())) {
-        // 重复登录
-        bindResp.setResult(2);
-        ctx.channel().writeAndFlush(bindResp).addListener(new GenericFutureListener<Future<? super Void>>() {
+
+      byte[] sourceBytes = loginName.getBytes(StandardCharsets.ISO_8859_1);
+      byte[] secretBytes = loginPassword.getBytes(StandardCharsets.ISO_8859_1);
+      byte[] timestampBytes = StringUtils.leftPad(String.valueOf(connect.getTimestamp()), 10, "0").getBytes(StandardCharsets.ISO_8859_1);
+      byte[] authenticatorSource = DigestUtils.md5(ByteUtil.concat(sourceBytes, new byte[9], secretBytes, timestampBytes));
+
+      if (!connect.getSourceAddr().equals(loginName) ||
+          !Arrays.equals(authenticatorSource, connect.getAuthenticatorSource())) {
+
+        // 认证错误
+        resp.setStatus(3);
+        channel.writeAndFlush(resp).addListener(new GenericFutureListener<Future<? super Void>>() {
           @Override
           public void operationComplete(Future<? super Void> future) throws Exception {
             if (future.isSuccess()) {
-              ctx.channel().close();
-              logger.log(internalLevel, "{} bind failure[result:{}] and channel closed", loginName, 2);
+              channel.close();
+              logger.log(internalLevel, "{} connect failure[result:{}] and close channel", loginName, 3);
             }
           }
         });
         return;
       }
 
+      if (connect.getVersion() != ConnectMessage.VERSION_20) {
 
-      if (!loginName.equals(bind.getLoginName()) || !loginPassword.equals(bind.getLoginPassword())) {
-        // 用户名密码错误
-        bindResp.setResult(1);
-        ctx.channel().writeAndFlush(bindResp).addListener(new GenericFutureListener<Future<? super Void>>() {
+        // 版本太高
+        resp.setStatus(4);
+        channel.writeAndFlush(resp).addListener(new GenericFutureListener<Future<? super Void>>() {
           @Override
           public void operationComplete(Future<? super Void> future) throws Exception {
             if (future.isSuccess()) {
-              ctx.channel().close();
-              logger.log(internalLevel, "{} bind failure[result:{}] and channel closed", loginName, 1);
+              channel.close();
+              logger.log(internalLevel, "{} connect failure[result:{}] and close channel", loginName, 3);
             }
           }
         });
         return;
       }
 
-      if (2 != bind.getLoginType()) {
-        // 登录类型不对
-        bindResp.setResult(4);
-        ctx.channel().writeAndFlush(bindResp).addListener(new GenericFutureListener<Future<? super Void>>() {
-          @Override
-          public void operationComplete(Future<? super Void> future) throws Exception {
-            if (future.isSuccess()) {
-              ctx.channel().close();
-              logger.log(internalLevel, "{} bind failure[result:{}] and channel closed", loginName, 4);
-            }
-          }
-        });
-        return;
-      }
-
-      // bind 成功
-      channel.writeAndFlush(bindResp).addListener(new GenericFutureListener<Future<? super Void>>() {
+      // connect 成功
+      channel.writeAndFlush(resp).addListener(new GenericFutureListener<Future<? super Void>>() {
         @Override
         public void operationComplete(Future<? super Void> future) throws Exception {
           if (future.isSuccess()) {
-            logger.log(internalLevel, "{} bind success", loginName);
+            logger.log(internalLevel, "{} connect success", loginName);
             channel.attr(SESSION_VALID).set(true);
           }
         }

@@ -1,5 +1,6 @@
 package com.github.xfslove.smssp.message.cmpp20;
 
+import com.github.xfslove.smssp.message.sequence.Sequence;
 import com.github.xfslove.smssp.util.ByteUtil;
 import io.netty.buffer.ByteBuf;
 
@@ -11,7 +12,7 @@ import java.nio.charset.StandardCharsets;
  */
 public class ConnectRespMessage implements CmppMessage {
 
-  private final CmppHead head = new CmppHead(CmppConstants.CMPP_CONNECT_RESP);
+  private final CmppHead head;
 
   /**
    * 状态
@@ -37,6 +38,14 @@ public class ConnectRespMessage implements CmppMessage {
    * 服务器支持的最高版本号
    */
   private int version;
+
+  public ConnectRespMessage(int sequenceId) {
+     head = new CmppHead(CmppConstants.CMPP_CONNECT_RESP, sequenceId);
+  }
+
+  public ConnectRespMessage(Sequence sequence) {
+    head = new CmppHead(CmppConstants.CMPP_CONNECT_RESP, (int) sequence.next());
+  }
 
   @Override
   public CmppHead getHead() {

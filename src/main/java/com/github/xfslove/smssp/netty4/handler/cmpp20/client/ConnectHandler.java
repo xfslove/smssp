@@ -1,4 +1,4 @@
-package com.github.xfslove.smssp.netty4.handler.cmpp20.send;
+package com.github.xfslove.smssp.netty4.handler.cmpp20.client;
 
 import com.github.xfslove.smssp.message.cmpp20.ConnectMessage;
 import com.github.xfslove.smssp.message.cmpp20.ConnectRespMessage;
@@ -48,8 +48,7 @@ public class ConnectHandler extends ChannelDuplexHandler {
   public void channelActive(ChannelHandlerContext ctx) throws Exception {
 
     // 发送connect请求
-    ConnectMessage connect = new ConnectMessage();
-    connect.getHead().setSequenceId(sequence.next());
+    ConnectMessage connect = new ConnectMessage(sequence);
 
     connect.setTimestamp(Integer.valueOf(DateFormatUtils.format(new Date(), "MMddHHmmss")));
     connect.setSourceAddr(loginName);
@@ -60,7 +59,7 @@ public class ConnectHandler extends ChannelDuplexHandler {
     connect.setAuthenticatorSource(authenticationBytes);
 
     ctx.channel().writeAndFlush(connect);
-    logger.log(internalLevel, "{} send connect request", loginName);
+    logger.log(internalLevel, "{} client connect request", loginName);
 
     ctx.fireChannelActive();
   }

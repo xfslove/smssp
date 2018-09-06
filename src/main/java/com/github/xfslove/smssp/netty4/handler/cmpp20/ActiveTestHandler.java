@@ -48,9 +48,7 @@ public class ActiveTestHandler extends ChannelDuplexHandler {
     if (msg instanceof ActiveTestMessage) {
       ActiveTestMessage active = (ActiveTestMessage) msg;
 
-      ActiveTestRespMessage resp = new ActiveTestRespMessage();
-      resp.getHead().setSequenceId(active.getHead().getSequenceId());
-
+      ActiveTestRespMessage resp = new ActiveTestRespMessage(active.getHead().getSequenceId());
 
       channel.writeAndFlush(resp).addListener(new GenericFutureListener<Future<? super Void>>() {
         @Override
@@ -83,8 +81,7 @@ public class ActiveTestHandler extends ChannelDuplexHandler {
 
         if (keepAlive) {
           // 发送active test
-          ActiveTestMessage active = new ActiveTestMessage();
-          active.getHead().setSequenceId(sequence.next());
+          ActiveTestMessage active = new ActiveTestMessage(sequence);
 
           ctx.channel().writeAndFlush(active).addListener(new GenericFutureListener<Future<? super Void>>() {
             @Override

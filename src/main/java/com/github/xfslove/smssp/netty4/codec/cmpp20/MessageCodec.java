@@ -31,39 +31,37 @@ public class MessageCodec extends ByteToMessageCodec<CmppMessage> {
     // 4 bytes
     int messageLength = in.readInt();
     int commandId = in.readInt();
+    int sequenceId = in.readInt();
 
     CmppMessage message;
     switch (commandId) {
       case CmppConstants.CMPP_CONNECT:
-        message = new ConnectMessage();
+        message = new ConnectMessage(sequenceId);
         break;
       case CmppConstants.CMPP_CONNECT_RESP:
-        message = new ConnectRespMessage();
+        message = new ConnectRespMessage(sequenceId);
         break;
       case CmppConstants.CMPP_ACTIVE_TEST:
-        message = new ActiveTestMessage();
+        message = new ActiveTestMessage(sequenceId);
         break;
       case CmppConstants.CMPP_ACTIVE_TEST_RESP:
-        message = new ActiveTestRespMessage();
+        message = new ActiveTestRespMessage(sequenceId);
         break;
       case CmppConstants.CMPP_SUBMIT_RESP:
-        message = new SubmitRespMessage();
+        message = new SubmitRespMessage(sequenceId);
         break;
       case CmppConstants.CMPP_DELIVER:
-        message = new DeliverMessage();
+        message = new DeliverMessage(sequenceId);
         break;
       case CmppConstants.CMPP_TERMINATE:
-        message = new TerminateMessage();
+        message = new TerminateMessage(sequenceId);
         break;
       case CmppConstants.CMPP_TERMINATE_RESP:
-        message = new TerminateRespMessage();
+        message = new TerminateRespMessage(sequenceId);
         break;
       default:
         throw new IllegalArgumentException("unsupported commandId: " + commandId);
     }
-
-    int sequenceId = in.readInt();
-    message.getHead().setSequenceId(sequenceId);
 
     message.read(in);
 

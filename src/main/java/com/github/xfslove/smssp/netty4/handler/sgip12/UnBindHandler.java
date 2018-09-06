@@ -1,7 +1,6 @@
 package com.github.xfslove.smssp.netty4.handler.sgip12;
 
 import com.github.xfslove.smssp.message.sequence.Sequence;
-import com.github.xfslove.smssp.message.sgip12.SequenceNumber;
 import com.github.xfslove.smssp.message.sgip12.UnBindMessage;
 import com.github.xfslove.smssp.message.sgip12.UnBindRespMessage;
 import io.netty.channel.Channel;
@@ -16,9 +15,7 @@ import io.netty.util.concurrent.GenericFutureListener;
 import io.netty.util.internal.logging.InternalLogLevel;
 import io.netty.util.internal.logging.InternalLogger;
 import io.netty.util.internal.logging.InternalLoggerFactory;
-import org.apache.commons.lang3.time.DateFormatUtils;
 
-import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -35,12 +32,9 @@ public class UnBindHandler extends ChannelDuplexHandler {
 
   private Sequence sequence;
 
-  private int nodeId;
-
   private String loginName;
 
-  public UnBindHandler(int nodeId, String loginName, Sequence sequence, LogLevel level) {
-    this.nodeId = nodeId;
+  public UnBindHandler(String loginName, Sequence sequence, LogLevel level) {
     this.loginName = loginName;
     this.sequence = sequence;
     logger = InternalLoggerFactory.getInstance(getClass());
@@ -56,8 +50,7 @@ public class UnBindHandler extends ChannelDuplexHandler {
       UnBindMessage unbind = (UnBindMessage) msg;
 
       // 直接回复UnbindResp
-      UnBindRespMessage resp = new UnBindRespMessage();
-      resp.getHead().setSequenceNumber(unbind.getHead().getSequenceNumber());
+      UnBindRespMessage resp = new UnBindRespMessage(unbind.getHead().getSequenceNumber());
 
       channel.writeAndFlush(resp).addListener(new GenericFutureListener<Future<? super Void>>() {
         @Override
@@ -91,8 +84,7 @@ public class UnBindHandler extends ChannelDuplexHandler {
       if (iEvt.state().equals(IdleState.ALL_IDLE)) {
 
         // 发送unbind
-        UnBindMessage unbind = new UnBindMessage();
-        unbind.getHead().setSequenceNumber(SequenceNumber.create(nodeId, Integer.valueOf(DateFormatUtils.format(new Date(), "MMddHHmmss")), sequence.next()));
+        UnBindMessage unbind = new UnBindMessage(sequence);
 
         ctx.channel().writeAndFlush(unbind).addListener(new GenericFutureListener<Future<? super Void>>() {
           @Override

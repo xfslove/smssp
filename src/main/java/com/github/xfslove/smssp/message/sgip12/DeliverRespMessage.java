@@ -1,5 +1,6 @@
 package com.github.xfslove.smssp.message.sgip12;
 
+import com.github.xfslove.smssp.message.sequence.Sequence;
 import com.github.xfslove.smssp.util.ByteUtil;
 import io.netty.buffer.ByteBuf;
 
@@ -11,7 +12,7 @@ import java.nio.charset.StandardCharsets;
  */
 public class DeliverRespMessage implements SgipMessage {
 
-  private final SgipHead head = new SgipHead(SgipConstants.COMMAND_ID_DELIVER_RESP);
+  private final SgipHead head;
 
   /**
    * Deliver命令是否成功接收
@@ -24,6 +25,15 @@ public class DeliverRespMessage implements SgipMessage {
    * 保留，扩展用
    */
   private String reserve;
+
+
+  public DeliverRespMessage(SequenceNumber sequenceNumber) {
+    this.head = new SgipHead(SgipConstants.COMMAND_ID_DELIVER_RESP, sequenceNumber);
+  }
+
+  public DeliverRespMessage(Sequence sequence) {
+    this.head = new SgipHead(SgipConstants.COMMAND_ID_DELIVER_RESP, (SequenceNumber) sequence.next());
+  }
 
   @Override
   public SgipHead getHead() {

@@ -1,5 +1,6 @@
 package com.github.xfslove.smssp.message.sgip12;
 
+import com.github.xfslove.smssp.message.sequence.Sequence;
 import com.github.xfslove.smssp.util.ByteUtil;
 import io.netty.buffer.ByteBuf;
 
@@ -11,7 +12,7 @@ import java.nio.charset.StandardCharsets;
  */
 public class BindMessage implements SgipMessage {
 
-  private final SgipHead head = new SgipHead(SgipConstants.COMMAND_ID_BIND);
+  private final SgipHead head;
 
   /**
    * 登录类型
@@ -40,6 +41,14 @@ public class BindMessage implements SgipMessage {
    * 保留
    */
   private String reserve;
+
+  public BindMessage(SequenceNumber sequenceNumber) {
+    this.head = new SgipHead(SgipConstants.COMMAND_ID_BIND, sequenceNumber);
+  }
+
+  public BindMessage(Sequence sequence) {
+    this.head = new SgipHead(SgipConstants.COMMAND_ID_BIND, (SequenceNumber) sequence.next());
+  }
 
   @Override
   public SgipHead getHead() {

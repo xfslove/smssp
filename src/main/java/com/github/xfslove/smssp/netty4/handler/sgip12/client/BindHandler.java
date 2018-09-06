@@ -1,9 +1,8 @@
-package com.github.xfslove.smssp.netty4.handler.sgip12.send;
+package com.github.xfslove.smssp.netty4.handler.sgip12.client;
 
 import com.github.xfslove.smssp.message.sequence.Sequence;
 import com.github.xfslove.smssp.message.sgip12.BindMessage;
 import com.github.xfslove.smssp.message.sgip12.BindRespMessage;
-import com.github.xfslove.smssp.message.sgip12.SequenceNumber;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandler;
@@ -12,9 +11,6 @@ import io.netty.handler.logging.LogLevel;
 import io.netty.util.internal.logging.InternalLogLevel;
 import io.netty.util.internal.logging.InternalLogger;
 import io.netty.util.internal.logging.InternalLoggerFactory;
-import org.apache.commons.lang3.time.DateFormatUtils;
-
-import java.util.Date;
 
 /**
  * sp -> smg session管理handler
@@ -30,14 +26,11 @@ public class BindHandler extends ChannelDuplexHandler {
 
   private Sequence sequence;
 
-  private int nodeId;
-
   private String loginName;
 
   private String loginPassword;
 
-  public BindHandler(int nodeId, String loginName, String loginPassword, Sequence sequence, LogLevel level) {
-    this.nodeId = nodeId;
+  public BindHandler(String loginName, String loginPassword, Sequence sequence, LogLevel level) {
     this.loginName = loginName;
     this.loginPassword = loginPassword;
     this.sequence = sequence;
@@ -49,13 +42,12 @@ public class BindHandler extends ChannelDuplexHandler {
   public void channelActive(ChannelHandlerContext ctx) throws Exception {
 
     // 发送bind请求
-    BindMessage bind = new BindMessage();
-    bind.getHead().setSequenceNumber(SequenceNumber.create(nodeId, Integer.valueOf(DateFormatUtils.format(new Date(), "MMddHHmmss")), sequence.next()));
+    BindMessage bind = new BindMessage(sequence);
 
     bind.setLoginName(loginName);
     bind.setLoginPassword(loginPassword);
     ctx.channel().writeAndFlush(bind);
-    logger.log(internalLevel, "{} send bind request", loginName);
+    logger.log(internalLevel, "{} client bind request", loginName);
 
     ctx.fireChannelActive();
   }

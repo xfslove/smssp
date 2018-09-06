@@ -1,4 +1,4 @@
-package com.github.xfslove.smssp.netty4.handler.sgip12.subscribe;
+package com.github.xfslove.smssp.netty4.handler.sgip12.server;
 
 import com.github.xfslove.smssp.message.sequence.Sequence;
 import com.github.xfslove.smssp.netty4.codec.MesssageLengthCodec;
@@ -50,7 +50,7 @@ public class HandlerInitializer extends ChannelInitializer<Channel> {
     channel.pipeline().addLast("sgipMessageLogging", new LoggingHandler(logLevel));
 
     channel.pipeline().addLast("sgipBindHandler", new BindHandler(loginName, loginPassword, logLevel));
-    channel.pipeline().addLast("sgipUnBindHandler", new UnBindHandler(nodeId, loginName, sequence, logLevel));
+    channel.pipeline().addLast("sgipUnBindHandler", new UnBindHandler(loginName, sequence, logLevel));
     channel.pipeline().addLast("sgipReportHandler", new ReportHandler(deliverConsumer, logLevel));
     channel.pipeline().addLast("sgipDeliverHandler", new DeliverHandler(deliverConsumer, logLevel));
     channel.pipeline().addLast("sgipException", new ExceptionHandler(loginName, logLevel));

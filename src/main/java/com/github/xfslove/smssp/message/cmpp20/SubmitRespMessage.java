@@ -1,6 +1,7 @@
 package com.github.xfslove.smssp.message.cmpp20;
 
 import com.github.xfslove.smssp.client.Response;
+import com.github.xfslove.smssp.message.sequence.Sequence;
 import io.netty.buffer.ByteBuf;
 
 /**
@@ -9,7 +10,7 @@ import io.netty.buffer.ByteBuf;
  */
 public class SubmitRespMessage implements CmppMessage, Response {
 
-  private final CmppHead head = new CmppHead(CmppConstants.CMPP_SUBMIT_RESP);
+  private final CmppHead head;
 
   /**
    * 信息标识，生成算法如下：
@@ -42,6 +43,14 @@ public class SubmitRespMessage implements CmppMessage, Response {
    * 9~ ：其他错误码参考http://baijiahao.baidu.com/s?id=1554746383651964&wfr=spider&for=pc
    */
   private int result;
+
+  public SubmitRespMessage(int sequenceId) {
+    head = new CmppHead(CmppConstants.CMPP_SUBMIT_RESP, sequenceId);
+  }
+
+  public SubmitRespMessage(Sequence sequence) {
+    head = new CmppHead(CmppConstants.CMPP_SUBMIT_RESP, (int) sequence.next());
+  }
 
   @Override
   public String getId() {

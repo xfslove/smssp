@@ -1,5 +1,6 @@
 package com.github.xfslove.smssp.message.cmpp20;
 
+import com.github.xfslove.smssp.message.sequence.Sequence;
 import io.netty.buffer.ByteBuf;
 
 /**
@@ -8,7 +9,15 @@ import io.netty.buffer.ByteBuf;
  */
 public class TerminateMessage implements CmppMessage {
 
-  private final CmppHead head = new CmppHead(CmppConstants.CMPP_TERMINATE);
+  private final CmppHead head;
+
+  public TerminateMessage(int sequenceId) {
+    head = new CmppHead(CmppConstants.CMPP_TERMINATE, sequenceId);
+  }
+
+  public TerminateMessage(Sequence sequence) {
+    head = new CmppHead(CmppConstants.CMPP_TERMINATE, (int) sequence.next());
+  }
 
   @Override
   public int getLength() {
