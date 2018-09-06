@@ -57,7 +57,7 @@ public class PoolInitializer implements ChannelPoolHandler {
   @Override
   public void channelCreated(Channel channel) throws Exception {
 
-    channel.pipeline().addLast("sgipSocketLogging", new LoggingHandler(LogLevel.INFO));
+    channel.pipeline().addLast("sgipSocketLogging", new LoggingHandler());
     channel.pipeline().addLast("sgipIdleState", new IdleStateHandler(0, 0, idleCheckInterval, TimeUnit.SECONDS));
     channel.pipeline().addLast("sgipMessageLengthCodec", new MesssageLengthCodec(true));
     channel.pipeline().addLast("sgipMessageCodec", new MessageCodec());

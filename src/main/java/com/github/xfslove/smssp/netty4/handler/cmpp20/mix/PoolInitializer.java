@@ -60,7 +60,7 @@ public class PoolInitializer implements ChannelPoolHandler {
   @Override
   public void channelCreated(Channel channel) throws Exception {
 
-    channel.pipeline().addLast("cmppSocketLogging", new LoggingHandler(logLevel));
+    channel.pipeline().addLast("cmppSocketLogging", new LoggingHandler());
     channel.pipeline().addLast("cmppIdleState", new IdleStateHandler(0, 0, idleCheckInterval, TimeUnit.SECONDS));
     channel.pipeline().addLast("cmppMessageLengthCodec", new MesssageLengthCodec(true));
     channel.pipeline().addLast("cmppMessageCodec", new MessageCodec());
