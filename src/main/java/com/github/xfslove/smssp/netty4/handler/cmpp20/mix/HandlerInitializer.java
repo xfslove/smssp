@@ -13,7 +13,6 @@ import com.github.xfslove.smssp.netty4.handler.cmpp20.server.DeliverConsumer;
 import com.github.xfslove.smssp.netty4.handler.cmpp20.server.DeliverHandler;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelInitializer;
-import io.netty.channel.pool.ChannelPoolHandler;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 import io.netty.handler.timeout.IdleStateHandler;
@@ -21,6 +20,8 @@ import io.netty.handler.timeout.IdleStateHandler;
 import java.util.concurrent.TimeUnit;
 
 /**
+ * cmpp 长链接，deliver会提交到客户端发起的链接，这个init包含了{@link DeliverHandler}
+ *
  * @author hanwen
  * created at 2018/9/1
  */
