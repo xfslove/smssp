@@ -106,9 +106,9 @@ public class DefaultFuture implements ResponseFuture {
 
     if (future != null) {
       future.receive(response);
+    } else {
+      LOGGER.info("drop received unrelated response message {}", response);
     }
-
-    LOGGER.info("drop received unrelated response message {}", response);
   }
 
   public static class DefaultConsumer implements ResponseConsumer {
