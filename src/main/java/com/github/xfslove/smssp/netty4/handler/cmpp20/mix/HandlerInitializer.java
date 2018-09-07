@@ -12,6 +12,7 @@ import com.github.xfslove.smssp.netty4.handler.cmpp20.client.SubmitHandler;
 import com.github.xfslove.smssp.netty4.handler.cmpp20.server.DeliverConsumer;
 import com.github.xfslove.smssp.netty4.handler.cmpp20.server.DeliverHandler;
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelInitializer;
 import io.netty.channel.pool.ChannelPoolHandler;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
@@ -23,7 +24,7 @@ import java.util.concurrent.TimeUnit;
  * @author hanwen
  * created at 2018/9/1
  */
-public class PoolInitializer implements ChannelPoolHandler {
+public class HandlerInitializer extends ChannelInitializer<Channel> {
 
   private int idleCheckInterval = 5 * 60;
 
@@ -37,7 +38,7 @@ public class PoolInitializer implements ChannelPoolHandler {
 
   private Sequence sequence;
 
-  public PoolInitializer(String loginName, String loginPassword, DeliverConsumer deliverConsumer, ResponseConsumer consumer, Sequence sequence) {
+  public HandlerInitializer(String loginName, String loginPassword, DeliverConsumer deliverConsumer, ResponseConsumer consumer, Sequence sequence) {
     this.loginName = loginName;
     this.loginPassword = loginPassword;
     this.deliverConsumer = deliverConsumer;
@@ -46,17 +47,7 @@ public class PoolInitializer implements ChannelPoolHandler {
   }
 
   @Override
-  public void channelReleased(Channel channel) throws Exception {
-    // nothing
-  }
-
-  @Override
-  public void channelAcquired(Channel channel) throws Exception {
-    // nothing
-  }
-
-  @Override
-  public void channelCreated(Channel channel) throws Exception {
+  protected void initChannel(Channel channel) throws Exception {
 
     channel.pipeline().addLast("cmppSocketLogging", new LoggingHandler());
     channel.pipeline().addLast("cmppIdleState", new IdleStateHandler(0, 0, idleCheckInterval, TimeUnit.SECONDS));

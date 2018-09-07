@@ -8,7 +8,7 @@ import com.github.xfslove.smssp.netty4.handler.ExceptionHandler;
 import com.github.xfslove.smssp.netty4.handler.cmpp20.ActiveTestHandler;
 import com.github.xfslove.smssp.netty4.handler.cmpp20.TerminateHandler;
 import io.netty.channel.Channel;
-import io.netty.channel.pool.ChannelPoolHandler;
+import io.netty.channel.ChannelInitializer;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 import io.netty.handler.timeout.IdleStateHandler;
@@ -19,7 +19,7 @@ import java.util.concurrent.TimeUnit;
  * @author hanwen
  * created at 2018/9/1
  */
-public class PoolInitializer implements ChannelPoolHandler {
+public class HandlerInitializer extends ChannelInitializer<Channel> {
 
   private int idleCheckInterval = 5 * 60;
 
@@ -31,7 +31,7 @@ public class PoolInitializer implements ChannelPoolHandler {
 
   private Sequence sequence;
 
-  public PoolInitializer(String loginName, String loginPassword, ResponseConsumer consumer, Sequence sequence) {
+  public HandlerInitializer(String loginName, String loginPassword, ResponseConsumer consumer, Sequence sequence) {
     this.loginName = loginName;
     this.loginPassword = loginPassword;
     this.consumer = consumer;
@@ -39,17 +39,7 @@ public class PoolInitializer implements ChannelPoolHandler {
   }
 
   @Override
-  public void channelReleased(Channel channel) throws Exception {
-    // nothing
-  }
-
-  @Override
-  public void channelAcquired(Channel channel) throws Exception {
-    // nothing
-  }
-
-  @Override
-  public void channelCreated(Channel channel) throws Exception {
+  protected void initChannel(Channel channel) throws Exception {
 
     channel.pipeline().addLast("cmppSocketLogging", new LoggingHandler());
     channel.pipeline().addLast("cmppIdleState", new IdleStateHandler(0, 0, idleCheckInterval, TimeUnit.SECONDS));
@@ -62,5 +52,6 @@ public class PoolInitializer implements ChannelPoolHandler {
     channel.pipeline().addLast("cmppTerminateHandler", new TerminateHandler(sequence));
     channel.pipeline().addLast("cmppSubmitHandler", new SubmitHandler(consumer));
     channel.pipeline().addLast("cmppException", new ExceptionHandler());
+
   }
 }
