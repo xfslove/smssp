@@ -2,14 +2,14 @@ package com.github.xfslove.smssp.client;
 
 /**
  * @author hanwen
- * created at 2018/9/6
+ * created at 2018/9/7
  */
-public interface ResponseConsumer {
+public interface ResponseListener {
 
   /**
-   * 处理response
+   * callback
    *
    * @param response response
    */
-  void apply(Response response);
+  void done(Response response);
 }

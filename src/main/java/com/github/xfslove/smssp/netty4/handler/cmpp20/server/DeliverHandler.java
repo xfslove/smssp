@@ -9,11 +9,9 @@ import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.handler.logging.LogLevel;
 import io.netty.util.ReferenceCountUtil;
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.GenericFutureListener;
-import io.netty.util.internal.logging.InternalLogLevel;
 import io.netty.util.internal.logging.InternalLogger;
 import io.netty.util.internal.logging.InternalLoggerFactory;
 
@@ -27,19 +25,12 @@ import io.netty.util.internal.logging.InternalLoggerFactory;
 @ChannelHandler.Sharable
 public class DeliverHandler extends ChannelDuplexHandler {
 
-  private final InternalLogger logger;
-  private final InternalLogLevel internalLevel;
+  private final InternalLogger logger = InternalLoggerFactory.getInstance(getClass());
 
   private DeliverConsumer consumer;
 
-  private String loginName;
-
-  public DeliverHandler(String loginName, DeliverConsumer consumer, LogLevel level) {
-    this.loginName = loginName;
+  public DeliverHandler(DeliverConsumer consumer) {
     this.consumer = consumer;
-
-    logger = InternalLoggerFactory.getInstance(getClass());
-    internalLevel = level.toInternalLevel();
   }
 
   @Override
@@ -93,8 +84,8 @@ public class DeliverHandler extends ChannelDuplexHandler {
         ctx.writeAndFlush(deliverResp).addListener(new GenericFutureListener<Future<? super Void>>() {
           @Override
           public void operationComplete(Future<? super Void> listener) throws Exception {
+            logger.info("discard[NOT_VALID] deliver message {} and close channel", msg);
             ctx.channel().close();
-            logger.log(internalLevel, "{} discard[NOT_VALID] deliver message {}, channel closed", loginName, msg);
           }
         });
 

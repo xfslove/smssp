@@ -8,8 +8,6 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.handler.logging.LogLevel;
-import io.netty.util.internal.logging.InternalLogLevel;
 import io.netty.util.internal.logging.InternalLogger;
 import io.netty.util.internal.logging.InternalLoggerFactory;
 import org.apache.commons.codec.digest.DigestUtils;
@@ -26,8 +24,7 @@ import java.util.Date;
 @ChannelHandler.Sharable
 public class ConnectHandler extends ChannelDuplexHandler {
 
-  private final InternalLogger logger;
-  private final InternalLogLevel internalLevel;
+  private final InternalLogger logger = InternalLoggerFactory.getInstance(getClass());
 
   private String loginName;
 
@@ -35,13 +32,10 @@ public class ConnectHandler extends ChannelDuplexHandler {
 
   private Sequence sequence;
 
-  public ConnectHandler(String loginName, String loginPassword, Sequence sequence, LogLevel level) {
+  public ConnectHandler(String loginName, String loginPassword, Sequence sequence) {
     this.sequence = sequence;
     this.loginName = loginName;
     this.loginPassword = loginPassword;
-
-    logger = InternalLoggerFactory.getInstance(getClass());
-    internalLevel = level.toInternalLevel();
   }
 
   @Override
@@ -59,7 +53,7 @@ public class ConnectHandler extends ChannelDuplexHandler {
     connect.setAuthenticatorSource(authenticationBytes);
 
     ctx.channel().writeAndFlush(connect);
-    logger.log(internalLevel, "{} client connect request", loginName);
+    logger.info("connect request");
 
     ctx.fireChannelActive();
   }
@@ -76,12 +70,12 @@ public class ConnectHandler extends ChannelDuplexHandler {
 
       if (result == 0) {
         // connect 成功
-        logger.log(internalLevel, "{} connect success", loginName);
+        logger.info("connect success");
 
       } else {
 
+        logger.info("connect failure[result:{}] and close channel", result);
         channel.close();
-        logger.log(internalLevel, "{} connect failure[result:{}]", loginName, result);
       }
 
       return;

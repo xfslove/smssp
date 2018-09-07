@@ -7,12 +7,10 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.handler.logging.LogLevel;
 import io.netty.handler.timeout.IdleState;
 import io.netty.handler.timeout.IdleStateEvent;
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.GenericFutureListener;
-import io.netty.util.internal.logging.InternalLogLevel;
 import io.netty.util.internal.logging.InternalLogger;
 import io.netty.util.internal.logging.InternalLoggerFactory;
 
@@ -25,18 +23,12 @@ import java.util.concurrent.TimeUnit;
 @ChannelHandler.Sharable
 public class TerminateHandler extends ChannelDuplexHandler {
 
-  private final InternalLogger logger;
-  private final InternalLogLevel internalLevel;
+  private final InternalLogger logger = InternalLoggerFactory.getInstance(getClass());
 
   private Sequence sequence;
-  private String loginName;
 
-  public TerminateHandler(String loginName, Sequence sequence, LogLevel level) {
+  public TerminateHandler(Sequence sequence) {
     this.sequence = sequence;
-    this.loginName = loginName;
-
-    logger = InternalLoggerFactory.getInstance(getClass());
-    internalLevel = level.toInternalLevel();
   }
 
   @Override
@@ -44,7 +36,7 @@ public class TerminateHandler extends ChannelDuplexHandler {
     final Channel channel = ctx.channel();
 
     if (msg instanceof TerminateRespMessage) {
-      logger.log(internalLevel, "{} received terminate resp message and close channel", loginName);
+      logger.info("received terminate resp message and close channel");
       channel.close();
       return;
     }
@@ -59,7 +51,7 @@ public class TerminateHandler extends ChannelDuplexHandler {
         @Override
         public void operationComplete(Future<? super Void> future) throws Exception {
           if (future.isSuccess()) {
-            logger.log(internalLevel, "{} terminate success and close channel", loginName);
+            logger.info("terminate success and close channel");
             channel.close();
           }
         }
@@ -89,11 +81,11 @@ public class TerminateHandler extends ChannelDuplexHandler {
                 @Override
                 public void run() {
                   ctx.channel().close();
-                  logger.log(internalLevel, "{} channel closed due to not received resp", loginName);
+                  logger.info("channel closed due to not received resp message");
                 }
               }, 500, TimeUnit.MILLISECONDS);
 
-              logger.log(internalLevel, "{} request terminate when idle and delay 500ms close channel if no resp", loginName);
+              logger.info("request terminate when idle and delay 500ms close channel if no resp message");
             }
           }
         });

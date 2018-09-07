@@ -12,7 +12,6 @@ import io.netty.handler.logging.LogLevel;
 import io.netty.util.AttributeKey;
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.GenericFutureListener;
-import io.netty.util.internal.logging.InternalLogLevel;
 import io.netty.util.internal.logging.InternalLogger;
 import io.netty.util.internal.logging.InternalLoggerFactory;
 
@@ -27,18 +26,15 @@ public class BindHandler extends ChannelDuplexHandler {
 
   private static final AttributeKey<Boolean> SESSION_VALID = AttributeKey.valueOf("sessionValid");
 
-  private final InternalLogger logger;
-  private final InternalLogLevel internalLevel;
+  private final InternalLogger logger = InternalLoggerFactory.getInstance(getClass());
 
   private final String loginName;
 
   private final String loginPassword;
 
-  public BindHandler(String loginName, String loginPassword, LogLevel level) {
+  public BindHandler(String loginName, String loginPassword) {
     this.loginName = loginName;
     this.loginPassword = loginPassword;
-    logger = InternalLoggerFactory.getInstance(getClass());
-    internalLevel = level.toInternalLevel();
   }
 
   @Override
@@ -58,8 +54,8 @@ public class BindHandler extends ChannelDuplexHandler {
           @Override
           public void operationComplete(Future<? super Void> future) throws Exception {
             if (future.isSuccess()) {
+              logger.info("bind failure[result:{}] and close channel", 2);
               ctx.channel().close();
-              logger.log(internalLevel, "{} bind failure[result:{}] and channel closed", loginName, 2);
             }
           }
         });
@@ -74,8 +70,8 @@ public class BindHandler extends ChannelDuplexHandler {
           @Override
           public void operationComplete(Future<? super Void> future) throws Exception {
             if (future.isSuccess()) {
+              logger.info("bind failure[result:{}] and close channel", 1);
               ctx.channel().close();
-              logger.log(internalLevel, "{} bind failure[result:{}] and channel closed", loginName, 1);
             }
           }
         });
@@ -89,8 +85,8 @@ public class BindHandler extends ChannelDuplexHandler {
           @Override
           public void operationComplete(Future<? super Void> future) throws Exception {
             if (future.isSuccess()) {
+              logger.info("bind failure[result:{}] and close channel", 4);
               ctx.channel().close();
-              logger.log(internalLevel, "{} bind failure[result:{}] and channel closed", loginName, 4);
             }
           }
         });
@@ -102,7 +98,7 @@ public class BindHandler extends ChannelDuplexHandler {
         @Override
         public void operationComplete(Future<? super Void> future) throws Exception {
           if (future.isSuccess()) {
-            logger.log(internalLevel, "{} bind success", loginName);
+            logger.info("bind success");
             channel.attr(SESSION_VALID).set(true);
           }
         }
@@ -113,7 +109,7 @@ public class BindHandler extends ChannelDuplexHandler {
 
     if (!Boolean.TRUE.equals(channel.attr(SESSION_VALID).get())) {
       // 没有注册 session 收到消息
-      logger.log(internalLevel, "{} received message when session not valid, fire SESSION_EVENT[NOT_VALID]", loginName, msg);
+      logger.info("received message when session not valid, fire SESSION_EVENT[NOT_VALID]", msg);
 
       ctx.fireUserEventTriggered(SessionEvent.NOT_VALID((Message) msg));
       return;
@@ -125,7 +121,7 @@ public class BindHandler extends ChannelDuplexHandler {
   @Override
   public void channelInactive(ChannelHandlerContext ctx) throws Exception {
 
-    ctx.channel().attr(SESSION_VALID).set(false);
+    ctx.channel().attr(SESSION_VALID).set(null);
 
     ctx.fireChannelInactive();
   }

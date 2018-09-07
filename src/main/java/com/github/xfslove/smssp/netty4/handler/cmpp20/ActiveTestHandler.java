@@ -7,12 +7,10 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.handler.logging.LogLevel;
 import io.netty.handler.timeout.IdleState;
 import io.netty.handler.timeout.IdleStateEvent;
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.GenericFutureListener;
-import io.netty.util.internal.logging.InternalLogLevel;
 import io.netty.util.internal.logging.InternalLogger;
 import io.netty.util.internal.logging.InternalLoggerFactory;
 
@@ -23,21 +21,15 @@ import io.netty.util.internal.logging.InternalLoggerFactory;
 @ChannelHandler.Sharable
 public class ActiveTestHandler extends ChannelDuplexHandler {
 
-  private final InternalLogger logger;
-  private final InternalLogLevel internalLevel;
+  private final InternalLogger logger = InternalLoggerFactory.getInstance(getClass());
 
   private Sequence sequence;
 
-  private String loginName;
   private boolean keepAlive;
 
-  public ActiveTestHandler(String loginName, Sequence sequence, boolean keepAlive, LogLevel level) {
+  public ActiveTestHandler(Sequence sequence, boolean keepAlive) {
     this.sequence = sequence;
-    this.loginName = loginName;
     this.keepAlive = keepAlive;
-
-    logger = InternalLoggerFactory.getInstance(getClass());
-    internalLevel = level.toInternalLevel();
   }
 
   @Override
@@ -54,7 +46,7 @@ public class ActiveTestHandler extends ChannelDuplexHandler {
         @Override
         public void operationComplete(Future<? super Void> future) throws Exception {
           if (future.isSuccess()) {
-            logger.log(internalLevel, "{} received active test message", loginName);
+            logger.info("received active test message");
           }
         }
       });
@@ -64,7 +56,7 @@ public class ActiveTestHandler extends ChannelDuplexHandler {
 
     // activeTestResp
     if (msg instanceof ActiveTestRespMessage) {
-      logger.log(internalLevel, "{} received active test resp message", loginName);
+      logger.info("received active test resp message");
       return;
     }
 
@@ -87,7 +79,7 @@ public class ActiveTestHandler extends ChannelDuplexHandler {
             @Override
             public void operationComplete(Future<? super Void> future) throws Exception {
               if (future.isSuccess()) {
-                logger.log(internalLevel, "{} request active test when idle", loginName);
+                logger.info("request active test when idle");
               }
             }
           });

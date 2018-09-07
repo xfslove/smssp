@@ -20,8 +20,6 @@ import java.util.concurrent.TimeUnit;
  */
 public class HandlerInitializer extends ChannelInitializer<Channel> {
 
-  private LogLevel logLevel = LogLevel.INFO;
-
   private int idleCheckInterval = 5 * 60;
 
   private String loginName;
@@ -41,17 +39,17 @@ public class HandlerInitializer extends ChannelInitializer<Channel> {
 
   @Override
   protected void initChannel(Channel channel) throws Exception {
-    channel.pipeline().addLast("cmppSocketLogging", new LoggingHandler(logLevel));
+    channel.pipeline().addLast("cmppSocketLogging", new LoggingHandler());
     channel.pipeline().addLast("cmppIdleState", new IdleStateHandler(0, 0, idleCheckInterval, TimeUnit.SECONDS));
     channel.pipeline().addLast("cmppMessageLengthCodec", new MesssageLengthCodec(true));
     channel.pipeline().addLast("cmppMessageCodec", new MessageCodec());
-    channel.pipeline().addLast("cmppMessageLogging", new LoggingHandler(logLevel));
+    channel.pipeline().addLast("cmppMessageLogging", new LoggingHandler(LogLevel.INFO));
 
-    channel.pipeline().addLast("cmppConnectHandler", new ConnectHandler(loginName, loginPassword, logLevel));
-    channel.pipeline().addLast("cmppActiveTestHandler", new ActiveTestHandler(loginName, sequence, true, logLevel));
-    channel.pipeline().addLast("cmppTerminateHandler", new TerminateHandler(loginName, sequence, logLevel));
-    channel.pipeline().addLast("cmppDeliverHandler", new DeliverHandler(loginName, deliverConsumer, logLevel));
-    channel.pipeline().addLast("cmppException", new ExceptionHandler(loginName, logLevel));
+    channel.pipeline().addLast("cmppConnectHandler", new ConnectHandler(loginName, loginPassword));
+    channel.pipeline().addLast("cmppActiveTestHandler", new ActiveTestHandler(sequence, true));
+    channel.pipeline().addLast("cmppTerminateHandler", new TerminateHandler(sequence));
+    channel.pipeline().addLast("cmppDeliverHandler", new DeliverHandler(deliverConsumer));
+    channel.pipeline().addLast("cmppException", new ExceptionHandler());
   }
 
   public void setIdleCheckInterval(int idleCheckInterval) {

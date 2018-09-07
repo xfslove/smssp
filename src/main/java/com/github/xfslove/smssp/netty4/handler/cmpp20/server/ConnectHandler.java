@@ -9,11 +9,9 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.handler.logging.LogLevel;
 import io.netty.util.AttributeKey;
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.GenericFutureListener;
-import io.netty.util.internal.logging.InternalLogLevel;
 import io.netty.util.internal.logging.InternalLogger;
 import io.netty.util.internal.logging.InternalLoggerFactory;
 import org.apache.commons.codec.digest.DigestUtils;
@@ -33,18 +31,15 @@ public class ConnectHandler extends ChannelDuplexHandler {
 
   private static final AttributeKey<Boolean> SESSION_VALID = AttributeKey.valueOf("sessionValid");
 
-  private final InternalLogger logger;
-  private final InternalLogLevel internalLevel;
+  private final InternalLogger logger = InternalLoggerFactory.getInstance(getClass());
 
   private final String loginName;
 
   private final String loginPassword;
 
-  public ConnectHandler(String loginName, String loginPassword, LogLevel level) {
+  public ConnectHandler(String loginName, String loginPassword) {
     this.loginName = loginName;
     this.loginPassword = loginPassword;
-    logger = InternalLoggerFactory.getInstance(getClass());
-    internalLevel = level.toInternalLevel();
   }
 
   @Override
@@ -73,8 +68,8 @@ public class ConnectHandler extends ChannelDuplexHandler {
           @Override
           public void operationComplete(Future<? super Void> future) throws Exception {
             if (future.isSuccess()) {
+              logger.info("connect failure[result:{}] and close channel", 3);
               channel.close();
-              logger.log(internalLevel, "{} connect failure[result:{}] and close channel", loginName, 3);
             }
           }
         });
@@ -89,8 +84,8 @@ public class ConnectHandler extends ChannelDuplexHandler {
           @Override
           public void operationComplete(Future<? super Void> future) throws Exception {
             if (future.isSuccess()) {
+              logger.info("connect failure[result:{}] and close channel", 3);
               channel.close();
-              logger.log(internalLevel, "{} connect failure[result:{}] and close channel", loginName, 3);
             }
           }
         });
@@ -102,7 +97,7 @@ public class ConnectHandler extends ChannelDuplexHandler {
         @Override
         public void operationComplete(Future<? super Void> future) throws Exception {
           if (future.isSuccess()) {
-            logger.log(internalLevel, "{} connect success", loginName);
+            logger.info("connect success");
             channel.attr(SESSION_VALID).set(true);
           }
         }
@@ -113,7 +108,7 @@ public class ConnectHandler extends ChannelDuplexHandler {
 
     if (!Boolean.TRUE.equals(channel.attr(SESSION_VALID).get())) {
       // 没有注册 session 收到消息
-      logger.log(internalLevel, "{} received message when session not valid, fire SESSION_EVENT[NOT_VALID]", loginName, msg);
+      logger.info("received message when session not valid, fire SESSION_EVENT[NOT_VALID]", msg);
 
       ctx.fireUserEventTriggered(SessionEvent.NOT_VALID((Message) msg));
       return;
@@ -125,7 +120,7 @@ public class ConnectHandler extends ChannelDuplexHandler {
   @Override
   public void channelInactive(ChannelHandlerContext ctx) throws Exception {
 
-    ctx.channel().attr(SESSION_VALID).set(false);
+    ctx.channel().attr(SESSION_VALID).set(null);
 
     ctx.fireChannelInactive();
   }

@@ -7,12 +7,10 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.handler.logging.LogLevel;
 import io.netty.handler.timeout.IdleState;
 import io.netty.handler.timeout.IdleStateEvent;
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.GenericFutureListener;
-import io.netty.util.internal.logging.InternalLogLevel;
 import io.netty.util.internal.logging.InternalLogger;
 import io.netty.util.internal.logging.InternalLoggerFactory;
 
@@ -27,18 +25,12 @@ import java.util.concurrent.TimeUnit;
 @ChannelHandler.Sharable
 public class UnBindHandler extends ChannelDuplexHandler {
 
-  private final InternalLogger logger;
-  private final InternalLogLevel internalLevel;
+  private final InternalLogger logger = InternalLoggerFactory.getInstance(getClass());
 
   private Sequence sequence;
 
-  private String loginName;
-
-  public UnBindHandler(String loginName, Sequence sequence, LogLevel level) {
-    this.loginName = loginName;
+  public UnBindHandler(Sequence sequence) {
     this.sequence = sequence;
-    logger = InternalLoggerFactory.getInstance(getClass());
-    internalLevel = level.toInternalLevel();
   }
 
   @Override
@@ -56,8 +48,8 @@ public class UnBindHandler extends ChannelDuplexHandler {
         @Override
         public void operationComplete(Future<? super Void> future) throws Exception {
           if (future.isSuccess()) {
+            logger.info("unbind success and close channel");
             channel.close();
-            logger.log(internalLevel, "{} unbind success and channel closed", loginName);
           }
         }
       });
@@ -67,7 +59,7 @@ public class UnBindHandler extends ChannelDuplexHandler {
 
     // unbindResp
     if (msg instanceof UnBindRespMessage) {
-      logger.log(internalLevel, "{} received unbind resp message and close channel", loginName);
+      logger.info("received unbind resp message and close channel");
       channel.close();
       return;
     }
@@ -95,11 +87,11 @@ public class UnBindHandler extends ChannelDuplexHandler {
                 @Override
                 public void run() {
                   ctx.channel().close();
-                  logger.log(internalLevel, "{} channel closed due to not received resp", loginName);
+                  logger.info("channel closed due to not received resp message");
                 }
               }, 500, TimeUnit.MILLISECONDS);
 
-              logger.log(internalLevel, "{} request unbind when idle and delay 500ms close channel if no resp", loginName);
+              logger.info("request unbind when idle and delay 500ms close channel if no resp message");
             }
           }
         });

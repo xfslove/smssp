@@ -1,5 +1,8 @@
 package com.github.xfslove.smssp.client;
 
+import io.netty.util.internal.logging.InternalLogger;
+import io.netty.util.internal.logging.InternalLoggerFactory;
+
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
@@ -13,10 +16,13 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public class DefaultFuture implements ResponseFuture {
 
-  private static final Map<String, DefaultFuture> FUTURES = new ConcurrentHashMap<>(512);
+  private static final InternalLogger LOGGER = InternalLoggerFactory.getInstance(DefaultFuture.class);
+
+  private static final Map<String, DefaultFuture> FUTURES = new ConcurrentHashMap<>(256);
 
   private Request request;
   private Response response;
+  private ResponseListener listener;
 
   private final Lock lock = new ReentrantLock();
   private final Condition done = lock.newCondition();
@@ -43,6 +49,8 @@ public class DefaultFuture implements ResponseFuture {
         lock.unlock();
       }
       if (!isDone()) {
+        FUTURES.remove(request.getId());
+        LOGGER.info("drop timeout request message {}", request);
         return null;
       }
     }
@@ -50,8 +58,34 @@ public class DefaultFuture implements ResponseFuture {
   }
 
   @Override
+  public void setListener(ResponseListener listener) {
+    if (isDone()) {
+      invoke(listener);
+    } else {
+      boolean isdone = false;
+      lock.lock();
+      try {
+        if (!isDone()) {
+          this.listener = listener;
+        } else {
+          isdone = true;
+        }
+      } finally {
+        lock.unlock();
+      }
+      if (isdone) {
+        invoke(listener);
+      }
+    }
+  }
+
+  @Override
   public boolean isDone() {
     return response != null;
+  }
+
+  private void invoke(ResponseListener listener) {
+    listener.done(response);
   }
 
   private void receive(Response response) {
@@ -62,24 +96,26 @@ public class DefaultFuture implements ResponseFuture {
     } finally {
       lock.unlock();
     }
+    if (this.listener != null) {
+      invoke(this.listener);
+    }
   }
 
-  public static boolean received(Response response) {
+  private static void received(Response response) {
     DefaultFuture future = FUTURES.remove(response.getId());
 
     if (future != null) {
       future.receive(response);
-      return true;
     }
 
-    return false;
+    LOGGER.info("drop received unrelated response message {}", response);
   }
 
   public static class DefaultConsumer implements ResponseConsumer {
 
     @Override
-    public boolean apply(Response response) {
-      return DefaultFuture.received(response);
+    public void apply(Response response) {
+      DefaultFuture.received(response);
     }
   }
 }

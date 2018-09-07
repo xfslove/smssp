@@ -7,8 +7,6 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.handler.logging.LogLevel;
-import io.netty.util.internal.logging.InternalLogLevel;
 import io.netty.util.internal.logging.InternalLogger;
 import io.netty.util.internal.logging.InternalLoggerFactory;
 
@@ -21,8 +19,7 @@ import io.netty.util.internal.logging.InternalLoggerFactory;
 @ChannelHandler.Sharable
 public class BindHandler extends ChannelDuplexHandler {
 
-  private final InternalLogger logger;
-  private final InternalLogLevel internalLevel;
+  private final InternalLogger logger = InternalLoggerFactory.getInstance(getClass());
 
   private Sequence sequence;
 
@@ -30,12 +27,10 @@ public class BindHandler extends ChannelDuplexHandler {
 
   private String loginPassword;
 
-  public BindHandler(String loginName, String loginPassword, Sequence sequence, LogLevel level) {
+  public BindHandler(String loginName, String loginPassword, Sequence sequence) {
     this.loginName = loginName;
     this.loginPassword = loginPassword;
     this.sequence = sequence;
-    logger = InternalLoggerFactory.getInstance(getClass());
-    internalLevel = level.toInternalLevel();
   }
 
   @Override
@@ -47,7 +42,7 @@ public class BindHandler extends ChannelDuplexHandler {
     bind.setLoginName(loginName);
     bind.setLoginPassword(loginPassword);
     ctx.channel().writeAndFlush(bind);
-    logger.log(internalLevel, "{} client bind request", loginName);
+    logger.info("client bind request");
 
     ctx.fireChannelActive();
   }
@@ -64,12 +59,12 @@ public class BindHandler extends ChannelDuplexHandler {
 
       if (result == 0) {
         // bind 成功
-        logger.log(internalLevel, "{} bind success", loginName);
+        logger.info("bind success");
 
       } else {
 
         channel.close();
-        logger.log(internalLevel, "{} bind failure[result:{}]", loginName, result);
+        logger.info("bind failure[result:{}]", result);
       }
 
       return;

@@ -7,10 +7,8 @@ import com.github.xfslove.smssp.netty4.handler.SessionEvent;
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.handler.logging.LogLevel;
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.GenericFutureListener;
-import io.netty.util.internal.logging.InternalLogLevel;
 import io.netty.util.internal.logging.InternalLogger;
 import io.netty.util.internal.logging.InternalLoggerFactory;
 
@@ -25,13 +23,10 @@ public class ReportHandler extends ChannelDuplexHandler {
 
   private DeliverConsumer consumer;
 
-  private final InternalLogger logger;
-  private final InternalLogLevel internalLevel;
+  private final InternalLogger logger = InternalLoggerFactory.getInstance(getClass());
 
-  public ReportHandler(DeliverConsumer consumer, LogLevel level) {
+  public ReportHandler(DeliverConsumer consumer) {
     this.consumer = consumer;
-    logger = InternalLoggerFactory.getInstance(getClass());
-    internalLevel = level.toInternalLevel();
   }
 
   @Override
@@ -71,8 +66,8 @@ public class ReportHandler extends ChannelDuplexHandler {
         ctx.writeAndFlush(reportResp).addListener(new GenericFutureListener<Future<? super Void>>() {
           @Override
           public void operationComplete(Future<? super Void> listener) throws Exception {
+            logger.info("discard[NOT_VALID] report message {} and close channel", msg);
             ctx.channel().close();
-            logger.log(internalLevel, "discard[NOT_VALID] report message {}, channel closed", msg);
           }
         });
 

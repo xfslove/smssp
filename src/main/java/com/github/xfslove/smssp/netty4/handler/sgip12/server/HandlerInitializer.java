@@ -19,13 +19,9 @@ import java.util.concurrent.TimeUnit;
  */
 public class HandlerInitializer extends ChannelInitializer<Channel> {
 
-  private final LogLevel logLevel = LogLevel.INFO;
-
   private DeliverConsumer deliverConsumer;
 
   private int idleCheckInterval = 5 * 60;
-
-  private int nodeId;
 
   private String loginName;
 
@@ -33,8 +29,7 @@ public class HandlerInitializer extends ChannelInitializer<Channel> {
 
   private Sequence sequence;
 
-  public HandlerInitializer(int nodeId, String loginName, String loginPassword, DeliverConsumer deliverConsumer, Sequence sequence) {
-    this.nodeId = nodeId;
+  public HandlerInitializer(String loginName, String loginPassword, DeliverConsumer deliverConsumer, Sequence sequence) {
     this.loginName = loginName;
     this.loginPassword = loginPassword;
     this.deliverConsumer = deliverConsumer;
@@ -47,17 +42,13 @@ public class HandlerInitializer extends ChannelInitializer<Channel> {
     channel.pipeline().addLast("sgipIdleState", new IdleStateHandler(0, 0, idleCheckInterval, TimeUnit.SECONDS));
     channel.pipeline().addLast("sgipMessageLengthCodec", new MesssageLengthCodec(true));
     channel.pipeline().addLast("sgipMessageCodec", new MessageCodec());
-    channel.pipeline().addLast("sgipMessageLogging", new LoggingHandler(logLevel));
+    channel.pipeline().addLast("sgipMessageLogging", new LoggingHandler(LogLevel.INFO));
 
-    channel.pipeline().addLast("sgipBindHandler", new BindHandler(loginName, loginPassword, logLevel));
-    channel.pipeline().addLast("sgipUnBindHandler", new UnBindHandler(loginName, sequence, logLevel));
-    channel.pipeline().addLast("sgipReportHandler", new ReportHandler(deliverConsumer, logLevel));
-    channel.pipeline().addLast("sgipDeliverHandler", new DeliverHandler(deliverConsumer, logLevel));
-    channel.pipeline().addLast("sgipException", new ExceptionHandler(loginName, logLevel));
+    channel.pipeline().addLast("sgipBindHandler", new BindHandler(loginName, loginPassword));
+    channel.pipeline().addLast("sgipUnBindHandler", new UnBindHandler(sequence));
+    channel.pipeline().addLast("sgipReportHandler", new ReportHandler(deliverConsumer));
+    channel.pipeline().addLast("sgipDeliverHandler", new DeliverHandler(deliverConsumer));
+    channel.pipeline().addLast("sgipException", new ExceptionHandler());
 
-  }
-
-  public void setIdleCheckInterval(int idleCheckInterval) {
-    this.idleCheckInterval = idleCheckInterval;
   }
 }
