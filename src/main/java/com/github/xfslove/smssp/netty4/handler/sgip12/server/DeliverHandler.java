@@ -3,6 +3,8 @@ package com.github.xfslove.smssp.netty4.handler.sgip12.server;
 import com.github.xfslove.smssp.message.Message;
 import com.github.xfslove.smssp.message.sgip12.DeliverMessage;
 import com.github.xfslove.smssp.message.sgip12.DeliverRespMessage;
+import com.github.xfslove.smssp.message.sgip12.ReportMessage;
+import com.github.xfslove.smssp.message.sgip12.ReportRespMessage;
 import com.github.xfslove.smssp.netty4.handler.SessionEvent;
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandler;
@@ -21,14 +23,7 @@ import io.netty.util.internal.logging.InternalLoggerFactory;
 @ChannelHandler.Sharable
 public class DeliverHandler extends ChannelDuplexHandler {
 
-  private DeliverConsumer consumer;
-
   private final InternalLogger logger = InternalLoggerFactory.getInstance(getClass());
-  ;
-
-  public DeliverHandler(DeliverConsumer consumer) {
-    this.consumer = consumer;
-  }
 
   @Override
   public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
@@ -40,9 +35,15 @@ public class DeliverHandler extends ChannelDuplexHandler {
       deliverResp.setResult(0);
 
       ctx.writeAndFlush(deliverResp);
+    }
 
-      consumer.apply(deliver);
-      return;
+    if (msg instanceof ReportMessage) {
+      ReportMessage report = (ReportMessage) msg;
+
+      ReportRespMessage reportResp = new ReportRespMessage(report.getHead().getSequenceNumber());
+      reportResp.setResult(0);
+
+      ctx.writeAndFlush(reportResp);
     }
 
     ctx.fireChannelRead(msg);
@@ -68,6 +69,24 @@ public class DeliverHandler extends ChannelDuplexHandler {
           @Override
           public void operationComplete(Future<? super Void> listener) throws Exception {
             logger.info("discard[NOT_VALID] deliver message {} and close channel", msg);
+            ctx.channel().close();
+          }
+        });
+
+        return;
+      }
+
+      if (msg instanceof ReportMessage) {
+        ReportMessage report = (ReportMessage) msg;
+
+        // 需要先登录
+        ReportRespMessage reportResp = new ReportRespMessage(report.getHead().getSequenceNumber());
+        reportResp.setResult(1);
+
+        ctx.writeAndFlush(reportResp).addListener(new GenericFutureListener<Future<? super Void>>() {
+          @Override
+          public void operationComplete(Future<? super Void> listener) throws Exception {
+            logger.info("discard[NOT_VALID] report message {} and close channel", msg);
             ctx.channel().close();
           }
         });

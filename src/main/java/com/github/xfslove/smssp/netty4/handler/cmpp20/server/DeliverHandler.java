@@ -27,12 +27,6 @@ public class DeliverHandler extends ChannelDuplexHandler {
 
   private final InternalLogger logger = InternalLoggerFactory.getInstance(getClass());
 
-  private DeliverConsumer consumer;
-
-  public DeliverHandler(DeliverConsumer consumer) {
-    this.consumer = consumer;
-  }
-
   @Override
   public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
 
@@ -45,20 +39,6 @@ public class DeliverHandler extends ChannelDuplexHandler {
       deliverResp.setResult(0);
 
       ctx.writeAndFlush(deliverResp);
-
-      if (deliver.getRegisteredDelivery() == 1) {
-        // 状态报告
-        ByteBuf in = Unpooled.wrappedBuffer(deliver.getUdBytes());
-        DeliverMessage.Report report = deliver.createReport();
-        report.read(in);
-        consumer.apply(report);
-
-        ReferenceCountUtil.release(in);
-        return;
-      }
-
-      consumer.apply(deliver);
-      return;
     }
 
     ctx.fireChannelRead(msg);

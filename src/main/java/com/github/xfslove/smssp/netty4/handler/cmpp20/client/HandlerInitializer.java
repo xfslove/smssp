@@ -21,8 +21,6 @@ import java.util.concurrent.TimeUnit;
  */
 public class HandlerInitializer extends ChannelInitializer<Channel> {
 
-  private int idleCheckInterval = 5 * 60;
-
   private String loginName;
 
   private String loginPassword;
@@ -42,7 +40,7 @@ public class HandlerInitializer extends ChannelInitializer<Channel> {
   protected void initChannel(Channel channel) throws Exception {
 
     channel.pipeline().addLast("cmppSocketLogging", new LoggingHandler());
-    channel.pipeline().addLast("cmppIdleState", new IdleStateHandler(0, 0, idleCheckInterval, TimeUnit.SECONDS));
+    channel.pipeline().addLast("cmppIdleState", new IdleStateHandler(0, 0, 5 * 60, TimeUnit.SECONDS));
     channel.pipeline().addLast("cmppMessageLengthCodec", new MesssageLengthCodec(true));
     channel.pipeline().addLast("cmppMessageCodec", new MessageCodec());
     channel.pipeline().addLast("cmppMessageLogging", new LoggingHandler(LogLevel.INFO));

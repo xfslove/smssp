@@ -11,6 +11,7 @@ import io.netty.channel.ChannelInitializer;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 import io.netty.handler.timeout.IdleStateHandler;
+import io.netty.util.concurrent.DefaultEventExecutorGroup;
 
 import java.util.concurrent.TimeUnit;
 
@@ -19,8 +20,6 @@ import java.util.concurrent.TimeUnit;
  * created at 2018/9/1
  */
 public class HandlerInitializer extends ChannelInitializer<Channel> {
-
-  private int idleCheckInterval = 5 * 60;
 
   private String loginName;
 
@@ -40,7 +39,7 @@ public class HandlerInitializer extends ChannelInitializer<Channel> {
   @Override
   protected void initChannel(Channel channel) throws Exception {
     channel.pipeline().addLast("cmppSocketLogging", new LoggingHandler());
-    channel.pipeline().addLast("cmppIdleState", new IdleStateHandler(0, 0, idleCheckInterval, TimeUnit.SECONDS));
+    channel.pipeline().addLast("cmppIdleState", new IdleStateHandler(0, 0, 5 * 60, TimeUnit.SECONDS));
     channel.pipeline().addLast("cmppMessageLengthCodec", new MesssageLengthCodec(true));
     channel.pipeline().addLast("cmppMessageCodec", new MessageCodec());
     channel.pipeline().addLast("cmppMessageLogging", new LoggingHandler(LogLevel.INFO));
@@ -48,11 +47,8 @@ public class HandlerInitializer extends ChannelInitializer<Channel> {
     channel.pipeline().addLast("cmppConnectHandler", new ConnectHandler(loginName, loginPassword));
     channel.pipeline().addLast("cmppActiveTestHandler", new ActiveTestHandler(sequence, true));
     channel.pipeline().addLast("cmppTerminateHandler", new TerminateHandler(sequence));
-    channel.pipeline().addLast("cmppDeliverHandler", new DeliverHandler(deliverConsumer));
+    channel.pipeline().addLast("cmppDeliverHandler", new DeliverHandler());
+    channel.pipeline().addLast(new DefaultEventExecutorGroup(16), "cmppDeliverBizHandler", new DeliverBizHandler(deliverConsumer));
     channel.pipeline().addLast("cmppException", new ExceptionHandler());
-  }
-
-  public void setIdleCheckInterval(int idleCheckInterval) {
-    this.idleCheckInterval = idleCheckInterval;
   }
 }

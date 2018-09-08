@@ -10,6 +10,7 @@ import io.netty.channel.ChannelInitializer;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 import io.netty.handler.timeout.IdleStateHandler;
+import io.netty.util.concurrent.DefaultEventExecutorGroup;
 
 import java.util.concurrent.TimeUnit;
 
@@ -20,8 +21,6 @@ import java.util.concurrent.TimeUnit;
 public class HandlerInitializer extends ChannelInitializer<Channel> {
 
   private DeliverConsumer deliverConsumer;
-
-  private int idleCheckInterval = 5 * 60;
 
   private String loginName;
 
@@ -39,15 +38,15 @@ public class HandlerInitializer extends ChannelInitializer<Channel> {
   @Override
   protected void initChannel(Channel channel) throws Exception {
     channel.pipeline().addLast("sgipSocketLogging", new LoggingHandler());
-    channel.pipeline().addLast("sgipIdleState", new IdleStateHandler(0, 0, idleCheckInterval, TimeUnit.SECONDS));
+    channel.pipeline().addLast("sgipIdleState", new IdleStateHandler(0, 0, 5 * 60, TimeUnit.SECONDS));
     channel.pipeline().addLast("sgipMessageLengthCodec", new MesssageLengthCodec(true));
     channel.pipeline().addLast("sgipMessageCodec", new MessageCodec());
     channel.pipeline().addLast("sgipMessageLogging", new LoggingHandler(LogLevel.INFO));
 
     channel.pipeline().addLast("sgipBindHandler", new BindHandler(loginName, loginPassword));
     channel.pipeline().addLast("sgipUnBindHandler", new UnBindHandler(sequence));
-    channel.pipeline().addLast("sgipReportHandler", new ReportHandler(deliverConsumer));
-    channel.pipeline().addLast("sgipDeliverHandler", new DeliverHandler(deliverConsumer));
+    channel.pipeline().addLast("sgipDeliverHandler", new DeliverHandler());
+    channel.pipeline().addLast(new DefaultEventExecutorGroup(16), "sgipDeliverBizHandler", new DeliverBizHandler(deliverConsumer));
     channel.pipeline().addLast("sgipException", new ExceptionHandler());
 
   }
