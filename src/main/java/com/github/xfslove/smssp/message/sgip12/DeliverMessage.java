@@ -5,6 +5,7 @@ import com.github.xfslove.smsj.sms.dcs.SmsDcs;
 import com.github.xfslove.smsj.sms.ud.SmsUdhElement;
 import com.github.xfslove.smsj.sms.ud.SmsUdhUtil;
 import com.github.xfslove.smssp.message.sequence.Sequence;
+import com.github.xfslove.smssp.server.Notification;
 import com.github.xfslove.smssp.util.ByteUtil;
 import io.netty.buffer.ByteBuf;
 
@@ -14,7 +15,7 @@ import java.nio.charset.StandardCharsets;
  * @author hanwen
  * created at 2018/8/28
  */
-public class DeliverMessage extends SmsPdu implements SgipMessage {
+public class DeliverMessage extends SmsPdu implements SgipMessage, Notification {
 
   private final SgipHead head;
 
@@ -51,6 +52,11 @@ public class DeliverMessage extends SmsPdu implements SgipMessage {
 
   public DeliverMessage(Sequence sequence) {
     this.head = new SgipHead(SgipConstants.COMMAND_ID_DELIVER, (SequenceNumber) sequence.next());
+  }
+
+  @Override
+  public String getId() {
+    return getHead().getSequenceNumber().stringId();
   }
 
   @Override

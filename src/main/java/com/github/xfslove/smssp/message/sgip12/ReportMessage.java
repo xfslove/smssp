@@ -1,6 +1,7 @@
 package com.github.xfslove.smssp.message.sgip12;
 
 import com.github.xfslove.smssp.message.sequence.Sequence;
+import com.github.xfslove.smssp.server.Notification;
 import io.netty.buffer.ByteBuf;
 
 import java.nio.charset.StandardCharsets;
@@ -9,7 +10,7 @@ import java.nio.charset.StandardCharsets;
  * @author hanwen
  * created at 2018/8/28
  */
-public class ReportMessage implements SgipMessage {
+public class ReportMessage implements SgipMessage, Notification {
 
   private final SgipHead head;
 
@@ -54,6 +55,11 @@ public class ReportMessage implements SgipMessage {
 
   public ReportMessage(Sequence sequence) {
     this.head = new SgipHead(SgipConstants.COMMAND_ID_REPORT, (SequenceNumber) sequence.next());
+  }
+
+  @Override
+  public String getId() {
+    return getHead().getSequenceNumber().stringId();
   }
 
   @Override

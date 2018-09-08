@@ -1,6 +1,6 @@
 package com.github.xfslove.smssp.netty4.handler.cmpp20.client;
 
-import com.github.xfslove.smssp.client.ResponseConsumer;
+import com.github.xfslove.smssp.client.ResponseListener;
 import com.github.xfslove.smssp.message.cmpp20.SubmitRespMessage;
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandler;
@@ -13,9 +13,9 @@ import io.netty.channel.ChannelHandlerContext;
 @ChannelHandler.Sharable
 public class SubmitHandler extends ChannelDuplexHandler {
 
-  private ResponseConsumer consumer;
+  private ResponseListener consumer;
 
-  public SubmitHandler(ResponseConsumer consumer) {
+  public SubmitHandler(ResponseListener consumer) {
     this.consumer = consumer;
   }
 
@@ -24,7 +24,7 @@ public class SubmitHandler extends ChannelDuplexHandler {
 
     // submitResp
     if (msg instanceof SubmitRespMessage) {
-      consumer.apply((SubmitRespMessage) msg);
+      consumer.done((SubmitRespMessage) msg);
       return;
     }
 

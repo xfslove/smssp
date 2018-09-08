@@ -16,13 +16,6 @@ public interface ResponseFuture {
   Response getResponse(int timeout) throws InterruptedException;
 
   /**
-   * 异步获取response
-   *
-   * @param listener listener
-   */
-  void setListener(ResponseListener listener);
-
-  /**
    * isDone
    *
    * @return true isDone

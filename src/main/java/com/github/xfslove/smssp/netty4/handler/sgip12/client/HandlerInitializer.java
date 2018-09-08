@@ -1,6 +1,6 @@
 package com.github.xfslove.smssp.netty4.handler.sgip12.client;
 
-import com.github.xfslove.smssp.client.ResponseConsumer;
+import com.github.xfslove.smssp.client.ResponseListener;
 import com.github.xfslove.smssp.message.sequence.Sequence;
 import com.github.xfslove.smssp.netty4.codec.MesssageLengthCodec;
 import com.github.xfslove.smssp.netty4.codec.sgip12.MessageCodec;
@@ -11,6 +11,7 @@ import io.netty.channel.ChannelInitializer;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 import io.netty.handler.timeout.IdleStateHandler;
+import io.netty.util.concurrent.EventExecutorGroup;
 
 import java.util.concurrent.TimeUnit;
 
@@ -24,15 +25,18 @@ public class HandlerInitializer extends ChannelInitializer<Channel> {
 
   private String loginPassword;
 
-  private ResponseConsumer consumer;
+  private ResponseListener consumer;
 
   private Sequence sequence;
 
-  public HandlerInitializer(String loginName, String loginPassword, ResponseConsumer consumer, Sequence sequence) {
+  private EventExecutorGroup bizEventGroup;
+
+  public HandlerInitializer(String loginName, String loginPassword, ResponseListener consumer, Sequence sequence, EventExecutorGroup bizEventGroup) {
     this.loginName = loginName;
     this.loginPassword = loginPassword;
     this.consumer = consumer;
     this.sequence = sequence;
+    this.bizEventGroup = bizEventGroup;
   }
 
   @Override
@@ -46,7 +50,7 @@ public class HandlerInitializer extends ChannelInitializer<Channel> {
 
     channel.pipeline().addLast("sgipBindHandler", new BindHandler(loginName, loginPassword, sequence));
     channel.pipeline().addLast("sgipUnBindHandler", new UnBindHandler(sequence));
-    channel.pipeline().addLast("sgipSubmitHandler", new SubmitHandler(consumer));
+    channel.pipeline().addLast(bizEventGroup, "sgipSubmitHandler", new SubmitHandler(consumer));
     channel.pipeline().addLast("sgipException", new ExceptionHandler());
 
   }

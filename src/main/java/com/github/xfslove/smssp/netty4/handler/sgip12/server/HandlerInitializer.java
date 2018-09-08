@@ -5,12 +5,13 @@ import com.github.xfslove.smssp.netty4.codec.MesssageLengthCodec;
 import com.github.xfslove.smssp.netty4.codec.sgip12.MessageCodec;
 import com.github.xfslove.smssp.netty4.handler.ExceptionHandler;
 import com.github.xfslove.smssp.netty4.handler.sgip12.UnBindHandler;
+import com.github.xfslove.smssp.server.NotificationListener;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelInitializer;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 import io.netty.handler.timeout.IdleStateHandler;
-import io.netty.util.concurrent.DefaultEventExecutorGroup;
+import io.netty.util.concurrent.EventExecutorGroup;
 
 import java.util.concurrent.TimeUnit;
 
@@ -20,7 +21,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class HandlerInitializer extends ChannelInitializer<Channel> {
 
-  private DeliverConsumer deliverConsumer;
+  private NotificationListener consumer;
 
   private String loginName;
 
@@ -28,11 +29,14 @@ public class HandlerInitializer extends ChannelInitializer<Channel> {
 
   private Sequence sequence;
 
-  public HandlerInitializer(String loginName, String loginPassword, DeliverConsumer deliverConsumer, Sequence sequence) {
+  private EventExecutorGroup bizEventGroup;
+
+  public HandlerInitializer(String loginName, String loginPassword, NotificationListener consumer, Sequence sequence, EventExecutorGroup bizEventGroup) {
     this.loginName = loginName;
     this.loginPassword = loginPassword;
-    this.deliverConsumer = deliverConsumer;
+    this.consumer = consumer;
     this.sequence = sequence;
+    this.bizEventGroup = bizEventGroup;
   }
 
   @Override
@@ -45,8 +49,7 @@ public class HandlerInitializer extends ChannelInitializer<Channel> {
 
     channel.pipeline().addLast("sgipBindHandler", new BindHandler(loginName, loginPassword));
     channel.pipeline().addLast("sgipUnBindHandler", new UnBindHandler(sequence));
-    channel.pipeline().addLast("sgipDeliverHandler", new DeliverHandler());
-    channel.pipeline().addLast(new DefaultEventExecutorGroup(16), "sgipDeliverBizHandler", new DeliverBizHandler(deliverConsumer));
+    channel.pipeline().addLast(bizEventGroup, "sgipDeliverHandler", new DeliverHandler(consumer));
     channel.pipeline().addLast("sgipException", new ExceptionHandler());
 
   }

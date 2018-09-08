@@ -6,6 +6,7 @@ import com.github.xfslove.smssp.message.sgip12.DeliverRespMessage;
 import com.github.xfslove.smssp.message.sgip12.ReportMessage;
 import com.github.xfslove.smssp.message.sgip12.ReportRespMessage;
 import com.github.xfslove.smssp.netty4.handler.SessionEvent;
+import com.github.xfslove.smssp.server.NotificationListener;
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
@@ -25,6 +26,12 @@ public class DeliverHandler extends ChannelDuplexHandler {
 
   private final InternalLogger logger = InternalLoggerFactory.getInstance(getClass());
 
+  private NotificationListener consumer;
+
+  public DeliverHandler(NotificationListener consumer) {
+    this.consumer = consumer;
+  }
+
   @Override
   public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
 
@@ -35,6 +42,9 @@ public class DeliverHandler extends ChannelDuplexHandler {
       deliverResp.setResult(0);
 
       ctx.writeAndFlush(deliverResp);
+
+      consumer.done(deliver);
+      return;
     }
 
     if (msg instanceof ReportMessage) {
@@ -44,6 +54,9 @@ public class DeliverHandler extends ChannelDuplexHandler {
       reportResp.setResult(0);
 
       ctx.writeAndFlush(reportResp);
+
+      consumer.done(report);
+      return;
     }
 
     ctx.fireChannelRead(msg);

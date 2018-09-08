@@ -1,6 +1,6 @@
 package com.github.xfslove.smssp.netty4.handler.cmpp20.mix;
 
-import com.github.xfslove.smssp.client.ResponseConsumer;
+import com.github.xfslove.smssp.client.ResponseListener;
 import com.github.xfslove.smssp.message.sequence.Sequence;
 import com.github.xfslove.smssp.netty4.codec.MesssageLengthCodec;
 import com.github.xfslove.smssp.netty4.codec.cmpp20.MessageCodec;
@@ -9,15 +9,14 @@ import com.github.xfslove.smssp.netty4.handler.cmpp20.ActiveTestHandler;
 import com.github.xfslove.smssp.netty4.handler.cmpp20.TerminateHandler;
 import com.github.xfslove.smssp.netty4.handler.cmpp20.client.ConnectHandler;
 import com.github.xfslove.smssp.netty4.handler.cmpp20.client.SubmitHandler;
-import com.github.xfslove.smssp.netty4.handler.cmpp20.server.DeliverBizHandler;
-import com.github.xfslove.smssp.netty4.handler.cmpp20.server.DeliverConsumer;
 import com.github.xfslove.smssp.netty4.handler.cmpp20.server.DeliverHandler;
+import com.github.xfslove.smssp.server.NotificationListener;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelInitializer;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 import io.netty.handler.timeout.IdleStateHandler;
-import io.netty.util.concurrent.DefaultEventExecutorGroup;
+import io.netty.util.concurrent.EventExecutorGroup;
 
 import java.util.concurrent.TimeUnit;
 
@@ -33,18 +32,21 @@ public class HandlerInitializer extends ChannelInitializer<Channel> {
 
   private String loginPassword;
 
-  private DeliverConsumer deliverConsumer;
+  private NotificationListener consumer2;
 
-  private ResponseConsumer consumer;
+  private ResponseListener consumer;
 
   private Sequence sequence;
 
-  public HandlerInitializer(String loginName, String loginPassword, DeliverConsumer deliverConsumer, ResponseConsumer consumer, Sequence sequence) {
+  private EventExecutorGroup bizEventGroup;
+
+  public HandlerInitializer(String loginName, String loginPassword, NotificationListener consumer2, ResponseListener consumer, Sequence sequence, EventExecutorGroup bizEventGroup) {
     this.loginName = loginName;
     this.loginPassword = loginPassword;
-    this.deliverConsumer = deliverConsumer;
+    this.consumer2 = consumer2;
     this.consumer = consumer;
     this.sequence = sequence;
+    this.bizEventGroup = bizEventGroup;
   }
 
   @Override
@@ -59,9 +61,8 @@ public class HandlerInitializer extends ChannelInitializer<Channel> {
     channel.pipeline().addLast("cmppConnectHandler", new ConnectHandler(loginName, loginPassword, sequence));
     channel.pipeline().addLast("cmppActiveTestHandler", new ActiveTestHandler(sequence, true));
     channel.pipeline().addLast("cmppTerminateHandler", new TerminateHandler(sequence));
-    channel.pipeline().addLast("cmppSubmitHandler", new SubmitHandler(consumer));
-    channel.pipeline().addLast("cmppDeliverHandler", new DeliverHandler());
-    channel.pipeline().addLast(new DefaultEventExecutorGroup(16), "cmppDeliverBizHandler", new DeliverBizHandler(deliverConsumer));
+    channel.pipeline().addLast(bizEventGroup, "cmppSubmitHandler", new SubmitHandler(consumer));
+    channel.pipeline().addLast(bizEventGroup, "cmppDeliverHandler", new DeliverHandler(consumer2));
     channel.pipeline().addLast("cmppException", new ExceptionHandler());
 
   }

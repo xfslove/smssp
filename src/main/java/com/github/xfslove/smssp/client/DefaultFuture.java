@@ -22,7 +22,6 @@ public class DefaultFuture implements ResponseFuture {
 
   private Request request;
   private Response response;
-  private ResponseListener listener;
 
   private final Lock lock = new ReentrantLock();
   private final Condition done = lock.newCondition();
@@ -58,34 +57,8 @@ public class DefaultFuture implements ResponseFuture {
   }
 
   @Override
-  public void setListener(ResponseListener listener) {
-    if (isDone()) {
-      invoke(listener);
-    } else {
-      boolean isdone = false;
-      lock.lock();
-      try {
-        if (!isDone()) {
-          this.listener = listener;
-        } else {
-          isdone = true;
-        }
-      } finally {
-        lock.unlock();
-      }
-      if (isdone) {
-        invoke(listener);
-      }
-    }
-  }
-
-  @Override
   public boolean isDone() {
     return response != null;
-  }
-
-  private void invoke(ResponseListener listener) {
-    listener.done(response);
   }
 
   private void receive(Response response) {
@@ -95,9 +68,6 @@ public class DefaultFuture implements ResponseFuture {
       done.signal();
     } finally {
       lock.unlock();
-    }
-    if (this.listener != null) {
-      invoke(this.listener);
     }
   }
 
@@ -111,10 +81,10 @@ public class DefaultFuture implements ResponseFuture {
     }
   }
 
-  public static class DefaultConsumer implements ResponseConsumer {
+  public static class DefaultListener implements ResponseListener {
 
     @Override
-    public void apply(Response response) {
+    public void done(Response response) {
       DefaultFuture.received(response);
     }
   }

@@ -5,8 +5,8 @@ import com.github.xfslove.smsj.sms.dcs.SmsDcs;
 import com.github.xfslove.smsj.sms.ud.SmsUdhElement;
 import com.github.xfslove.smsj.sms.ud.SmsUdhUtil;
 import com.github.xfslove.smssp.message.Message;
-import com.github.xfslove.smssp.message.MessageHead;
 import com.github.xfslove.smssp.message.sequence.Sequence;
+import com.github.xfslove.smssp.server.Notification;
 import com.github.xfslove.smssp.util.ByteUtil;
 import io.netty.buffer.ByteBuf;
 
@@ -16,7 +16,7 @@ import java.nio.charset.StandardCharsets;
  * @author hanwen
  * created at 2018/8/28
  */
-public class DeliverMessage extends SmsPdu implements CmppMessage {
+public class DeliverMessage extends SmsPdu implements CmppMessage, Notification {
 
   private final CmppHead head;
 
@@ -80,6 +80,11 @@ public class DeliverMessage extends SmsPdu implements CmppMessage {
 
   public DeliverMessage(Sequence sequence) {
     head = new CmppHead(CmppConstants.CMPP_DELIVER, (int) sequence.next());
+  }
+
+  @Override
+  public String getId() {
+    return String.valueOf(getHead().getSequenceId());
   }
 
   @Override
@@ -209,7 +214,7 @@ public class DeliverMessage extends SmsPdu implements CmppMessage {
     return new Report();
   }
 
-  public class Report implements Message {
+  public class Report implements Message, Notification {
 
     /**
      * 信息标识
@@ -250,7 +255,12 @@ public class DeliverMessage extends SmsPdu implements CmppMessage {
     private int smscSequence;
 
     @Override
-    public MessageHead getHead() {
+    public String getId() {
+      return String.valueOf(getHead().getSequenceId());
+    }
+
+    @Override
+    public CmppHead getHead() {
       return DeliverMessage.this.getHead();
     }
 
