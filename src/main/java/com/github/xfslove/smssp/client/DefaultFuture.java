@@ -1,10 +1,10 @@
 package com.github.xfslove.smssp.client;
 
+import com.google.common.cache.*;
 import io.netty.util.internal.logging.InternalLogger;
 import io.netty.util.internal.logging.InternalLoggerFactory;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
@@ -18,7 +18,20 @@ public class DefaultFuture implements ResponseFuture {
 
   private static final InternalLogger LOGGER = InternalLoggerFactory.getInstance(DefaultFuture.class);
 
-  private static final Map<String, DefaultFuture> FUTURES = new ConcurrentHashMap<>(256);
+  private static final Cache<String, DefaultFuture> FUTURES_CACHE = CacheBuilder.newBuilder().initialCapacity(256).expireAfterAccess(30, TimeUnit.SECONDS)
+      .removalListener(new RemovalListener<String, DefaultFuture>() {
+        @Override
+        public void onRemoval(RemovalNotification<String, DefaultFuture> notification) {
+
+          RemovalCause cause = notification.getCause();
+          if (!RemovalCause.EXPLICIT.equals(cause)) {
+            LOGGER.info("drop cached future {} cause by {}", notification.getValue().request, cause);
+          }
+
+        }
+      })
+      .build();
+  private static final ConcurrentMap<String, DefaultFuture> FUTURES = FUTURES_CACHE.asMap();
 
   private Request request;
   private Response response;
@@ -49,7 +62,7 @@ public class DefaultFuture implements ResponseFuture {
       }
       if (!isDone()) {
         FUTURES.remove(request.getId());
-        LOGGER.info("drop timeout request message {}", request);
+        LOGGER.info("drop request message {} cause by timeout", request);
         return null;
       }
     }
