@@ -61,6 +61,7 @@ public class CmppClient {
   private int port;
   private int[] localPorts;
   private int connections = 1;
+  private int idleCheckTime = 300;
 
   private Sequence sequence = new DefaultCmppSequence();
   private ResponseListener consumer = new DefaultFuture.DefaultListener();
@@ -101,13 +102,18 @@ public class CmppClient {
     return this;
   }
 
-  public CmppClient consumer(ResponseListener consumer) {
+  public CmppClient responseListener(ResponseListener consumer) {
     this.consumer = consumer;
     return this;
   }
 
-  public CmppClient notificationConsumer(NotificationListener consumer2) {
+  public CmppClient notificationListener(NotificationListener consumer2) {
     this.consumer2 = new DefaultProxyListener(consumer2);
+    return this;
+  }
+
+  public CmppClient idleCheckTime(int idleCheckTime) {
+    this.idleCheckTime = idleCheckTime;
     return this;
   }
 
@@ -119,7 +125,7 @@ public class CmppClient {
    */
   public CmppClient connect() throws InterruptedException {
 
-    HandlerInitializer mix = new HandlerInitializer(loginName, loginPassword, consumer2, consumer, sequence, bizGroup, 5 * 60);
+    HandlerInitializer mix = new HandlerInitializer(loginName, loginPassword, consumer2, consumer, sequence, bizGroup, idleCheckTime);
 
     bootstrap.remoteAddress(host, port);
 
@@ -131,14 +137,19 @@ public class CmppClient {
     }
 
     Channel[] channels = new Channel[connections];
-    for (int i = 0; i < connections; i++) {
-      Future<Channel> future = channelPool.acquire().sync();
-      if (future.isSuccess()) {
-        channels[i] = future.getNow();
+    try {
+      for (int i = 0; i < connections; i++) {
+        Future<Channel> future = channelPool.acquire().sync();
+        if (future.isSuccess()) {
+          channels[i] = future.getNow();
+        }
       }
-    }
-    for (Channel channel : channels) {
-      channelPool.release(channel);
+    } finally {
+      for (Channel channel : channels) {
+        if (channel != null) {
+          channelPool.release(channel);
+        }
+      }
     }
 
     return this;
@@ -147,6 +158,9 @@ public class CmppClient {
   public void close() {
 
     channelPool.close();
+
+    workGroup.shutdownGracefully().syncUninterruptibly();
+    bizGroup.shutdownGracefully().syncUninterruptibly();
   }
 
   public SubmitRespMessage[] submit(MessageBuilder message, int timeout) throws InterruptedException {
@@ -155,16 +169,19 @@ public class CmppClient {
       throw new InterruptedException("channel acquire failure");
     }
 
-    Channel channel = future.getNow();
-
-    if (message.msgSrc == null) {
-      message.msgSrc(loginName);
-    }
     SubmitMessage[] req = message.split(sequence);
-    for (SubmitMessage submit : req) {
-      channel.writeAndFlush(submit);
+
+    Channel channel = future.getNow();
+    try {
+      if (message.msgSrc == null) {
+        message.msgSrc(loginName);
+      }
+      for (SubmitMessage submit : req) {
+        channel.writeAndFlush(submit);
+      }
+    } finally {
+      channelPool.release(channel);
     }
-    channelPool.release(channel);
 
     SubmitRespMessage[] resp = new SubmitRespMessage[req.length];
     for (int i = 0; i < req.length; i++) {
