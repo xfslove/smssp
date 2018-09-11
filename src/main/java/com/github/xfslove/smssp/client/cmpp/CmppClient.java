@@ -119,7 +119,7 @@ public class CmppClient {
    */
   public CmppClient connect() throws InterruptedException {
 
-    HandlerInitializer mix = new HandlerInitializer(loginName, loginPassword, consumer2, consumer, sequence, bizGroup);
+    HandlerInitializer mix = new HandlerInitializer(loginName, loginPassword, consumer2, consumer, sequence, bizGroup, 5 * 60);
 
     bootstrap.remoteAddress(host, port);
 

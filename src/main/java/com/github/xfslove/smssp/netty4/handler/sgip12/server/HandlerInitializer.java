@@ -31,18 +31,21 @@ public class HandlerInitializer extends ChannelInitializer<Channel> {
 
   private EventExecutorGroup bizEventGroup;
 
-  public HandlerInitializer(String loginName, String loginPassword, NotificationListener consumer, Sequence sequence, EventExecutorGroup bizEventGroup) {
+  private int idleCheckTime;
+
+  public HandlerInitializer(String loginName, String loginPassword, NotificationListener consumer, Sequence sequence, EventExecutorGroup bizEventGroup, int idleCheckTime) {
     this.loginName = loginName;
     this.loginPassword = loginPassword;
     this.consumer = consumer;
     this.sequence = sequence;
     this.bizEventGroup = bizEventGroup;
+    this.idleCheckTime = idleCheckTime;
   }
 
   @Override
   protected void initChannel(Channel channel) throws Exception {
     channel.pipeline().addLast("sgipSocketLogging", new LoggingHandler());
-    channel.pipeline().addLast("sgipIdleState", new IdleStateHandler(0, 0, 5 * 60, TimeUnit.SECONDS));
+    channel.pipeline().addLast("sgipIdleState", new IdleStateHandler(0, 0, idleCheckTime, TimeUnit.SECONDS));
     channel.pipeline().addLast("sgipMessageLengthCodec", new MesssageLengthCodec(true));
     channel.pipeline().addLast("sgipMessageCodec", new MessageCodec());
     channel.pipeline().addLast("sgipMessageLogging", new LoggingHandler(LogLevel.INFO));

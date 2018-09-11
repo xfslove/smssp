@@ -40,20 +40,23 @@ public class HandlerInitializer extends ChannelInitializer<Channel> {
 
   private EventExecutorGroup bizEventGroup;
 
-  public HandlerInitializer(String loginName, String loginPassword, NotificationListener consumer2, ResponseListener consumer, Sequence sequence, EventExecutorGroup bizEventGroup) {
+  private int idleCheckTime;
+
+  public HandlerInitializer(String loginName, String loginPassword, NotificationListener consumer2, ResponseListener consumer, Sequence sequence, EventExecutorGroup bizEventGroup, int idleCheckTime) {
     this.loginName = loginName;
     this.loginPassword = loginPassword;
     this.consumer2 = consumer2;
     this.consumer = consumer;
     this.sequence = sequence;
     this.bizEventGroup = bizEventGroup;
+    this.idleCheckTime = idleCheckTime;
   }
 
   @Override
   protected void initChannel(Channel channel) throws Exception {
 
     channel.pipeline().addLast("cmppSocketLogging", new LoggingHandler());
-    channel.pipeline().addLast("cmppIdleState", new IdleStateHandler(0, 0, 5 * 60, TimeUnit.SECONDS));
+    channel.pipeline().addLast("cmppIdleState", new IdleStateHandler(0, 0, idleCheckTime, TimeUnit.SECONDS));
     channel.pipeline().addLast("cmppMessageLengthCodec", new MesssageLengthCodec(true));
     channel.pipeline().addLast("cmppMessageCodec", new MessageCodec());
     channel.pipeline().addLast("cmppMessageLogging", new LoggingHandler(LogLevel.INFO));
