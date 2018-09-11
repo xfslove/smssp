@@ -50,7 +50,7 @@ public class BindHandler extends ChannelDuplexHandler {
       if (Boolean.TRUE.equals(ctx.channel().attr(SESSION_VALID).get())) {
         // 重复登录
         bindResp.setResult(2);
-        ctx.channel().writeAndFlush(bindResp).addListener(new GenericFutureListener<Future<? super Void>>() {
+        ctx.writeAndFlush(bindResp).addListener(new GenericFutureListener<Future<? super Void>>() {
           @Override
           public void operationComplete(Future<? super Void> future) throws Exception {
             if (future.isSuccess()) {
@@ -66,7 +66,7 @@ public class BindHandler extends ChannelDuplexHandler {
       if (!loginName.equals(bind.getLoginName()) || !loginPassword.equals(bind.getLoginPassword())) {
         // 用户名密码错误
         bindResp.setResult(1);
-        ctx.channel().writeAndFlush(bindResp).addListener(new GenericFutureListener<Future<? super Void>>() {
+        ctx.writeAndFlush(bindResp).addListener(new GenericFutureListener<Future<? super Void>>() {
           @Override
           public void operationComplete(Future<? super Void> future) throws Exception {
             if (future.isSuccess()) {
@@ -81,7 +81,7 @@ public class BindHandler extends ChannelDuplexHandler {
       if (2 != bind.getLoginType()) {
         // 登录类型不对
         bindResp.setResult(4);
-        ctx.channel().writeAndFlush(bindResp).addListener(new GenericFutureListener<Future<? super Void>>() {
+        ctx.writeAndFlush(bindResp).addListener(new GenericFutureListener<Future<? super Void>>() {
           @Override
           public void operationComplete(Future<? super Void> future) throws Exception {
             if (future.isSuccess()) {
@@ -94,7 +94,7 @@ public class BindHandler extends ChannelDuplexHandler {
       }
 
       // bind 成功
-      channel.writeAndFlush(bindResp).addListener(new GenericFutureListener<Future<? super Void>>() {
+      ctx.writeAndFlush(bindResp).addListener(new GenericFutureListener<Future<? super Void>>() {
         @Override
         public void operationComplete(Future<? super Void> future) throws Exception {
           if (future.isSuccess()) {

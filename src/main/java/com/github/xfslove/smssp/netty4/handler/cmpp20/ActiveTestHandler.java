@@ -34,15 +34,13 @@ public class ActiveTestHandler extends ChannelDuplexHandler {
 
   @Override
   public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-    Channel channel = ctx.channel();
-
     // activeTest
     if (msg instanceof ActiveTestMessage) {
       ActiveTestMessage active = (ActiveTestMessage) msg;
 
       ActiveTestRespMessage resp = new ActiveTestRespMessage(active.getHead().getSequenceId());
 
-      channel.writeAndFlush(resp).addListener(new GenericFutureListener<Future<? super Void>>() {
+      ctx.writeAndFlush(resp).addListener(new GenericFutureListener<Future<? super Void>>() {
         @Override
         public void operationComplete(Future<? super Void> future) throws Exception {
           if (future.isSuccess()) {
@@ -75,7 +73,7 @@ public class ActiveTestHandler extends ChannelDuplexHandler {
           // 发送active test
           ActiveTestMessage active = new ActiveTestMessage(sequence);
 
-          ctx.channel().writeAndFlush(active).addListener(new GenericFutureListener<Future<? super Void>>() {
+          ctx.writeAndFlush(active).addListener(new GenericFutureListener<Future<? super Void>>() {
             @Override
             public void operationComplete(Future<? super Void> future) throws Exception {
               if (future.isSuccess()) {

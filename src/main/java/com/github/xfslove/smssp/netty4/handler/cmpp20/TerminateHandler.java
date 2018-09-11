@@ -47,7 +47,7 @@ public class TerminateHandler extends ChannelDuplexHandler {
       TerminateRespMessage resp = new TerminateRespMessage(terminate.getHead().getSequenceId());
 
       // 直接回复UnbindResp
-      channel.writeAndFlush(resp).addListener(new GenericFutureListener<Future<? super Void>>() {
+      ctx.writeAndFlush(resp).addListener(new GenericFutureListener<Future<? super Void>>() {
         @Override
         public void operationComplete(Future<? super Void> future) throws Exception {
           if (future.isSuccess()) {
@@ -73,7 +73,7 @@ public class TerminateHandler extends ChannelDuplexHandler {
 
         TerminateMessage terminate = new TerminateMessage(sequence);
 
-        ctx.channel().writeAndFlush(terminate).addListener(new GenericFutureListener<Future<? super Void>>() {
+        ctx.writeAndFlush(terminate).addListener(new GenericFutureListener<Future<? super Void>>() {
           @Override
           public void operationComplete(Future<? super Void> future) throws Exception {
             if (future.isSuccess()) {

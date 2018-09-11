@@ -52,7 +52,7 @@ public class ConnectHandler extends ChannelDuplexHandler {
     byte[] authenticationBytes = DigestUtils.md5(ByteUtil.concat(sourceBytes, new byte[9], secretBytes, timestampBytes));
     connect.setAuthenticatorSource(authenticationBytes);
 
-    ctx.channel().writeAndFlush(connect);
+    ctx.writeAndFlush(connect);
     logger.info("connect request");
 
     ctx.fireChannelActive();

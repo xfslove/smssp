@@ -64,7 +64,7 @@ public class ConnectHandler extends ChannelDuplexHandler {
 
         // 认证错误
         resp.setStatus(3);
-        channel.writeAndFlush(resp).addListener(new GenericFutureListener<Future<? super Void>>() {
+        ctx.writeAndFlush(resp).addListener(new GenericFutureListener<Future<? super Void>>() {
           @Override
           public void operationComplete(Future<? super Void> future) throws Exception {
             if (future.isSuccess()) {
@@ -80,7 +80,7 @@ public class ConnectHandler extends ChannelDuplexHandler {
 
         // 版本太高
         resp.setStatus(4);
-        channel.writeAndFlush(resp).addListener(new GenericFutureListener<Future<? super Void>>() {
+        ctx.writeAndFlush(resp).addListener(new GenericFutureListener<Future<? super Void>>() {
           @Override
           public void operationComplete(Future<? super Void> future) throws Exception {
             if (future.isSuccess()) {
@@ -93,7 +93,7 @@ public class ConnectHandler extends ChannelDuplexHandler {
       }
 
       // connect 成功
-      channel.writeAndFlush(resp).addListener(new GenericFutureListener<Future<? super Void>>() {
+      ctx.writeAndFlush(resp).addListener(new GenericFutureListener<Future<? super Void>>() {
         @Override
         public void operationComplete(Future<? super Void> future) throws Exception {
           if (future.isSuccess()) {

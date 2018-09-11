@@ -41,7 +41,7 @@ public class BindHandler extends ChannelDuplexHandler {
 
     bind.setLoginName(loginName);
     bind.setLoginPassword(loginPassword);
-    ctx.channel().writeAndFlush(bind);
+    ctx.writeAndFlush(bind);
     logger.info("client bind request");
 
     ctx.fireChannelActive();

@@ -44,7 +44,7 @@ public class UnBindHandler extends ChannelDuplexHandler {
       // 直接回复UnbindResp
       UnBindRespMessage resp = new UnBindRespMessage(unbind.getHead().getSequenceNumber());
 
-      channel.writeAndFlush(resp).addListener(new GenericFutureListener<Future<? super Void>>() {
+      ctx.writeAndFlush(resp).addListener(new GenericFutureListener<Future<? super Void>>() {
         @Override
         public void operationComplete(Future<? super Void> future) throws Exception {
           if (future.isSuccess()) {
@@ -78,7 +78,7 @@ public class UnBindHandler extends ChannelDuplexHandler {
         // 发送unbind
         UnBindMessage unbind = new UnBindMessage(sequence);
 
-        ctx.channel().writeAndFlush(unbind).addListener(new GenericFutureListener<Future<? super Void>>() {
+        ctx.writeAndFlush(unbind).addListener(new GenericFutureListener<Future<? super Void>>() {
           @Override
           public void operationComplete(Future<? super Void> future) throws Exception {
             if (future.isSuccess()) {
