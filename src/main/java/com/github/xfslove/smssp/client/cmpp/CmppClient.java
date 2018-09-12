@@ -15,6 +15,7 @@ import com.github.xfslove.smssp.message.sequence.Sequence;
 import com.github.xfslove.smssp.netty4.handler.cmpp20.mix.HandlerInitializer;
 import com.github.xfslove.smssp.netty4.handler.cmpp20.mix.PoolHandler;
 import com.github.xfslove.smssp.server.DefaultProxyListener;
+import com.github.xfslove.smssp.server.Notification;
 import com.github.xfslove.smssp.server.NotificationListener;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.PooledByteBufAllocator;
@@ -31,6 +32,8 @@ import io.netty.util.concurrent.EventExecutorGroup;
 import io.netty.util.concurrent.Future;
 import io.netty.util.internal.PlatformDependent;
 import io.netty.util.internal.SocketUtils;
+import io.netty.util.internal.logging.InternalLogger;
+import io.netty.util.internal.logging.InternalLoggerFactory;
 
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
@@ -41,6 +44,8 @@ import java.util.Deque;
  * created at 2018/9/4
  */
 public class CmppClient {
+
+  private static final InternalLogger LOGGER = InternalLoggerFactory.getInstance(CmppClient.class);
 
   private EventLoopGroup workGroup = new NioEventLoopGroup(Math.min(Runtime.getRuntime().availableProcessors() + 1, 32), new DefaultThreadFactory("cmppWorker", true));
 
@@ -65,7 +70,12 @@ public class CmppClient {
 
   private Sequence sequence = new DefaultCmppSequence();
   private ResponseListener consumer = new DefaultFuture.DefaultListener();
-  private NotificationListener consumer2;
+  private NotificationListener consumer2 = new NotificationListener() {
+    @Override
+    public void done(Notification notification) {
+      LOGGER.info("received notification: {}", notification);
+    }
+  };
 
   public CmppClient loginName(String loginName) {
     this.loginName = loginName;
@@ -108,7 +118,7 @@ public class CmppClient {
   }
 
   public CmppClient notificationListener(NotificationListener consumer2) {
-    this.consumer2 = new DefaultProxyListener(consumer2);
+    this.consumer2 = consumer2;
     return this;
   }
 
@@ -121,11 +131,10 @@ public class CmppClient {
    * 建立链接（长链接），会初始化链接，并保持
    *
    * @return this
-   * @throws InterruptedException ex
    */
-  public CmppClient connect() throws InterruptedException {
+  public CmppClient connect() {
 
-    HandlerInitializer mix = new HandlerInitializer(loginName, loginPassword, consumer2, consumer, sequence, bizGroup, idleCheckTime);
+    HandlerInitializer mix = new HandlerInitializer(loginName, loginPassword, new DefaultProxyListener(consumer2), consumer, sequence, bizGroup, idleCheckTime);
 
     bootstrap.remoteAddress(host, port);
 
@@ -133,7 +142,7 @@ public class CmppClient {
       channelPool = new FixedChannelPool(bootstrap, new PoolHandler(mix), connections);
     } else {
       connections = localPorts.length;
-      channelPool = new CmppChannelPool(bootstrap, new PoolHandler(mix), new CmppHealthChecker());
+      channelPool = new CmppChannelPool(bootstrap, new PoolHandler(mix));
     }
 
     Channel[] channels = new Channel[connections];
@@ -142,8 +151,12 @@ public class CmppClient {
         Future<Channel> future = channelPool.acquire().sync();
         if (future.isSuccess()) {
           channels[i] = future.getNow();
+        } else {
+          LOGGER.info("init channel failure when connect to [{}:{}]", host, port);
         }
       }
+    } catch (InterruptedException e) {
+      LOGGER.info("init channel failure when connect to [{}:{}], be interrupted", host, port);
     } finally {
       for (Channel channel : channels) {
         if (channel != null) {
@@ -163,30 +176,42 @@ public class CmppClient {
     bizGroup.shutdownGracefully().syncUninterruptibly();
   }
 
-  public SubmitRespMessage[] submit(MessageBuilder message, int timeout) throws InterruptedException {
-    Future<Channel> future = channelPool.acquire().sync();
-    if (!future.isSuccess()) {
-      throw new InterruptedException("channel acquire failure");
+  public SubmitRespMessage[] submit(MessageBuilder message, int timeout) {
+    if (message.msgSrc == null) {
+      message.msgSrc(loginName);
     }
-
     SubmitMessage[] req = message.split(sequence);
 
-    Channel channel = future.getNow();
+    Channel channel = null;
     try {
-      if (message.msgSrc == null) {
-        message.msgSrc(loginName);
+      Future<Channel> future = channelPool.acquire().sync();
+      if (!future.isSuccess()) {
+        LOGGER.info("acquired channel failure");
+        return null;
       }
+      channel = future.getNow();
+
       for (SubmitMessage submit : req) {
         channel.writeAndFlush(submit);
       }
+    } catch (InterruptedException e) {
+      LOGGER.info("acquired channel failure, be interrupted");
+      return null;
     } finally {
-      channelPool.release(channel);
+      if (channel != null) {
+        channelPool.release(channel);
+      }
     }
 
     SubmitRespMessage[] resp = new SubmitRespMessage[req.length];
     for (int i = 0; i < req.length; i++) {
 
-      SubmitRespMessage response = (SubmitRespMessage) new DefaultFuture(req[i]).getResponse(timeout);
+      SubmitRespMessage response = null;
+      try {
+        response = (SubmitRespMessage) new DefaultFuture(req[i]).getResponse(timeout);
+      } catch (InterruptedException e) {
+        LOGGER.info("get response failure, be interrupted");
+      }
       resp[i] = response;
     }
 
@@ -281,8 +306,8 @@ public class CmppClient {
 
   private class CmppChannelPool extends FixedChannelPool {
 
-    CmppChannelPool(Bootstrap bootstrap, ChannelPoolHandler handler, ChannelHealthChecker healthChecker) {
-      super(bootstrap, handler, healthChecker, null, -1, connections, Integer.MAX_VALUE);
+    CmppChannelPool(Bootstrap bootstrap, ChannelPoolHandler handler) {
+      super(bootstrap, handler, new CmppHealthChecker(), null, -1, connections, Integer.MAX_VALUE);
     }
 
     @Override
