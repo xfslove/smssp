@@ -37,6 +37,7 @@ import io.netty.util.internal.logging.InternalLoggerFactory;
 
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
+import java.util.Arrays;
 import java.util.Deque;
 
 /**
@@ -165,6 +166,8 @@ public class CmppClient {
       }
     }
 
+    LOGGER.info("connect to [{}:{}] success, listen localPorts:{}", host, port, Arrays.toString(localPorts));
+
     return this;
   }
 
@@ -174,6 +177,8 @@ public class CmppClient {
 
     workGroup.shutdownGracefully().syncUninterruptibly();
     bizGroup.shutdownGracefully().syncUninterruptibly();
+
+    LOGGER.info("shutdown gracefully, disconnect to [{}:{}] success", host, port);
   }
 
   public SubmitRespMessage[] submit(MessageBuilder message, int timeout) {
