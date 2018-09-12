@@ -32,7 +32,7 @@ public class ConnectRespMessage implements CmppMessage {
    * AuthenticatorSource为源地址实体发送给ISMG的对应消息CMPP_Connect中的值
    *  认证出错时，此项为空
    */
-  private String authenticatorISMG;
+  private byte[] authenticatorISMG;
 
   /**
    * 服务器支持的最高版本号
@@ -62,7 +62,7 @@ public class ConnectRespMessage implements CmppMessage {
     // 4 bytes
     out.writeByte(getStatus());
     // 16 bytes
-    out.writeBytes(ByteUtil.getStringOctetBytes(getAuthenticatorISMG(), 16, StandardCharsets.ISO_8859_1));
+    out.writeBytes(ByteUtil.getOctetBytes(getAuthenticatorISMG(), 16));
     // 1 byte
     out.writeByte(getVersion());
   }
@@ -70,7 +70,9 @@ public class ConnectRespMessage implements CmppMessage {
   @Override
   public void read(ByteBuf in) {
     setStatus(in.readUnsignedByte());
-    setAuthenticatorISMG(in.readCharSequence(16, StandardCharsets.ISO_8859_1).toString().trim());
+    byte[] bytes = new byte[16];
+    in.readBytes(bytes);
+    setAuthenticatorISMG(bytes);
     setVersion(in.readUnsignedByte());
   }
 
@@ -82,11 +84,11 @@ public class ConnectRespMessage implements CmppMessage {
     this.status = status;
   }
 
-  public String getAuthenticatorISMG() {
+  public byte[] getAuthenticatorISMG() {
     return authenticatorISMG;
   }
 
-  public void setAuthenticatorISMG(String authenticatorISMG) {
+  public void setAuthenticatorISMG(byte[] authenticatorISMG) {
     this.authenticatorISMG = authenticatorISMG;
   }
 
@@ -103,7 +105,6 @@ public class ConnectRespMessage implements CmppMessage {
     return "ConnectRespMessage{" +
         "head=" + head +
         ", status=" + status +
-        ", authenticatorISMG='" + authenticatorISMG + '\'' +
         ", version=" + version +
         '}';
   }
