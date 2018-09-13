@@ -352,8 +352,8 @@ public class SubmitMessage extends SmsPdu implements CmppMessage, Request {
         "head=" + head +
         ", msgId=" + msgId +
         ", dcs=" + getDcs().getValue() +
-        ", userDataHeader='" + ByteUtil.getString(getUdhBytes(), getDcs().getAlphabet()) + '\'' +
-        ", userData='" + ByteUtil.getString(getUdBytes(), getDcs().getAlphabet()) + '\'' +
+        ", userDataHeader='" + ByteUtil.getString(getUdhBytes(), getDcs().getAlphabet(), StandardCharsets.UTF_8) + '\'' +
+        ", userData='" + ByteUtil.getString(getUdBytes(), getDcs().getAlphabet(), StandardCharsets.UTF_8) + '\'' +
         ", pkTotal=" + pkTotal +
         ", pkNumber=" + pkNumber +
         ", registeredDelivery=" + registeredDelivery +

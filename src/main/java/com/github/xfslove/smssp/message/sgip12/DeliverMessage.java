@@ -10,6 +10,7 @@ import com.github.xfslove.smssp.server.Notification;
 import com.github.xfslove.smssp.util.ByteUtil;
 import io.netty.buffer.ByteBuf;
 
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
 /**
@@ -193,8 +194,8 @@ public class DeliverMessage extends SmsPdu implements SgipMessage, Notification 
     return "DeliverMessage{" +
         "head=" + head +
         ", dcs=" + getDcs().getValue() +
-        ", userDataHeader='" + ByteUtil.getString(getUdhBytes(), getDcs().getAlphabet()) + '\'' +
-        ", userData='" + ByteUtil.getString(getUdBytes(), getDcs().getAlphabet()) + '\'' +
+        ", userDataHeader='" + ByteUtil.getString(getUdhBytes(), getDcs().getAlphabet(), Charset.forName("GBK")) + '\'' +
+        ", userData='" + ByteUtil.getString(getUdBytes(), getDcs().getAlphabet(), Charset.forName("GBK")) + '\'' +
         ", spNumber='" + spNumber + '\'' +
         ", userNumber='" + userNumber + '\'' +
         ", tpPid=" + tpPid +

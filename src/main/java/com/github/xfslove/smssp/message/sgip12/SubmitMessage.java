@@ -6,6 +6,7 @@ import com.github.xfslove.smssp.message.sequence.Sequence;
 import com.github.xfslove.smssp.util.ByteUtil;
 import io.netty.buffer.ByteBuf;
 
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
@@ -359,8 +360,8 @@ public class SubmitMessage extends SmsPdu implements SgipMessage, Request {
     return "SubmitMessage{" +
         "head=" + head +
         ", dcs=" + getDcs().getValue() +
-        ", userDataHeader='" + ByteUtil.getString(getUdhBytes(), getDcs().getAlphabet()) + '\'' +
-        ", userData='" + ByteUtil.getString(getUdBytes(), getDcs().getAlphabet()) + '\'' +
+        ", userDataHeader='" + ByteUtil.getString(getUdhBytes(), getDcs().getAlphabet(), Charset.forName("GBK")) + '\'' +
+        ", userData='" + ByteUtil.getString(getUdBytes(), getDcs().getAlphabet(), Charset.forName("GBK")) + '\'' +
         ", spNumber='" + spNumber + '\'' +
         ", chargeNumber='" + chargeNumber + '\'' +
         ", userNumbers=" + userNumbers +

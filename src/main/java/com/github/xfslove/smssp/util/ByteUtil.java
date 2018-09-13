@@ -53,7 +53,7 @@ public class ByteUtil {
     return result;
   }
 
-  public static String getString(byte[] bytes, SmsAlphabet alphabet) {
+  public static String getString(byte[] bytes, SmsAlphabet alphabet, Charset reserved) {
     if (bytes == null || bytes.length == 0) {
       return null;
     }
@@ -68,9 +68,8 @@ public class ByteUtil {
         return new String(bytes, StandardCharsets.ISO_8859_1);
       case UCS2:
         return new String(bytes, StandardCharsets.UTF_16BE);
-      // cmpp用的utf-8, sgip?
       case RESERVED:
-        return new String(bytes, StandardCharsets.UTF_8);
+        return new String(bytes, reserved);
       default:
         return null;
     }

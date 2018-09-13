@@ -400,8 +400,8 @@ public class DeliverMessage extends SmsPdu implements CmppMessage, Notification 
         "head=" + head +
         ", msgId=" + msgId +
         ", dcs=" + getDcs().getValue() +
-        ", userDataHeader='" + ByteUtil.getString(getUdhBytes(), getDcs().getAlphabet()) + '\'' +
-        ", userData='" + ByteUtil.getString(getUdBytes(), getDcs().getAlphabet()) + '\'' +
+        ", userDataHeader='" + ByteUtil.getString(getUdhBytes(), getDcs().getAlphabet(), StandardCharsets.UTF_8) + '\'' +
+        ", userData='" + ByteUtil.getString(getUdBytes(), getDcs().getAlphabet(), StandardCharsets.UTF_8) + '\'' +
         ", destId='" + destId + '\'' +
         ", serviceId='" + serviceId + '\'' +
         ", tpPid=" + tpPid +
