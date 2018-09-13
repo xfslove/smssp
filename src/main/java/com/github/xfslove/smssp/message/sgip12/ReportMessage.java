@@ -63,6 +63,17 @@ public class ReportMessage implements SgipMessage, Notification {
   }
 
   @Override
+  public Partition getPartition() {
+    return new Partition(1, 1, null);
+  }
+
+  @Override
+  public boolean merge(Notification next) {
+    // no need implement
+    return false;
+  }
+
+  @Override
   public SgipHead getHead() {
     return head;
   }

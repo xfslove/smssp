@@ -38,7 +38,7 @@ public class SgipClient {
 
   private static final InternalLogger LOGGER = InternalLoggerFactory.getInstance(SgipClient.class);
 
-  private EventLoopGroup workGroup = new NioEventLoopGroup(Math.min(Runtime.getRuntime().availableProcessors() + 1, 32), new DefaultThreadFactory("cmppWorker", true));
+  private EventLoopGroup workGroup = new NioEventLoopGroup(Math.min(Runtime.getRuntime().availableProcessors() + 1, 32), new DefaultThreadFactory("sgipWorker", true));
 
   private Bootstrap bootstrap = new Bootstrap().group(workGroup)
       .channel(NioSocketChannel.class)

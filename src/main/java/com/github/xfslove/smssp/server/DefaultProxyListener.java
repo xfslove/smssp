@@ -1,10 +1,6 @@
 package com.github.xfslove.smssp.server;
 
-import com.github.xfslove.smsj.sms.ud.SmsUdhElement;
-import com.github.xfslove.smsj.sms.ud.SmsUdhIei;
 import com.github.xfslove.smssp.client.DefaultFuture;
-import com.github.xfslove.smssp.message.cmpp20.DeliverMessage;
-import com.github.xfslove.smssp.util.ByteUtil;
 import com.google.common.cache.*;
 import io.netty.util.internal.logging.InternalLogger;
 import io.netty.util.internal.logging.InternalLoggerFactory;
@@ -20,20 +16,20 @@ public class DefaultProxyListener implements NotificationListener {
 
   private static final InternalLogger LOGGER = InternalLoggerFactory.getInstance(DefaultFuture.class);
 
-  private static final Cache<String, DeliverMessage> MSGS_CACHE = CacheBuilder.newBuilder().initialCapacity(256).expireAfterWrite(30, TimeUnit.MINUTES)
-      .removalListener(new RemovalListener<String, DeliverMessage>() {
+  private static final Cache<String, Notification> MSGS_CACHE = CacheBuilder.newBuilder().initialCapacity(256).expireAfterWrite(30, TimeUnit.MINUTES)
+      .removalListener(new RemovalListener<String, Notification>() {
         @Override
-        public void onRemoval(RemovalNotification<String, DeliverMessage> notification) {
+        public void onRemoval(RemovalNotification<String, Notification> notification) {
 
           RemovalCause cause = notification.getCause();
           if (!RemovalCause.EXPLICIT.equals(cause)) {
-            LOGGER.info("drop cached message {} cause by {}", notification.getValue(), cause);
+            LOGGER.info("drop cached notification message {} cause by {}", notification.getValue(), cause);
           }
 
         }
       })
       .build();
-  private static final ConcurrentMap<String, DeliverMessage> MSGS = MSGS_CACHE.asMap();
+  private static final ConcurrentMap<String, Notification> MSGS = MSGS_CACHE.asMap();
 
   private static final Cache<String, String[]> ONE_IDS_CACHE = CacheBuilder.newBuilder().initialCapacity(256).expireAfterWrite(30, TimeUnit.MINUTES).build();
   private static final ConcurrentMap<String, String[]> IDS = ONE_IDS_CACHE.asMap();
@@ -47,71 +43,49 @@ public class DefaultProxyListener implements NotificationListener {
   @Override
   public void done(Notification notification) {
 
-    if (notification instanceof DeliverMessage) {
-      DeliverMessage deliver = (DeliverMessage) notification;
+    Notification.Partition partition = notification.getPartition();
+    if (partition == null) {
+      LOGGER.info("drop received notification message {}, maybe it's not extract partition info", notification);
+      return;
+    }
 
-      if (deliver.getTpUdhi() == 0) {
-        target.done(notification);
-        return;
-      }
-
-      SmsUdhElement[] udh = deliver.getUserDateHeaders();
-
-      if (udh.length > 1) {
-        LOGGER.info("drop received deliver message {} cause by it's not sms", deliver);
-        return;
-      }
-
-      SmsUdhElement firstUdh = udh[0];
-      if (!SmsUdhIei.APP_PORT_8BIT.equals(firstUdh.getUdhIei())) {
-        LOGGER.info("drop received deliver message {} cause by it's not concat udh", deliver);
-        return;
-      }
-
-      int refNr = firstUdh.getUdhIeiData()[0] & 0xff;
-      int total = firstUdh.getUdhIeiData()[1] & 0xff;
-      int seqNr = firstUdh.getUdhIeiData()[2] & 0xff;
-      String key = deliver.getSrcTerminalId() + "-" + refNr;
-
-      LOGGER.info("received deliver message {}, parts of [id:{} | idx:{}] , cache it 30 mins", deliver, key, seqNr);
-      MSGS.put(deliver.getId(), deliver);
-
-      IDS.putIfAbsent(key, new String[total]);
-      String[] exists = IDS.get(key);
-
-      exists[seqNr - 1] = deliver.getId();
-
-      for (int i = 0; i < total; i++) {
-        String id = exists[i];
-        if (id == null) {
-          return;
-        }
-      }
-
-
-      DeliverMessage full = null;
-      for (int i = 0; i < total; i++) {
-        DeliverMessage one = MSGS.remove(exists[i]);
-
-        if (full == null) {
-          full = one;
-        } else {
-
-          if (full.getDcs().getValue() != one.getDcs().getValue()) {
-            LOGGER.info("drop message [id:{}] contains different dcs[{}, {}] cause by it can't merged", key, full.getDcs().getValue(), one.getDcs().getValue());
-            break;
-          }
-
-          full.setUserData(ByteUtil.concat(full.getUdBytes(), one.getUdBytes()), full.getDcs());
-        }
-      }
-
-      if (full != null) {
-        target.done(full);
-      }
-
-    } else {
+    if (!partition.isPartOf()) {
       target.done(notification);
+      return;
+    }
+
+    LOGGER.info("received notification message {}, partition {}, cache it 30m to wait other parts", notification, partition);
+    MSGS.put(notification.getId(), notification);
+
+    IDS.putIfAbsent(partition.getKey(), new String[partition.getTotal()]);
+    String[] exists = IDS.get(partition.getKey());
+
+    exists[partition.getIndex() - 1] = notification.getId();
+
+    for (int i = 0; i < partition.getTotal(); i++) {
+      String id = exists[i];
+      if (id == null) {
+        return;
+      }
+    }
+
+
+    Notification full = null;
+    for (int i = 0; i < partition.getTotal(); i++) {
+      Notification one = MSGS.remove(exists[i]);
+
+      if (full == null) {
+        full = one;
+      } else {
+
+        if (!full.merge(one)) {
+          LOGGER.info("drop message {} cause by it can't merged", notification);
+        }
+      }
+    }
+
+    if (full != null) {
+      target.done(full);
     }
 
   }

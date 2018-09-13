@@ -44,7 +44,7 @@ public class SequenceNumber implements Serializable {
   public String stringId() {
     // nodeId:32bits, sequenceId:32bits
     return String.format("%1$010d%2$010d%3$010d",
-        nodeId, timestamp, sequenceId);
+        nodeId & 0xffffffffL, timestamp, sequenceId);
   }
 
   public byte[] getBytes() {
@@ -75,7 +75,7 @@ public class SequenceNumber implements Serializable {
   @Override
   public String toString() {
     return "SequenceNumber{" +
-        "nodeId=" + nodeId +
+        "nodeId=" + (nodeId & 0xffffffffL) +
         ", timestamp=" + timestamp +
         ", sequenceId=" + sequenceId +
         ", stringId=" + stringId() +

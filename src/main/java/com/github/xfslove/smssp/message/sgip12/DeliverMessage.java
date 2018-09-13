@@ -3,6 +3,7 @@ package com.github.xfslove.smssp.message.sgip12;
 import com.github.xfslove.smsj.sms.SmsPdu;
 import com.github.xfslove.smsj.sms.dcs.SmsDcs;
 import com.github.xfslove.smsj.sms.ud.SmsUdhElement;
+import com.github.xfslove.smsj.sms.ud.SmsUdhIei;
 import com.github.xfslove.smsj.sms.ud.SmsUdhUtil;
 import com.github.xfslove.smssp.message.sequence.Sequence;
 import com.github.xfslove.smssp.server.Notification;
@@ -57,6 +58,42 @@ public class DeliverMessage extends SmsPdu implements SgipMessage, Notification 
   @Override
   public String getId() {
     return getHead().getSequenceNumber().stringId();
+  }
+
+  @Override
+  public Partition getPartition() {
+    if (getTpUdhi() == 0) {
+      return new Partition(1, 1, null);
+    }
+
+    SmsUdhElement[] udh = getUserDateHeaders();
+
+    // notice: 暂时只做普通短信的合并
+    if (udh.length > 1) {
+      return null;
+    }
+    SmsUdhElement firstUdh = udh[0];
+    if (!SmsUdhIei.APP_PORT_8BIT.equals(firstUdh.getUdhIei())) {
+      return null;
+    }
+
+    int refNr = firstUdh.getUdhIeiData()[0] & 0xff;
+    int total = firstUdh.getUdhIeiData()[1] & 0xff;
+    int seqNr = firstUdh.getUdhIeiData()[2] & 0xff;
+    String key = getUserNumber() + "-" + refNr;
+
+    return new Partition(total, seqNr, key);
+  }
+
+  @Override
+  public boolean merge(Notification next) {
+    // notice: 暂时只做普通短信的合并
+    DeliverMessage d = (DeliverMessage) next;
+    if (getDcs().getValue() != d.getDcs().getValue()) {
+      return false;
+    }
+    setUserData(ByteUtil.concat(getUdBytes(), d.getUdBytes()), getDcs());
+    return true;
   }
 
   @Override
