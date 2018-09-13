@@ -49,7 +49,7 @@ public class HandlerInitializer extends ChannelInitializer<Channel> {
     channel.pipeline().addLast("sgipIdleState", new IdleStateHandler(0, 0, idleCheckTime, TimeUnit.SECONDS));
     channel.pipeline().addLast("sgipMessageLengthCodec", new MesssageLengthCodec(true));
     channel.pipeline().addLast("sgipMessageCodec", new MessageCodec());
-    channel.pipeline().addLast("sgipMessageLogging", new LoggingHandler(LogLevel.INFO));
+    channel.pipeline().addLast("sgipMessageLogging", new LoggingHandler(LogLevel.DEBUG));
 
     channel.pipeline().addLast("sgipBindHandler", new BindHandler(loginName, loginPassword, sequence));
     channel.pipeline().addLast("sgipUnBindHandler", new UnBindHandler(sequence));
