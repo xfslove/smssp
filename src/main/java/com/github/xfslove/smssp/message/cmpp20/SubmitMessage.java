@@ -60,7 +60,7 @@ public class SubmitMessage extends SmsPdu implements CmppMessage, Request {
    * 2：对SP计费;
    * 3：表示本字段无效，对谁计费参见Fee_terminal_Id字段
    */
-  private int feeUserType;
+  private int feeUserType = 2;
 
   /**
    * 被计费用户的号码（如本字节填空，则表示本字段无效，对谁计费参见Fee_UserType字段，本字段与Fee_UserType字段互斥）
@@ -90,7 +90,7 @@ public class SubmitMessage extends SmsPdu implements CmppMessage, Request {
    * 04：对“计费用户号码”的信息费封顶
    * 05：对“计费用户号码”的收费是由SP实现
    */
-  private String feeType;
+  private String feeType = "05";
 
   /**
    * 资费代码（以分为单位）

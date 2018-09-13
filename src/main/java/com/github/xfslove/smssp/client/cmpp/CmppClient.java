@@ -78,6 +78,13 @@ public class CmppClient {
     }
   };
 
+  private CmppClient() {
+  }
+
+  public static CmppClient newConnection() {
+    return new CmppClient();
+  }
+
   public CmppClient loginName(String loginName) {
     this.loginName = loginName;
     return this;
@@ -233,8 +240,6 @@ public class CmppClient {
 
     private String srcId;
     private String serviceId;
-    private int userType = 2;
-    private String feeType = "05";
     private String msgSrc;
 
     public MessageBuilder text(String text) {
@@ -267,16 +272,6 @@ public class CmppClient {
       return this;
     }
 
-    public MessageBuilder userType(int userType) {
-      this.userType = userType;
-      return this;
-    }
-
-    public MessageBuilder feeType(String feeType) {
-      this.feeType = feeType;
-      return this;
-    }
-
     public MessageBuilder msgSrc(String msgSrc) {
       this.msgSrc = msgSrc;
       return this;
@@ -295,8 +290,6 @@ public class CmppClient {
         }
         message.setSrcId(srcId);
         message.setServiceId(serviceId);
-        message.setFeeUserType(userType);
-        message.setFeeType(feeType);
         message.setPkTotal(pdus.length);
         message.setPkNumber(i + 1);
         message.setMsgSrc(msgSrc);

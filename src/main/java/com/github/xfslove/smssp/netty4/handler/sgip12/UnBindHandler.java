@@ -86,8 +86,10 @@ public class UnBindHandler extends ChannelDuplexHandler {
               ctx.executor().schedule(new Runnable() {
                 @Override
                 public void run() {
-                  ctx.channel().close();
-                  logger.info("channel closed due to not received resp message");
+                  if (ctx.channel().isActive()) {
+                    logger.info("close channel due to not received resp message");
+                    ctx.channel().close();
+                  }
                 }
               }, 500, TimeUnit.MILLISECONDS);
 
