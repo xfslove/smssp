@@ -1,6 +1,7 @@
 package com.github.xfslove.smssp.message.sgip12;
 
 import com.github.xfslove.smsj.sms.SmsPdu;
+import com.github.xfslove.smsj.util.StringUtil;
 import com.github.xfslove.smssp.client.Request;
 import com.github.xfslove.smssp.message.sequence.Sequence;
 import com.github.xfslove.smssp.util.ByteUtil;
@@ -360,8 +361,8 @@ public class SubmitMessage extends SmsPdu implements SgipMessage, Request {
     return "SubmitMessage{" +
         "head=" + head +
         ", dcs=" + getDcs().getValue() +
-        ", userDataHeader='" + ByteUtil.getString(getUdhBytes(), getDcs().getAlphabet(), Charset.forName("GBK")) + '\'' +
-        ", userData='" + ByteUtil.getString(getUdBytes(), getDcs().getAlphabet(), Charset.forName("GBK")) + '\'' +
+        ", userDataHeader='" + StringUtil.bytesToHexString(getUdhBytes()) + '\'' +
+        ", userData='" + StringUtil.getString(getUdBytes(), getDcs().getAlphabet(), Charset.forName("GBK")) + '\'' +
         ", spNumber='" + spNumber + '\'' +
         ", chargeNumber='" + chargeNumber + '\'' +
         ", userNumbers=" + userNumbers +

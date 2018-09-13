@@ -5,6 +5,7 @@ import com.github.xfslove.smsj.sms.dcs.SmsDcs;
 import com.github.xfslove.smsj.sms.ud.SmsUdhElement;
 import com.github.xfslove.smsj.sms.ud.SmsUdhIei;
 import com.github.xfslove.smsj.sms.ud.SmsUdhUtil;
+import com.github.xfslove.smsj.util.StringUtil;
 import com.github.xfslove.smssp.message.sequence.Sequence;
 import com.github.xfslove.smssp.server.Notification;
 import com.github.xfslove.smssp.util.ByteUtil;
@@ -194,8 +195,8 @@ public class DeliverMessage extends SmsPdu implements SgipMessage, Notification 
     return "DeliverMessage{" +
         "head=" + head +
         ", dcs=" + getDcs().getValue() +
-        ", userDataHeader='" + ByteUtil.getString(getUdhBytes(), getDcs().getAlphabet(), Charset.forName("GBK")) + '\'' +
-        ", userData='" + ByteUtil.getString(getUdBytes(), getDcs().getAlphabet(), Charset.forName("GBK")) + '\'' +
+        ", userDataHeader='" + StringUtil.bytesToHexString(getUdhBytes()) + '\'' +
+        ", userData='" + StringUtil.getString(getUdBytes(), getDcs().getAlphabet(), Charset.forName("GBK")) + '\'' +
         ", spNumber='" + spNumber + '\'' +
         ", userNumber='" + userNumber + '\'' +
         ", tpPid=" + tpPid +

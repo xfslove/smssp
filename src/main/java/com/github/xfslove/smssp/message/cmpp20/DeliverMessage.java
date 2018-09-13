@@ -5,6 +5,7 @@ import com.github.xfslove.smsj.sms.dcs.SmsDcs;
 import com.github.xfslove.smsj.sms.ud.SmsUdhElement;
 import com.github.xfslove.smsj.sms.ud.SmsUdhIei;
 import com.github.xfslove.smsj.sms.ud.SmsUdhUtil;
+import com.github.xfslove.smsj.util.StringUtil;
 import com.github.xfslove.smssp.message.Message;
 import com.github.xfslove.smssp.message.sequence.Sequence;
 import com.github.xfslove.smssp.server.Notification;
@@ -400,8 +401,8 @@ public class DeliverMessage extends SmsPdu implements CmppMessage, Notification 
         "head=" + head +
         ", msgId=" + msgId +
         ", dcs=" + getDcs().getValue() +
-        ", userDataHeader='" + ByteUtil.getString(getUdhBytes(), getDcs().getAlphabet(), StandardCharsets.UTF_8) + '\'' +
-        ", userData='" + ByteUtil.getString(getUdBytes(), getDcs().getAlphabet(), StandardCharsets.UTF_8) + '\'' +
+        ", userDataHeader='" + StringUtil.bytesToHexString(getUdhBytes()) + '\'' +
+        ", userData='" + StringUtil.getString(getUdBytes(), getDcs().getAlphabet(), StandardCharsets.UTF_8) + '\'' +
         ", destId='" + destId + '\'' +
         ", serviceId='" + serviceId + '\'' +
         ", tpPid=" + tpPid +

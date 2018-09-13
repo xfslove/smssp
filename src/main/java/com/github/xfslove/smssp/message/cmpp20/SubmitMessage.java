@@ -1,6 +1,7 @@
 package com.github.xfslove.smssp.message.cmpp20;
 
 import com.github.xfslove.smsj.sms.SmsPdu;
+import com.github.xfslove.smsj.util.StringUtil;
 import com.github.xfslove.smssp.client.Request;
 import com.github.xfslove.smssp.message.sequence.Sequence;
 import com.github.xfslove.smssp.util.ByteUtil;
@@ -352,8 +353,8 @@ public class SubmitMessage extends SmsPdu implements CmppMessage, Request {
         "head=" + head +
         ", msgId=" + msgId +
         ", dcs=" + getDcs().getValue() +
-        ", userDataHeader='" + ByteUtil.getString(getUdhBytes(), getDcs().getAlphabet(), StandardCharsets.UTF_8) + '\'' +
-        ", userData='" + ByteUtil.getString(getUdBytes(), getDcs().getAlphabet(), StandardCharsets.UTF_8) + '\'' +
+        ", userDataHeader='" + StringUtil.bytesToHexString(getUdhBytes()) + '\'' +
+        ", userData='" + StringUtil.getString(getUdBytes(), getDcs().getAlphabet(), StandardCharsets.UTF_8) + '\'' +
         ", pkTotal=" + pkTotal +
         ", pkNumber=" + pkNumber +
         ", registeredDelivery=" + registeredDelivery +
