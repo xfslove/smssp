@@ -31,8 +31,8 @@ public class DefaultProxyListener implements NotificationListener {
       .build();
   private static final ConcurrentMap<String, Notification> MSGS = MSGS_CACHE.asMap();
 
-  private static final Cache<String, String[]> ONE_IDS_CACHE = CacheBuilder.newBuilder().initialCapacity(256).expireAfterWrite(30, TimeUnit.MINUTES).build();
-  private static final ConcurrentMap<String, String[]> IDS = ONE_IDS_CACHE.asMap();
+  private static final Cache<String, String[]> SAME_CACHE = CacheBuilder.newBuilder().initialCapacity(256).expireAfterWrite(30, TimeUnit.MINUTES).build();
+  private static final ConcurrentMap<String, String[]> SAME = SAME_CACHE.asMap();
 
   private NotificationListener target;
 
@@ -57,8 +57,8 @@ public class DefaultProxyListener implements NotificationListener {
     LOGGER.info("received notification message {}, partition {}, cache it 30m to wait other parts", notification, partition);
     MSGS.put(notification.getId(), notification);
 
-    IDS.putIfAbsent(partition.getKey(), new String[partition.getTotal()]);
-    String[] exists = IDS.get(partition.getKey());
+    SAME.putIfAbsent(partition.getKey(), new String[partition.getTotal()]);
+    String[] exists = SAME.get(partition.getKey());
 
     exists[partition.getIndex() - 1] = notification.getId();
 
