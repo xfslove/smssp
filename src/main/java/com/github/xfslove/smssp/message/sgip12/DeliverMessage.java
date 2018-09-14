@@ -38,13 +38,6 @@ public class DeliverMessage extends SmsPdu implements SgipMessage, Notification 
   private int tpPid = 0;
 
   /**
-   * GSM协议类型。详细解释请参考GSM03.40中的9.2.3.23,仅使用1位
-   * 0: 没有udh
-   * 1: 有udh
-   */
-  private int tpUdhi = 0;
-
-  /**
    * 保留，扩展用
    */
   private String reserve;
@@ -64,7 +57,7 @@ public class DeliverMessage extends SmsPdu implements SgipMessage, Notification 
 
   @Override
   public Partition getPartition() {
-    if (getTpUdhi() == 0) {
+    if (getUserDateHeaders() == null) {
       return new Partition(1, 1, null);
     }
 
@@ -119,7 +112,8 @@ public class DeliverMessage extends SmsPdu implements SgipMessage, Notification 
     setUserNumber(in.readCharSequence(21, StandardCharsets.ISO_8859_1).toString().trim());
     setSpNumber(in.readCharSequence(21, StandardCharsets.ISO_8859_1).toString().trim());
     setTpPid(in.readUnsignedByte());
-    setTpUdhi(in.readUnsignedByte());
+
+    int tpUdhi = in.readUnsignedByte();
 
     int dcs = in.readUnsignedByte();
 
@@ -174,14 +168,6 @@ public class DeliverMessage extends SmsPdu implements SgipMessage, Notification 
     this.tpPid = tpPid;
   }
 
-  public int getTpUdhi() {
-    return tpUdhi;
-  }
-
-  public void setTpUdhi(int tpUdhi) {
-    this.tpUdhi = tpUdhi;
-  }
-
   public String getReserve() {
     return reserve;
   }
@@ -200,7 +186,6 @@ public class DeliverMessage extends SmsPdu implements SgipMessage, Notification 
         ", spNumber='" + spNumber + '\'' +
         ", userNumber='" + userNumber + '\'' +
         ", tpPid=" + tpPid +
-        ", tpUdhi=" + tpUdhi +
         ", reserve='" + reserve + '\'' +
         '}';
   }

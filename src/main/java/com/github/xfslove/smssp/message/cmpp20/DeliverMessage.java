@@ -55,11 +55,6 @@ public class DeliverMessage extends SmsPdu implements CmppMessage, Notification 
   private int tpPid;
 
   /**
-   * GSM协议类型。详细解释请参考GSM03.40中的9.2.3.23，仅使用1位，右对齐
-   */
-  private int tpUdhi;
-
-  /**
    * 源终端MSISDN号码（状态报告时填为CMPP_SUBMIT消息的目的终端号码）
    */
   private String srcTerminalId;
@@ -91,7 +86,7 @@ public class DeliverMessage extends SmsPdu implements CmppMessage, Notification 
 
   @Override
   public Partition getPartition() {
-    if (getTpUdhi() == 0) {
+    if (getUserDateHeaders() == null) {
       return new Partition(1, 1, null);
     }
 
@@ -149,7 +144,6 @@ public class DeliverMessage extends SmsPdu implements CmppMessage, Notification 
     setTpPid(in.readUnsignedByte());
 
     int tpUdhi = in.readUnsignedByte();
-    setTpUdhi(tpUdhi);
 
     int dcs = in.readUnsignedByte();
 
@@ -214,14 +208,6 @@ public class DeliverMessage extends SmsPdu implements CmppMessage, Notification 
 
   public void setTpPid(int tpPid) {
     this.tpPid = tpPid;
-  }
-
-  public int getTpUdhi() {
-    return tpUdhi;
-  }
-
-  public void setTpUdhi(int tpUdhi) {
-    this.tpUdhi = tpUdhi;
   }
 
   public String getSrcTerminalId() {
@@ -406,7 +392,6 @@ public class DeliverMessage extends SmsPdu implements CmppMessage, Notification 
         ", destId='" + destId + '\'' +
         ", serviceId='" + serviceId + '\'' +
         ", tpPid=" + tpPid +
-        ", tpUdhi=" + tpUdhi +
         ", srcTerminalId='" + srcTerminalId + '\'' +
         ", registeredDelivery=" + registeredDelivery +
         ", reserve='" + reserve + '\'' +
