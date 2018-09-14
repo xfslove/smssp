@@ -74,11 +74,6 @@ public class SubmitMessage extends SmsPdu implements CmppMessage, Request {
   private int tpPid = 0;
 
   /**
-   * GSM协议类型。详细是解释请参考GSM03.40中的9.2.3.23,仅使用1位，右对齐
-   */
-  private int tpUdhi = 0;
-
-  /**
    * 信息内容来源(SP_Id)
    */
   private String msgSrc;
@@ -168,7 +163,11 @@ public class SubmitMessage extends SmsPdu implements CmppMessage, Request {
     out.writeBytes(ByteUtil.getStringOctetBytes(getFeeTerminalId(), 21, StandardCharsets.ISO_8859_1));
     // 1 byte
     out.writeByte(getTpPid());
-    out.writeByte(getTpUdhi());
+
+    byte[] udh = getUdhBytes();
+    // 1 byte
+    int tpUdhi = udh.length == 0 ? 0 : 1;
+    out.writeByte(tpUdhi);
 
     out.writeByte(getDcs().getValue());
 
@@ -189,7 +188,6 @@ public class SubmitMessage extends SmsPdu implements CmppMessage, Request {
       out.writeBytes(ByteUtil.getStringOctetBytes(destTerminalId, 21, StandardCharsets.ISO_8859_1));
     }
 
-    byte[] udh = getUdhBytes();
     byte[] ud = getUdBytes();
     out.writeByte(udh.length + ud.length);
     out.writeBytes(udh);
@@ -275,14 +273,6 @@ public class SubmitMessage extends SmsPdu implements CmppMessage, Request {
     this.tpPid = tpPid;
   }
 
-  public int getTpUdhi() {
-    return tpUdhi;
-  }
-
-  public void setTpUdhi(int tpUdhi) {
-    this.tpUdhi = tpUdhi;
-  }
-
   public String getMsgSrc() {
     return msgSrc;
   }
@@ -363,7 +353,6 @@ public class SubmitMessage extends SmsPdu implements CmppMessage, Request {
         ", feeUserType=" + feeUserType +
         ", feeTerminalId='" + feeTerminalId + '\'' +
         ", tpPid=" + tpPid +
-        ", tpUdhi=" + tpUdhi +
         ", msgSrc='" + msgSrc + '\'' +
         ", feeType='" + feeType + '\'' +
         ", feeCode='" + feeCode + '\'' +

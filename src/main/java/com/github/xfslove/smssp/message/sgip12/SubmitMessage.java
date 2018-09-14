@@ -117,13 +117,6 @@ public class SubmitMessage extends SmsPdu implements SgipMessage, Request {
   private int tpPid = 0;
 
   /**
-   * GSM协议类型。详细解释请参考GSM03.40中的9.2.3.23,仅使用1位
-   * 0: 没有udh
-   * 1: 有udh
-   */
-  private int tpUdhi = 0;
-
-  /**
    * 信息类型：
    * 0-短消息信息
    * 其它：待定
@@ -192,13 +185,16 @@ public class SubmitMessage extends SmsPdu implements SgipMessage, Request {
     // 1 byte
     out.writeByte(getReportFlag());
     out.writeByte(getTpPid());
-    out.writeByte(getTpUdhi());
+
+    byte[] udh = getUdhBytes();
+    // 1 byte
+    int tpUdhi = udh.length == 0 ? 0 : 1;
+    out.writeByte(tpUdhi);
 
     // 1 byte
     out.writeByte(getDcs().getValue());
     out.writeByte(getMessageType());
     // 4 bytes
-    byte[] udh = getUdhBytes();
     byte[] ud = getUdBytes();
     out.writeInt(udh.length + ud.length);
     out.writeBytes(udh);
@@ -332,14 +328,6 @@ public class SubmitMessage extends SmsPdu implements SgipMessage, Request {
     this.tpPid = tpPid;
   }
 
-  public int getTpUdhi() {
-    return tpUdhi;
-  }
-
-  public void setTpUdhi(int tpUdhi) {
-    this.tpUdhi = tpUdhi;
-  }
-
   public int getMessageType() {
     return messageType;
   }
@@ -378,7 +366,6 @@ public class SubmitMessage extends SmsPdu implements SgipMessage, Request {
         ", scheduleTime='" + scheduleTime + '\'' +
         ", reportFlag=" + reportFlag +
         ", tpPid=" + tpPid +
-        ", tpUdhi=" + tpUdhi +
         ", messageType=" + messageType +
         ", reserve='" + reserve + '\'' +
         '}';

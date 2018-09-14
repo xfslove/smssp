@@ -183,6 +183,9 @@ public class SgipClient {
     private String serviceType;
     private int morelatetoMTFlag = 3;
 
+    // todo 暂时的
+    private int udhi = 0;
+
     public MessageBuilder phones(String... phones) {
       this.phones = phones;
       return this;
@@ -223,6 +226,11 @@ public class SgipClient {
       return this;
     }
 
+    public MessageBuilder udhi(int udhi) {
+      this.udhi = udhi;
+      return this;
+    }
+
     public SubmitMessage[] split(Sequence sequence) {
 
       SmsTextMessage text = new SmsTextMessage(this.text, SmsDcs.general(DcsGroup.GENERAL_DATA_CODING, alphabet, msgClass));
@@ -239,6 +247,7 @@ public class SgipClient {
         message.setCorpId(corpId);
         message.setServiceType(serviceType);
         message.setMorelatetoMTFlag(morelatetoMTFlag);
+        message.setTpUdhi(udhi);
 
         message.setUserData(pdus[i].getUserData());
         split[i] = message;
