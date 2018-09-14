@@ -16,12 +16,12 @@ public interface Notification {
   Partition getPartition();
 
   /**
-   * 把下一个通知合并进来
+   * 把下一个通知拼起来
    *
    * @param next next notification
    * @return true if success
    */
-  boolean merge(Notification next);
+  boolean concat(Notification next);
 
   class Partition {
     /**

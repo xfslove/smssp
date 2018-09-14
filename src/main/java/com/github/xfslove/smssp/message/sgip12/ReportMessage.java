@@ -68,7 +68,7 @@ public class ReportMessage implements SgipMessage, Notification {
   }
 
   @Override
-  public boolean merge(Notification next) {
+  public boolean concat(Notification next) {
     // no need implement
     return false;
   }

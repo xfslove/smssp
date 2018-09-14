@@ -78,7 +78,7 @@ public class DefaultProxyListener implements NotificationListener {
         full = one;
       } else {
 
-        if (!full.merge(one)) {
+        if (!full.concat(one)) {
           LOGGER.info("drop message {} cause by it can't merged", notification);
         }
       }

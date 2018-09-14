@@ -88,7 +88,7 @@ public class DeliverMessage extends SmsPdu implements SgipMessage, Notification 
   }
 
   @Override
-  public boolean merge(Notification next) {
+  public boolean concat(Notification next) {
     // notice: 暂时只做普通短信的合并
     DeliverMessage d = (DeliverMessage) next;
     if (getDcs().getValue() != d.getDcs().getValue()) {
