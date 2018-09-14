@@ -24,11 +24,13 @@ import io.netty.channel.pool.ChannelPool;
 import io.netty.channel.pool.FixedChannelPool;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.util.concurrent.DefaultEventExecutorGroup;
+import io.netty.util.concurrent.DefaultPromise;
 import io.netty.util.concurrent.DefaultThreadFactory;
 import io.netty.util.concurrent.EventExecutorGroup;
-import io.netty.util.concurrent.Future;
 import io.netty.util.internal.logging.InternalLogger;
 import io.netty.util.internal.logging.InternalLoggerFactory;
+
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author hanwen
@@ -125,18 +127,14 @@ public class SgipClient {
 
     Channel channel = null;
     try {
-      Future<Channel> future = channelPool.acquire().sync();
-      if (!future.isSuccess()) {
-        LOGGER.info("acquired channel failure");
-        return null;
-      }
-      channel = future.getNow();
+      DefaultPromise<Channel> future = (DefaultPromise<Channel>) channelPool.acquire();
+      channel = future.get(timeout, TimeUnit.MILLISECONDS);
 
       for (SubmitMessage submit : req) {
         channel.writeAndFlush(submit);
       }
-    } catch (InterruptedException e) {
-      LOGGER.info("acquired channel failure, be interrupted");
+    } catch (Exception e) {
+      LOGGER.info("acquired channel failure, exception message: {}", e.getMessage());
       return null;
     } finally {
       if (channel != null) {
@@ -151,7 +149,7 @@ public class SgipClient {
       try {
         response = (SubmitRespMessage) new DefaultFuture(req[i]).getResponse(timeout);
       } catch (InterruptedException e) {
-        LOGGER.info("get response failure, be interrupted");
+        LOGGER.info("get response failure, exception message: {}", e.getMessage());
       }
       resp[i] = response;
     }
