@@ -1,11 +1,13 @@
 package com.github.xfslove.smssp.client.cmpp;
 
+import com.github.xfslove.smsj.sms.SmsMessage;
 import com.github.xfslove.smsj.sms.SmsPdu;
 import com.github.xfslove.smsj.sms.SmsTextMessage;
 import com.github.xfslove.smsj.sms.dcs.DcsGroup;
 import com.github.xfslove.smsj.sms.dcs.SmsAlphabet;
 import com.github.xfslove.smsj.sms.dcs.SmsDcs;
 import com.github.xfslove.smsj.sms.dcs.SmsMsgClass;
+import com.github.xfslove.smsj.wap.mms.SmsMmsNotificationMessage;
 import com.github.xfslove.smssp.client.DefaultFuture;
 import com.github.xfslove.smssp.client.ResponseListener;
 import com.github.xfslove.smssp.message.cmpp20.SubmitMessage;
@@ -31,6 +33,7 @@ import io.netty.util.internal.PlatformDependent;
 import io.netty.util.internal.SocketUtils;
 import io.netty.util.internal.logging.InternalLogger;
 import io.netty.util.internal.logging.InternalLoggerFactory;
+import org.apache.commons.lang3.StringUtils;
 
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
@@ -236,6 +239,12 @@ public class CmppClient {
     private String serviceId;
     private String msgSrc;
 
+    private String transactionId;
+    private String from;
+    private int size;
+    private String contentLocation;
+    private int expiry = 7 * 24 * 60 * 60;
+
     public MessageBuilder text(String text) {
       this.text = text;
       return this;
@@ -271,25 +280,60 @@ public class CmppClient {
       return this;
     }
 
-    public SubmitMessage[] split(Sequence sequence) {
-      SmsTextMessage text = new SmsTextMessage(this.text, SmsDcs.general(DcsGroup.GENERAL_DATA_CODING, alphabet, msgClass));
 
-      SmsPdu[] pdus = text.getPdus();
+    public MessageBuilder transactionId(String transactionId) {
+      this.transactionId = transactionId;
+      return this;
+    }
+
+    public MessageBuilder from(String from) {
+      this.from = from;
+      return this;
+    }
+
+    public MessageBuilder size(int size) {
+      this.size = size;
+      return this;
+    }
+
+    public MessageBuilder contentLocation(String contentLocation) {
+      this.contentLocation = contentLocation;
+      return this;
+    }
+
+    public MessageBuilder expiry(int expiry) {
+      this.expiry = expiry;
+      return this;
+    }
+
+    public SubmitMessage[] split(Sequence sequence) {
+
+      SmsMessage message;
+      if (StringUtils.isNoneBlank(text)) {
+        message = new SmsTextMessage(this.text, SmsDcs.general(DcsGroup.GENERAL_DATA_CODING, alphabet, msgClass));
+      } else {
+        message = new SmsMmsNotificationMessage(contentLocation, size);
+        ((SmsMmsNotificationMessage) message).setFrom(from + "/TYPE=PLMN");
+        ((SmsMmsNotificationMessage) message).setTransactionId(transactionId);
+        ((SmsMmsNotificationMessage) message).setExpiry(expiry);
+      }
+
+      SmsPdu[] pdus = message.getPdus();
       SubmitMessage[] split = new SubmitMessage[pdus.length];
       for (int i = 0; i < pdus.length; i++) {
-        final SubmitMessage message = new SubmitMessage(sequence);
+        final SubmitMessage submit = new SubmitMessage(sequence);
 
         for (String phone : phones) {
-          message.getDestTerminalIds().add(phone);
+          submit.getDestTerminalIds().add(phone);
         }
-        message.setSrcId(srcId);
-        message.setServiceId(serviceId);
-        message.setPkTotal(pdus.length);
-        message.setPkNumber(i + 1);
-        message.setMsgSrc(msgSrc);
+        submit.setSrcId(srcId);
+        submit.setServiceId(serviceId);
+        submit.setPkTotal(pdus.length);
+        submit.setPkNumber(i + 1);
+        submit.setMsgSrc(msgSrc);
 
-        message.setUserData(pdus[i].getUserData());
-        split[i] = message;
+        submit.setUserData(pdus[i].getUserData());
+        split[i] = submit;
       }
 
       return split;

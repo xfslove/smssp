@@ -1,11 +1,13 @@
 package com.github.xfslove.smssp.client.sgip;
 
+import com.github.xfslove.smsj.sms.SmsMessage;
 import com.github.xfslove.smsj.sms.SmsPdu;
 import com.github.xfslove.smsj.sms.SmsTextMessage;
 import com.github.xfslove.smsj.sms.dcs.DcsGroup;
 import com.github.xfslove.smsj.sms.dcs.SmsAlphabet;
 import com.github.xfslove.smsj.sms.dcs.SmsDcs;
 import com.github.xfslove.smsj.sms.dcs.SmsMsgClass;
+import com.github.xfslove.smsj.wap.mms.SmsMmsNotificationMessage;
 import com.github.xfslove.smssp.client.DefaultFuture;
 import com.github.xfslove.smssp.client.ResponseListener;
 import com.github.xfslove.smssp.message.sequence.DefaultSgipSequence;
@@ -29,6 +31,7 @@ import io.netty.util.concurrent.DefaultThreadFactory;
 import io.netty.util.concurrent.EventExecutorGroup;
 import io.netty.util.internal.logging.InternalLogger;
 import io.netty.util.internal.logging.InternalLoggerFactory;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.concurrent.TimeUnit;
 
@@ -181,6 +184,12 @@ public class SgipClient {
     private String serviceType;
     private int morelatetoMTFlag = 3;
 
+    private String transactionId;
+    private String from;
+    private int size;
+    private String contentLocation;
+    private int expiry = 7 * 24 * 60 * 60;
+
     public MessageBuilder phones(String... phones) {
       this.phones = phones;
       return this;
@@ -191,7 +200,7 @@ public class SgipClient {
       return this;
     }
 
-    public MessageBuilder alphabet(SmsAlphabet alphabet) {
+    public MessageBuilder charset(SmsAlphabet alphabet) {
       this.alphabet = alphabet;
       return this;
     }
@@ -221,25 +230,58 @@ public class SgipClient {
       return this;
     }
 
+    public MessageBuilder transactionId(String transactionId) {
+      this.transactionId = transactionId;
+      return this;
+    }
+
+    public MessageBuilder from(String from) {
+      this.from = from;
+      return this;
+    }
+
+    public MessageBuilder size(int size) {
+      this.size = size;
+      return this;
+    }
+
+    public MessageBuilder contentLocation(String contentLocation) {
+      this.contentLocation = contentLocation;
+      return this;
+    }
+
+    public MessageBuilder expiry(int expiry) {
+      this.expiry = expiry;
+      return this;
+    }
+
     public SubmitMessage[] split(Sequence sequence) {
 
-      SmsTextMessage text = new SmsTextMessage(this.text, SmsDcs.general(DcsGroup.GENERAL_DATA_CODING, alphabet, msgClass));
+      SmsMessage message;
+      if (StringUtils.isNoneBlank(text)) {
+        message = new SmsTextMessage(this.text, SmsDcs.general(DcsGroup.GENERAL_DATA_CODING, alphabet, msgClass));
+      } else {
+        message = new SmsMmsNotificationMessage(contentLocation, size);
+        ((SmsMmsNotificationMessage) message).setFrom(from + "/TYPE=PLMN");
+        ((SmsMmsNotificationMessage) message).setTransactionId(transactionId);
+        ((SmsMmsNotificationMessage) message).setExpiry(expiry);
+      }
 
-      SmsPdu[] pdus = text.getPdus();
+      SmsPdu[] pdus = message.getPdus();
       SubmitMessage[] split = new SubmitMessage[pdus.length];
       for (int i = 0; i < pdus.length; i++) {
-        final SubmitMessage message = new SubmitMessage(sequence);
+        final SubmitMessage submit = new SubmitMessage(sequence);
 
         for (String phone : phones) {
-          message.getUserNumbers().add(phone);
+          submit.getUserNumbers().add(phone);
         }
-        message.setSpNumber(spNumber);
-        message.setCorpId(corpId);
-        message.setServiceType(serviceType);
-        message.setMorelatetoMTFlag(morelatetoMTFlag);
+        submit.setSpNumber(spNumber);
+        submit.setCorpId(corpId);
+        submit.setServiceType(serviceType);
+        submit.setMorelatetoMTFlag(morelatetoMTFlag);
 
-        message.setUserData(pdus[i].getUserData());
-        split[i] = message;
+        submit.setUserData(pdus[i].getUserData());
+        split[i] = submit;
       }
 
       return split;
