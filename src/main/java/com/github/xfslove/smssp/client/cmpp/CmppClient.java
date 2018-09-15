@@ -260,7 +260,7 @@ public class CmppClient {
       return this;
     }
 
-    public MessageBuilder messsageClass(SmsMsgClass msgClass) {
+    public MessageBuilder messageClass(SmsMsgClass msgClass) {
       this.msgClass = msgClass;
       return this;
     }
