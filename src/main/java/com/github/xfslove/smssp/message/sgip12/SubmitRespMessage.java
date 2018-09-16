@@ -1,7 +1,7 @@
 package com.github.xfslove.smssp.message.sgip12;
 
 import com.github.xfslove.smssp.client.Response;
-import com.github.xfslove.smssp.message.sequence.Sequence;
+import com.github.xfslove.smssp.message.Sequence;
 import io.netty.buffer.ByteBuf;
 
 import java.nio.charset.StandardCharsets;

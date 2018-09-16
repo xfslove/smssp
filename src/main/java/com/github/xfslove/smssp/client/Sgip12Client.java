@@ -1,4 +1,4 @@
-package com.github.xfslove.smssp.client.sgip;
+package com.github.xfslove.smssp.client;
 
 import com.github.xfslove.smsj.sms.SmsMessage;
 import com.github.xfslove.smsj.sms.SmsPdu;
@@ -8,10 +8,8 @@ import com.github.xfslove.smsj.sms.dcs.SmsAlphabet;
 import com.github.xfslove.smsj.sms.dcs.SmsDcs;
 import com.github.xfslove.smsj.sms.dcs.SmsMsgClass;
 import com.github.xfslove.smsj.wap.mms.SmsMmsNotificationMessage;
-import com.github.xfslove.smssp.client.DefaultFuture;
-import com.github.xfslove.smssp.client.ResponseListener;
-import com.github.xfslove.smssp.message.sequence.DefaultSgipSequence;
-import com.github.xfslove.smssp.message.sequence.Sequence;
+import com.github.xfslove.smssp.message.sgip12.DefaultSequence;
+import com.github.xfslove.smssp.message.Sequence;
 import com.github.xfslove.smssp.message.sgip12.SubmitMessage;
 import com.github.xfslove.smssp.message.sgip12.SubmitRespMessage;
 import com.github.xfslove.smssp.netty4.handler.sgip12.client.HandlerInitializer;
@@ -39,9 +37,9 @@ import java.util.concurrent.TimeUnit;
  * @author hanwen
  * created at 2018/9/13
  */
-public class SgipClient {
+public class Sgip12Client {
 
-  private static final InternalLogger LOGGER = InternalLoggerFactory.getInstance(SgipClient.class);
+  private static final InternalLogger LOGGER = InternalLoggerFactory.getInstance(Sgip12Client.class);
 
   private EventLoopGroup workGroup = new NioEventLoopGroup(Math.min(Runtime.getRuntime().availableProcessors() + 1, 32), new DefaultThreadFactory("sgipWorker", true));
 
@@ -66,55 +64,55 @@ public class SgipClient {
   private Sequence sequence;
   private ResponseListener consumer = new DefaultFuture.DefaultListener();
 
-  private SgipClient(int nodeId) {
-    this.sequence = new DefaultSgipSequence(nodeId);
+  private Sgip12Client(int nodeId) {
+    this.sequence = new DefaultSequence(nodeId);
   }
 
-  public static SgipClient newConnection(int nodeId) {
-    return new SgipClient(nodeId);
+  public static Sgip12Client newConnection(int nodeId) {
+    return new Sgip12Client(nodeId);
   }
 
-  public SgipClient loginName(String loginName) {
+  public Sgip12Client loginName(String loginName) {
     this.loginName = loginName;
     return this;
   }
 
-  public SgipClient loginPassword(String loginPassword) {
+  public Sgip12Client loginPassword(String loginPassword) {
     this.loginPassword = loginPassword;
     return this;
   }
 
-  public SgipClient host(String host) {
+  public Sgip12Client host(String host) {
     this.host = host;
     return this;
   }
 
-  public SgipClient port(int port) {
+  public Sgip12Client port(int port) {
     this.port = port;
     return this;
   }
 
-  public SgipClient idleCheckTime(int idleCheckTime) {
+  public Sgip12Client idleCheckTime(int idleCheckTime) {
     this.idleCheckTime = idleCheckTime;
     return this;
   }
 
-  public SgipClient connections(int connections) {
+  public Sgip12Client connections(int connections) {
     this.connections = connections;
     return this;
   }
 
-  public SgipClient sequence(Sequence sequence) {
+  public Sgip12Client sequence(Sequence sequence) {
     this.sequence = sequence;
     return this;
   }
 
-  public SgipClient responseListener(ResponseListener consumer) {
+  public Sgip12Client responseListener(ResponseListener consumer) {
     this.consumer = consumer;
     return this;
   }
 
-  public SgipClient connect() {
+  public Sgip12Client connect() {
 
     HandlerInitializer handler = new HandlerInitializer(loginName, loginPassword, consumer, sequence, bizGroup, idleCheckTime);
 

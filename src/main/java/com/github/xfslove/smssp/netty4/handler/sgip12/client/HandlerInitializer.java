@@ -1,7 +1,7 @@
 package com.github.xfslove.smssp.netty4.handler.sgip12.client;
 
 import com.github.xfslove.smssp.client.ResponseListener;
-import com.github.xfslove.smssp.message.sequence.Sequence;
+import com.github.xfslove.smssp.message.Sequence;
 import com.github.xfslove.smssp.netty4.codec.MesssageLengthCodec;
 import com.github.xfslove.smssp.netty4.codec.sgip12.MessageCodec;
 import com.github.xfslove.smssp.netty4.handler.ExceptionHandler;

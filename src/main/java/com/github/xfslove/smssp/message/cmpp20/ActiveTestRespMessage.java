@@ -1,6 +1,6 @@
 package com.github.xfslove.smssp.message.cmpp20;
 
-import com.github.xfslove.smssp.message.sequence.Sequence;
+import com.github.xfslove.smssp.message.Sequence;
 import io.netty.buffer.ByteBuf;
 
 /**

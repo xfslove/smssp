@@ -1,10 +1,8 @@
 package com.github.xfslove.smssp.message.cmpp20;
 
-import com.github.xfslove.smssp.message.sequence.Sequence;
+import com.github.xfslove.smssp.message.Sequence;
 import com.github.xfslove.smssp.util.ByteUtil;
 import io.netty.buffer.ByteBuf;
-
-import java.nio.charset.StandardCharsets;
 
 /**
  * @author hanwen

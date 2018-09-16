@@ -2,7 +2,7 @@ package com.github.xfslove.smssp.netty4.handler.cmpp20;
 
 import com.github.xfslove.smssp.message.cmpp20.TerminateMessage;
 import com.github.xfslove.smssp.message.cmpp20.TerminateRespMessage;
-import com.github.xfslove.smssp.message.sequence.Sequence;
+import com.github.xfslove.smssp.message.Sequence;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandler;

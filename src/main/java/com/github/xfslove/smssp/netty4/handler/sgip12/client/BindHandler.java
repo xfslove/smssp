@@ -1,6 +1,6 @@
 package com.github.xfslove.smssp.netty4.handler.sgip12.client;
 
-import com.github.xfslove.smssp.message.sequence.Sequence;
+import com.github.xfslove.smssp.message.Sequence;
 import com.github.xfslove.smssp.message.sgip12.BindMessage;
 import com.github.xfslove.smssp.message.sgip12.BindRespMessage;
 import io.netty.channel.Channel;

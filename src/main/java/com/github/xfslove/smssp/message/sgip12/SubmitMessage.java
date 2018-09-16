@@ -3,7 +3,7 @@ package com.github.xfslove.smssp.message.sgip12;
 import com.github.xfslove.smsj.sms.SmsPdu;
 import com.github.xfslove.smsj.util.StringUtil;
 import com.github.xfslove.smssp.client.Request;
-import com.github.xfslove.smssp.message.sequence.Sequence;
+import com.github.xfslove.smssp.message.Sequence;
 import com.github.xfslove.smssp.util.ByteUtil;
 import io.netty.buffer.ByteBuf;
 

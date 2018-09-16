@@ -1,6 +1,6 @@
-package com.github.xfslove.smssp.message.sequence;
+package com.github.xfslove.smssp.message.sgip12;
 
-import com.github.xfslove.smssp.message.sgip12.SequenceNumber;
+import com.github.xfslove.smssp.message.Sequence;
 import org.apache.commons.lang3.time.DateFormatUtils;
 
 import java.util.Date;
@@ -10,13 +10,13 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @author hanwen
  * created at 2018/9/4
  */
-public class DefaultSgipSequence implements Sequence<SequenceNumber> {
+public class DefaultSequence implements Sequence<SequenceNumber> {
 
   private AtomicInteger seq = new AtomicInteger(1);
 
   private final int nodeId;
 
-  public DefaultSgipSequence(int nodeId) {
+  public DefaultSequence(int nodeId) {
     this.nodeId = nodeId;
   }
 

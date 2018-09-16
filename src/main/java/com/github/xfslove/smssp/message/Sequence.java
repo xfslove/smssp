@@ -1,4 +1,4 @@
-package com.github.xfslove.smssp.message.sequence;
+package com.github.xfslove.smssp.message;
 
 /**
  * @author hanwen

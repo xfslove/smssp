@@ -1,4 +1,4 @@
-package com.github.xfslove.smssp.client.cmpp;
+package com.github.xfslove.smssp.client;
 
 import com.github.xfslove.smsj.sms.SmsMessage;
 import com.github.xfslove.smsj.sms.SmsPdu;
@@ -8,12 +8,10 @@ import com.github.xfslove.smsj.sms.dcs.SmsAlphabet;
 import com.github.xfslove.smsj.sms.dcs.SmsDcs;
 import com.github.xfslove.smsj.sms.dcs.SmsMsgClass;
 import com.github.xfslove.smsj.wap.mms.SmsMmsNotificationMessage;
-import com.github.xfslove.smssp.client.DefaultFuture;
-import com.github.xfslove.smssp.client.ResponseListener;
 import com.github.xfslove.smssp.message.cmpp20.SubmitMessage;
 import com.github.xfslove.smssp.message.cmpp20.SubmitRespMessage;
-import com.github.xfslove.smssp.message.sequence.DefaultCmppSequence;
-import com.github.xfslove.smssp.message.sequence.Sequence;
+import com.github.xfslove.smssp.message.cmpp20.DefaultSequence;
+import com.github.xfslove.smssp.message.Sequence;
 import com.github.xfslove.smssp.netty4.handler.cmpp20.mix.HandlerInitializer;
 import com.github.xfslove.smssp.netty4.handler.cmpp20.mix.PoolHandler;
 import com.github.xfslove.smssp.server.DefaultProxyListener;
@@ -45,9 +43,9 @@ import java.util.concurrent.TimeUnit;
  * @author hanwen
  * created at 2018/9/4
  */
-public class CmppClient {
+public class Cmpp20Client {
 
-  private static final InternalLogger LOGGER = InternalLoggerFactory.getInstance(CmppClient.class);
+  private static final InternalLogger LOGGER = InternalLoggerFactory.getInstance(Cmpp20Client.class);
 
   private EventLoopGroup workGroup = new NioEventLoopGroup(Math.min(Runtime.getRuntime().availableProcessors() + 1, 32), new DefaultThreadFactory("cmppWorker", true));
 
@@ -70,7 +68,7 @@ public class CmppClient {
   private int connections = 1;
   private int idleCheckTime = 300;
 
-  private Sequence sequence = new DefaultCmppSequence();
+  private Sequence sequence = new DefaultSequence();
   private ResponseListener consumer = new DefaultFuture.DefaultListener();
   private NotificationListener consumer2 = new NotificationListener() {
     @Override
@@ -79,59 +77,59 @@ public class CmppClient {
     }
   };
 
-  private CmppClient() {
+  private Cmpp20Client() {
   }
 
-  public static CmppClient newConnection() {
-    return new CmppClient();
+  public static Cmpp20Client newConnection() {
+    return new Cmpp20Client();
   }
 
-  public CmppClient loginName(String loginName) {
+  public Cmpp20Client loginName(String loginName) {
     this.loginName = loginName;
     return this;
   }
 
-  public CmppClient loginPassword(String loginPassword) {
+  public Cmpp20Client loginPassword(String loginPassword) {
     this.loginPassword = loginPassword;
     return this;
   }
 
-  public CmppClient host(String host) {
+  public Cmpp20Client host(String host) {
     this.host = host;
     return this;
   }
 
-  public CmppClient port(int port) {
+  public Cmpp20Client port(int port) {
     this.port = port;
     return this;
   }
 
-  public CmppClient localPorts(int... localPorts) {
+  public Cmpp20Client localPorts(int... localPorts) {
     this.localPorts = localPorts;
     return this;
   }
 
-  public CmppClient connections(int connections) {
+  public Cmpp20Client connections(int connections) {
     this.connections = connections;
     return this;
   }
 
-  public CmppClient sequence(Sequence sequence) {
+  public Cmpp20Client sequence(Sequence sequence) {
     this.sequence = sequence;
     return this;
   }
 
-  public CmppClient responseListener(ResponseListener consumer) {
+  public Cmpp20Client responseListener(ResponseListener consumer) {
     this.consumer = consumer;
     return this;
   }
 
-  public CmppClient notificationListener(NotificationListener consumer2) {
+  public Cmpp20Client notificationListener(NotificationListener consumer2) {
     this.consumer2 = consumer2;
     return this;
   }
 
-  public CmppClient idleCheckTime(int idleCheckTime) {
+  public Cmpp20Client idleCheckTime(int idleCheckTime) {
     this.idleCheckTime = idleCheckTime;
     return this;
   }
@@ -141,7 +139,7 @@ public class CmppClient {
    *
    * @return this
    */
-  public CmppClient connect() {
+  public Cmpp20Client connect() {
 
     HandlerInitializer mix = new HandlerInitializer(loginName, loginPassword, new DefaultProxyListener(consumer2), consumer, sequence, bizGroup, idleCheckTime);
 
@@ -350,7 +348,7 @@ public class CmppClient {
     @Override
     protected ChannelFuture connectChannel(Bootstrap bs) {
       CmppHealthChecker checker = (CmppHealthChecker) healthChecker();
-      return bs.connect(SocketUtils.socketAddress(CmppClient.this.host, CmppClient.this.port), checker.availableAddress());
+      return bs.connect(SocketUtils.socketAddress(Cmpp20Client.this.host, Cmpp20Client.this.port), checker.availableAddress());
     }
   }
 
@@ -359,7 +357,7 @@ public class CmppClient {
     private Deque<SocketAddress> availableAddress = PlatformDependent.newConcurrentDeque();
 
     CmppHealthChecker() {
-      for (int localPort : CmppClient.this.localPorts) {
+      for (int localPort : Cmpp20Client.this.localPorts) {
         availableAddress.offer(new InetSocketAddress(localPort));
       }
     }

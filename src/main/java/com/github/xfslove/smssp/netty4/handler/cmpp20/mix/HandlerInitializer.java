@@ -1,7 +1,7 @@
 package com.github.xfslove.smssp.netty4.handler.cmpp20.mix;
 
 import com.github.xfslove.smssp.client.ResponseListener;
-import com.github.xfslove.smssp.message.sequence.Sequence;
+import com.github.xfslove.smssp.message.Sequence;
 import com.github.xfslove.smssp.netty4.codec.MesssageLengthCodec;
 import com.github.xfslove.smssp.netty4.codec.cmpp20.MessageCodec;
 import com.github.xfslove.smssp.netty4.handler.ExceptionHandler;
