@@ -52,7 +52,7 @@ public class DeliverHandler extends ChannelDuplexHandler {
         ByteBuf in = Unpooled.wrappedBuffer(deliver.getUdBytes());
         DeliverMessage.Report report = deliver.createReport();
         report.read(in);
-        ReferenceCountUtil.release(in);
+        in.release();
 
         consumer.done(report);
         return;
