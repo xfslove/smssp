@@ -85,7 +85,7 @@ public class DeliverHandler extends ChannelDuplexHandler {
         ctx.writeAndFlush(deliverResp).addListener(new GenericFutureListener<Future<? super Void>>() {
           @Override
           public void operationComplete(Future<? super Void> listener) throws Exception {
-            logger.info("discard[NOT_VALID] deliver message {} and close channel", msg);
+            logger.warn("discard[NOT_VALID] deliver message {} and close channel", msg);
             ctx.channel().close();
           }
         });

@@ -20,7 +20,7 @@ public class ExceptionHandler extends ChannelDuplexHandler {
   @Override
   public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
 
-    logger.error("catch exception and close channel", cause);
+    logger.warn("catch exception message: {}, and close channel", cause.getMessage());
     ctx.channel().close();
   }
 }

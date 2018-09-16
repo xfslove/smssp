@@ -161,11 +161,11 @@ public class CmppClient {
         if (future.isSuccess()) {
           channels[i] = future.getNow();
         } else {
-          LOGGER.info("init channel failure when connect to [{}:{}]", host, port);
+          LOGGER.warn("init channel failure when connect to [{}:{}]", host, port);
         }
       }
     } catch (InterruptedException e) {
-      LOGGER.info("init channel failure when connect to [{}:{}], be interrupted", host, port);
+      LOGGER.warn("init channel failure when connect to [{}:{}], be interrupted", host, port);
     } finally {
       for (Channel channel : channels) {
         if (channel != null) {
@@ -204,7 +204,7 @@ public class CmppClient {
         channel.writeAndFlush(submit);
       }
     } catch (Exception e) {
-      LOGGER.info("acquired channel failure, exception message: {}", e.getMessage());
+      LOGGER.warn("acquired channel failure, exception message: {}", e.getMessage());
       return null;
     } finally {
       if (channel != null) {
@@ -219,7 +219,7 @@ public class CmppClient {
       try {
         response = (SubmitRespMessage) new DefaultFuture(req[i]).getResponse(timeout);
       } catch (InterruptedException e) {
-        LOGGER.info("get response failure, exception message: {}", e.getMessage());
+        LOGGER.warn("get response failure, exception message: {}", e.getMessage());
       }
       resp[i] = response;
     }

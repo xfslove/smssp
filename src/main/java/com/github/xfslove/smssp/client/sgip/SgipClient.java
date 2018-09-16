@@ -152,7 +152,7 @@ public class SgipClient {
       try {
         response = (SubmitRespMessage) new DefaultFuture(req[i]).getResponse(timeout);
       } catch (InterruptedException e) {
-        LOGGER.info("get response failure, exception message: {}", e.getMessage());
+        LOGGER.warn("get response failure, exception message: {}", e.getMessage());
       }
       resp[i] = response;
     }

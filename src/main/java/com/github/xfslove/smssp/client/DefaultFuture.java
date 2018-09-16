@@ -25,7 +25,7 @@ public class DefaultFuture implements ResponseFuture {
 
           RemovalCause cause = notification.getCause();
           if (!RemovalCause.EXPLICIT.equals(cause)) {
-            LOGGER.info("drop cached future {} cause by {}", notification.getValue().request, cause);
+            LOGGER.warn("drop cached future {} cause by {}", notification.getValue().request, cause);
           }
 
         }
@@ -62,7 +62,7 @@ public class DefaultFuture implements ResponseFuture {
       }
       if (!isDone()) {
         FUTURES.remove(request.getId());
-        LOGGER.info("drop request message {} cause by timeout", request);
+        LOGGER.warn("drop request message {} cause by timeout", request);
         return null;
       }
     }
@@ -90,7 +90,7 @@ public class DefaultFuture implements ResponseFuture {
     if (future != null) {
       future.receive(response);
     } else {
-      LOGGER.info("drop received unrelated response message {}", response);
+      LOGGER.warn("drop received unrelated response message {}", response);
     }
   }
 

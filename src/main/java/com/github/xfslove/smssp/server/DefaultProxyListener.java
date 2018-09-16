@@ -23,7 +23,7 @@ public class DefaultProxyListener implements NotificationListener {
 
           RemovalCause cause = notification.getCause();
           if (!RemovalCause.EXPLICIT.equals(cause)) {
-            LOGGER.info("drop cached notification message {} cause by {}", notification.getValue(), cause);
+            LOGGER.warn("drop cached notification message {} cause by {}", notification.getValue(), cause);
           }
 
         }
@@ -45,7 +45,7 @@ public class DefaultProxyListener implements NotificationListener {
 
     Notification.Partition partition = notification.getPartition();
     if (partition == null) {
-      LOGGER.info("drop received notification message {}, maybe it's not extract partition info", notification);
+      LOGGER.warn("drop received notification message {}, maybe it's not extract partition info", notification);
       return;
     }
 
@@ -79,7 +79,7 @@ public class DefaultProxyListener implements NotificationListener {
       } else {
 
         if (!full.concat(one)) {
-          LOGGER.info("drop message {} cause by it can't merged", notification);
+          LOGGER.warn("drop message {} cause by it can't merged", notification);
         }
       }
     }
