@@ -332,6 +332,7 @@ public class CmppClient {
         submit.setPkNumber(i + 1);
         submit.setMsgSrc(msgSrc);
 
+        submit.setUserDataHeaders(pdus[i].getUserDateHeaders());
         submit.setUserData(pdus[i].getUserData());
         split[i] = submit;
       }

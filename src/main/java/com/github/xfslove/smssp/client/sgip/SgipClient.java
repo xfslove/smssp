@@ -280,6 +280,7 @@ public class SgipClient {
         submit.setServiceType(serviceType);
         submit.setMorelatetoMTFlag(morelatetoMTFlag);
 
+        submit.setUserDataHeaders(pdus[i].getUserDateHeaders());
         submit.setUserData(pdus[i].getUserData());
         split[i] = submit;
       }
