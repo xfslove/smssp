@@ -8,10 +8,10 @@ import com.github.xfslove.smsj.sms.dcs.SmsAlphabet;
 import com.github.xfslove.smsj.sms.dcs.SmsDcs;
 import com.github.xfslove.smsj.sms.dcs.SmsMsgClass;
 import com.github.xfslove.smsj.wap.mms.SmsMmsNotificationMessage;
+import com.github.xfslove.smssp.message.Sequence;
+import com.github.xfslove.smssp.message.cmpp20.DefaultSequence;
 import com.github.xfslove.smssp.message.cmpp20.SubmitMessage;
 import com.github.xfslove.smssp.message.cmpp20.SubmitRespMessage;
-import com.github.xfslove.smssp.message.cmpp20.DefaultSequence;
-import com.github.xfslove.smssp.message.Sequence;
 import com.github.xfslove.smssp.netty4.handler.cmpp20.mix.HandlerInitializer;
 import com.github.xfslove.smssp.netty4.handler.cmpp20.mix.PoolHandler;
 import com.github.xfslove.smssp.server.DefaultProxyListener;
@@ -192,6 +192,10 @@ public class Cmpp20Client {
       message.msgSrc(loginName);
     }
     SubmitMessage[] req = message.split(sequence);
+    DefaultFuture[] futures = new DefaultFuture[req.length];
+    for (int i = 0; i < req.length; i++) {
+      futures[i] = new DefaultFuture(req[i]);
+    }
 
     Channel channel = null;
     try {
@@ -215,7 +219,7 @@ public class Cmpp20Client {
 
       SubmitRespMessage response = null;
       try {
-        response = (SubmitRespMessage) new DefaultFuture(req[i]).getResponse(timeout);
+        response = (SubmitRespMessage) futures[i].getResponse(timeout);
       } catch (InterruptedException e) {
         LOGGER.warn("get response failure, exception message: {}", e.getMessage());
       }

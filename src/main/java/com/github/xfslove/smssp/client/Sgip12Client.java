@@ -125,6 +125,10 @@ public class Sgip12Client {
 
   public SubmitRespMessage[] submit(MessageBuilder message, int timeout) {
     SubmitMessage[] req = message.split(sequence);
+    DefaultFuture[] futures = new DefaultFuture[req.length];
+    for (int i = 0; i < req.length; i++) {
+      futures[i] = new DefaultFuture(req[i]);
+    }
 
     Channel channel = null;
     try {
@@ -143,12 +147,12 @@ public class Sgip12Client {
       }
     }
 
-    SubmitRespMessage[] resp = new SubmitRespMessage[req.length];
+    SubmitRespMessage[] resp = new SubmitRespMessage[futures.length];
     for (int i = 0; i < req.length; i++) {
 
       SubmitRespMessage response = null;
       try {
-        response = (SubmitRespMessage) new DefaultFuture(req[i]).getResponse(timeout);
+        response = (SubmitRespMessage) futures[i].getResponse(timeout);
       } catch (InterruptedException e) {
         LOGGER.warn("get response failure, exception message: {}", e.getMessage());
       }
