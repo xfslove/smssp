@@ -31,6 +31,7 @@ import io.netty.util.internal.logging.InternalLogger;
 import io.netty.util.internal.logging.InternalLoggerFactory;
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -120,6 +121,7 @@ public class Sgip12Client {
 
     channelPool = new FixedChannelPool(bootstrap, new PoolHandler(handler), connections);
 
+    LOGGER.info("init connection pool to [{}:{}] success", host, port);
     return this;
   }
 

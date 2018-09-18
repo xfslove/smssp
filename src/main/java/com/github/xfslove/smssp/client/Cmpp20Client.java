@@ -172,7 +172,7 @@ public class Cmpp20Client {
       }
     }
 
-    LOGGER.info("connect to [{}:{}] success, listen localPorts:{}", host, port, Arrays.toString(localPorts));
+    LOGGER.info("init connection pool to [{}:{}] success, listen localPorts:{}", host, port, Arrays.toString(localPorts));
 
     return this;
   }
