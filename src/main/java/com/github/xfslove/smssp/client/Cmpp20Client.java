@@ -35,7 +35,6 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
-import java.util.Arrays;
 import java.util.Deque;
 import java.util.concurrent.TimeUnit;
 
@@ -53,6 +52,7 @@ public class Cmpp20Client {
       .channel(NioSocketChannel.class)
       .option(ChannelOption.SO_KEEPALIVE, true)
       .option(ChannelOption.TCP_NODELAY, true)
+      .option(ChannelOption.SO_REUSEADDR, true)
       .option(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
       .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 3000);
 
@@ -152,28 +152,7 @@ public class Cmpp20Client {
       channelPool = new CmppChannelPool(bootstrap, new PoolHandler(mix));
     }
 
-    Channel[] channels = new Channel[connections];
-    try {
-      for (int i = 0; i < connections; i++) {
-        Future<Channel> future = channelPool.acquire().sync();
-        if (future.isSuccess()) {
-          channels[i] = future.getNow();
-        } else {
-          LOGGER.warn("init channel failure when connect to [{}:{}]", host, port);
-        }
-      }
-    } catch (InterruptedException e) {
-      LOGGER.warn("init channel failure when connect to [{}:{}], be interrupted", host, port);
-    } finally {
-      for (Channel channel : channels) {
-        if (channel != null) {
-          channelPool.release(channel);
-        }
-      }
-    }
-
-    LOGGER.info("init connection pool to [{}:{}] success, listen localPorts:{}", host, port, Arrays.toString(localPorts));
-
+    LOGGER.info("init connection pool to [{}:{}] success", host, port);
     return this;
   }
 

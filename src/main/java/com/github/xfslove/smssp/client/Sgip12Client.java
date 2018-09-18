@@ -48,6 +48,7 @@ public class Sgip12Client {
       .channel(NioSocketChannel.class)
       .option(ChannelOption.SO_KEEPALIVE, true)
       .option(ChannelOption.TCP_NODELAY, true)
+      .option(ChannelOption.SO_REUSEADDR, true)
       .option(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
       .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 3000);
 
