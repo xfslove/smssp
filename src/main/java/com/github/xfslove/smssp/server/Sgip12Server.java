@@ -83,7 +83,7 @@ public class Sgip12Server {
 
     HandlerInitializer handler = new HandlerInitializer(loginName, loginPassword, consumer, sequence, bizGroup, idleCheckTime);
 
-    bootstrap.childHandler(handler).bind(port);
+    bootstrap.childHandler(handler).bind(port).syncUninterruptibly();
 
     LOGGER.info("bind server success, listen port[{}]", port);
 
