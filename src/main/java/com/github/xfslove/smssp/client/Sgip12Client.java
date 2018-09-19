@@ -8,8 +8,9 @@ import com.github.xfslove.smsj.sms.dcs.SmsAlphabet;
 import com.github.xfslove.smsj.sms.dcs.SmsDcs;
 import com.github.xfslove.smsj.sms.dcs.SmsMsgClass;
 import com.github.xfslove.smsj.wap.mms.SmsMmsNotificationMessage;
-import com.github.xfslove.smssp.message.sgip12.DefaultSequence;
 import com.github.xfslove.smssp.message.Sequence;
+import com.github.xfslove.smssp.message.sgip12.DefaultSequence;
+import com.github.xfslove.smssp.message.sgip12.SequenceNumber;
 import com.github.xfslove.smssp.message.sgip12.SubmitMessage;
 import com.github.xfslove.smssp.message.sgip12.SubmitRespMessage;
 import com.github.xfslove.smssp.netty4.handler.sgip12.client.HandlerInitializer;
@@ -31,7 +32,6 @@ import io.netty.util.internal.logging.InternalLogger;
 import io.netty.util.internal.logging.InternalLoggerFactory;
 import org.apache.commons.lang3.StringUtils;
 
-import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -60,38 +60,26 @@ public class Sgip12Client {
   private String loginPassword;
   private String host;
   private int port;
+
   private int idleCheckTime = 30;
   private int connections = 1;
 
-  private Sequence sequence;
-  private ResponseListener consumer = new DefaultFuture.DefaultListener();
+  private int nodeId;
+  private Sequence<SequenceNumber> sequence;
+  private ResponseListener consumer;
 
-  private Sgip12Client(int nodeId) {
-    this.sequence = new DefaultSequence(nodeId);
-  }
-
-  public static Sgip12Client newConnection(int nodeId) {
-    return new Sgip12Client(nodeId);
-  }
-
-  public Sgip12Client loginName(String loginName) {
+  private Sgip12Client(int nodeId, String loginName, String loginPassword, String host, int port) {
+    this.nodeId = nodeId;
     this.loginName = loginName;
-    return this;
-  }
-
-  public Sgip12Client loginPassword(String loginPassword) {
     this.loginPassword = loginPassword;
-    return this;
-  }
-
-  public Sgip12Client host(String host) {
     this.host = host;
-    return this;
+    this.port = port;
+    this.sequence = new DefaultSequence(nodeId);
+    this.consumer = new DefaultFuture.DefaultListener(loginName);
   }
 
-  public Sgip12Client port(int port) {
-    this.port = port;
-    return this;
+  public static Sgip12Client newConnection(int nodeId, String loginName, String loginPassword, String host, int port) {
+    return new Sgip12Client(nodeId, loginName, loginPassword, host, port);
   }
 
   public Sgip12Client idleCheckTime(int idleCheckTime) {
@@ -104,7 +92,7 @@ public class Sgip12Client {
     return this;
   }
 
-  public Sgip12Client sequence(Sequence sequence) {
+  public Sgip12Client sequence(Sequence<SequenceNumber> sequence) {
     this.sequence = sequence;
     return this;
   }
@@ -130,7 +118,7 @@ public class Sgip12Client {
     SubmitMessage[] req = message.split(sequence);
     DefaultFuture[] futures = new DefaultFuture[req.length];
     for (int i = 0; i < req.length; i++) {
-      futures[i] = new DefaultFuture(req[i]);
+      futures[i] = new DefaultFuture(loginName, req[i]);
     }
 
     Channel channel = null;
@@ -172,6 +160,10 @@ public class Sgip12Client {
 
     workGroup.shutdownGracefully().syncUninterruptibly();
     bizGroup.shutdownGracefully().syncUninterruptibly();
+
+    if (consumer instanceof DefaultFuture.DefaultListener) {
+      DefaultFuture.cleanUp(loginName);
+    }
 
     LOGGER.info("shutdown gracefully, disconnect to [{}:{}] success", host, port);
   }
@@ -260,7 +252,7 @@ public class Sgip12Client {
       return this;
     }
 
-    public SubmitMessage[] split(Sequence sequence) {
+    public SubmitMessage[] split(Sequence<SequenceNumber> sequence) {
 
       SmsMessage message;
       if (StringUtils.isNoneBlank(text)) {

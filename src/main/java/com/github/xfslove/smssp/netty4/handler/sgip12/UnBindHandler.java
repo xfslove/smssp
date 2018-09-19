@@ -1,6 +1,7 @@
 package com.github.xfslove.smssp.netty4.handler.sgip12;
 
 import com.github.xfslove.smssp.message.Sequence;
+import com.github.xfslove.smssp.message.sgip12.SequenceNumber;
 import com.github.xfslove.smssp.message.sgip12.UnBindMessage;
 import com.github.xfslove.smssp.message.sgip12.UnBindRespMessage;
 import io.netty.channel.Channel;
@@ -27,9 +28,9 @@ public class UnBindHandler extends ChannelDuplexHandler {
 
   private final InternalLogger logger = InternalLoggerFactory.getInstance(getClass());
 
-  private Sequence sequence;
+  private Sequence<SequenceNumber> sequence;
 
-  public UnBindHandler(Sequence sequence) {
+  public UnBindHandler(Sequence<SequenceNumber> sequence) {
     this.sequence = sequence;
   }
 

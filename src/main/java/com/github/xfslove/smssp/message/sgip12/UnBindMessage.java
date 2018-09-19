@@ -15,8 +15,8 @@ public class UnBindMessage implements SgipMessage {
     this.head = new SgipHead(SgipConstants.COMMAND_ID_UNBIND, sequenceNumber);
   }
 
-  public UnBindMessage(Sequence sequence) {
-    this.head = new SgipHead(SgipConstants.COMMAND_ID_UNBIND, (SequenceNumber) sequence.next());
+  public UnBindMessage(Sequence<SequenceNumber> sequence) {
+    this.head = new SgipHead(SgipConstants.COMMAND_ID_UNBIND, sequence.next());
   }
 
   @Override

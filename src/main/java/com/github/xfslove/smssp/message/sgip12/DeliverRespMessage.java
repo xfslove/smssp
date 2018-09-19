@@ -31,8 +31,8 @@ public class DeliverRespMessage implements SgipMessage {
     this.head = new SgipHead(SgipConstants.COMMAND_ID_DELIVER_RESP, sequenceNumber);
   }
 
-  public DeliverRespMessage(Sequence sequence) {
-    this.head = new SgipHead(SgipConstants.COMMAND_ID_DELIVER_RESP, (SequenceNumber) sequence.next());
+  public DeliverRespMessage(Sequence<SequenceNumber> sequence) {
+    this.head = new SgipHead(SgipConstants.COMMAND_ID_DELIVER_RESP, sequence.next());
   }
 
   @Override

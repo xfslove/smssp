@@ -46,8 +46,8 @@ public class DeliverMessage extends SmsPdu implements SgipMessage, Notification 
     this.head = new SgipHead(SgipConstants.COMMAND_ID_DELIVER, sequenceNumber);
   }
 
-  public DeliverMessage(Sequence sequence) {
-    this.head = new SgipHead(SgipConstants.COMMAND_ID_DELIVER, (SequenceNumber) sequence.next());
+  public DeliverMessage(Sequence<SequenceNumber> sequence) {
+    this.head = new SgipHead(SgipConstants.COMMAND_ID_DELIVER, sequence.next());
   }
 
   @Override

@@ -15,8 +15,8 @@ public class TerminateMessage implements CmppMessage {
     head = new CmppHead(CmppConstants.CMPP_TERMINATE, sequenceId);
   }
 
-  public TerminateMessage(Sequence sequence) {
-    head = new CmppHead(CmppConstants.CMPP_TERMINATE, (int) sequence.next());
+  public TerminateMessage(Sequence<Integer> sequence) {
+    head = new CmppHead(CmppConstants.CMPP_TERMINATE, sequence.next());
   }
 
   @Override

@@ -27,8 +27,8 @@ public class SubmitRespMessage implements SgipMessage, Response {
     this.head = new SgipHead(SgipConstants.COMMAND_ID_SUBMIT_RESP, sequenceNumber);
   }
 
-  public SubmitRespMessage(Sequence sequence) {
-    this.head = new SgipHead(SgipConstants.COMMAND_ID_SUBMIT_RESP, (SequenceNumber) sequence.next());
+  public SubmitRespMessage(Sequence<SequenceNumber> sequence) {
+    this.head = new SgipHead(SgipConstants.COMMAND_ID_SUBMIT_RESP, sequence.next());
   }
 
   @Override

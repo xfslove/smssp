@@ -134,8 +134,8 @@ public class SubmitMessage extends SmsPdu implements SgipMessage, Request {
     this.head = new SgipHead(SgipConstants.COMMAND_ID_SUBMIT, sequenceNumber);
   }
 
-  public SubmitMessage(Sequence sequence) {
-    this.head = new SgipHead(SgipConstants.COMMAND_ID_SUBMIT, (SequenceNumber) sequence.next());
+  public SubmitMessage(Sequence<SequenceNumber> sequence) {
+    this.head = new SgipHead(SgipConstants.COMMAND_ID_SUBMIT, sequence.next());
   }
 
   @Override

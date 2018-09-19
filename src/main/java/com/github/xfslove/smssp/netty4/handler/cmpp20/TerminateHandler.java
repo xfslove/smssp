@@ -25,9 +25,9 @@ public class TerminateHandler extends ChannelDuplexHandler {
 
   private final InternalLogger logger = InternalLoggerFactory.getInstance(getClass());
 
-  private Sequence sequence;
+  private Sequence<Integer> sequence;
 
-  public TerminateHandler(Sequence sequence) {
+  public TerminateHandler(Sequence<Integer> sequence) {
     this.sequence = sequence;
   }
 

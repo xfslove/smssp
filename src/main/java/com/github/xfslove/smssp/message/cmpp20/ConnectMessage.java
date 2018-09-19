@@ -45,8 +45,8 @@ public class ConnectMessage implements CmppMessage {
     head = new CmppHead(CmppConstants.CMPP_CONNECT, sequenceId);
   }
 
-  public ConnectMessage(Sequence sequence) {
-    head = new CmppHead(CmppConstants.CMPP_CONNECT, (int) sequence.next());
+  public ConnectMessage(Sequence<Integer> sequence) {
+    head = new CmppHead(CmppConstants.CMPP_CONNECT, sequence.next());
   }
 
   @Override

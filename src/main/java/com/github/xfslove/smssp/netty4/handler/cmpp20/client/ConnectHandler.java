@@ -30,9 +30,9 @@ public class ConnectHandler extends ChannelDuplexHandler {
 
   private String loginPassword;
 
-  private Sequence sequence;
+  private Sequence<Integer> sequence;
 
-  public ConnectHandler(String loginName, String loginPassword, Sequence sequence) {
+  public ConnectHandler(String loginName, String loginPassword, Sequence<Integer> sequence) {
     this.sequence = sequence;
     this.loginName = loginName;
     this.loginPassword = loginPassword;

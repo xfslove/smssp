@@ -36,13 +36,13 @@ public class HandlerInitializer extends ChannelInitializer<Channel> {
 
   private ResponseListener consumer;
 
-  private Sequence sequence;
+  private Sequence<Integer> sequence;
 
   private EventExecutorGroup bizEventGroup;
 
   private int idleCheckTime;
 
-  public HandlerInitializer(String loginName, String loginPassword, NotificationListener consumer2, ResponseListener consumer, Sequence sequence, EventExecutorGroup bizEventGroup, int idleCheckTime) {
+  public HandlerInitializer(String loginName, String loginPassword, NotificationListener consumer2, ResponseListener consumer, Sequence<Integer> sequence, EventExecutorGroup bizEventGroup, int idleCheckTime) {
     this.loginName = loginName;
     this.loginPassword = loginPassword;
     this.consumer2 = consumer2;

@@ -21,7 +21,7 @@ public class SubmitMessage extends SmsPdu implements CmppMessage, Request {
 
   /**
    * 信息标识，由SP侧短信网关本身产生，本处填空
-   * sp 提交submit不需要msgId
+   * sp 提交submit可以不需要msgId
    */
   private MsgId msgId = new MsgId(0, 0, 0, 0, 0, 0, 0);
 
@@ -124,8 +124,8 @@ public class SubmitMessage extends SmsPdu implements CmppMessage, Request {
     head = new CmppHead(CmppConstants.CMPP_SUBMIT, sequenceId);
   }
 
-  public SubmitMessage(Sequence sequence) {
-    head = new CmppHead(CmppConstants.CMPP_SUBMIT, (int) sequence.next());
+  public SubmitMessage(Sequence<Integer> sequence) {
+    head = new CmppHead(CmppConstants.CMPP_SUBMIT, sequence.next());
   }
 
   @Override

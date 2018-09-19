@@ -3,6 +3,7 @@ package com.github.xfslove.smssp.netty4.handler.sgip12.client;
 import com.github.xfslove.smssp.message.Sequence;
 import com.github.xfslove.smssp.message.sgip12.BindMessage;
 import com.github.xfslove.smssp.message.sgip12.BindRespMessage;
+import com.github.xfslove.smssp.message.sgip12.SequenceNumber;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandler;
@@ -21,13 +22,13 @@ public class BindHandler extends ChannelDuplexHandler {
 
   private final InternalLogger logger = InternalLoggerFactory.getInstance(getClass());
 
-  private Sequence sequence;
+  private Sequence<SequenceNumber> sequence;
 
   private String loginName;
 
   private String loginPassword;
 
-  public BindHandler(String loginName, String loginPassword, Sequence sequence) {
+  public BindHandler(String loginName, String loginPassword, Sequence<SequenceNumber> sequence) {
     this.loginName = loginName;
     this.loginPassword = loginPassword;
     this.sequence = sequence;

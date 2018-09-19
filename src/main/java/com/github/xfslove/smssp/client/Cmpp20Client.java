@@ -10,6 +10,7 @@ import com.github.xfslove.smsj.sms.dcs.SmsMsgClass;
 import com.github.xfslove.smsj.wap.mms.SmsMmsNotificationMessage;
 import com.github.xfslove.smssp.message.Sequence;
 import com.github.xfslove.smssp.message.cmpp20.DefaultSequence;
+import com.github.xfslove.smssp.message.cmpp20.MsgId;
 import com.github.xfslove.smssp.message.cmpp20.SubmitMessage;
 import com.github.xfslove.smssp.message.cmpp20.SubmitRespMessage;
 import com.github.xfslove.smssp.netty4.handler.cmpp20.mix.HandlerInitializer;
@@ -35,6 +36,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
+import java.util.Calendar;
 import java.util.Deque;
 import java.util.concurrent.TimeUnit;
 
@@ -64,45 +66,36 @@ public class Cmpp20Client {
   private String loginPassword;
   private String host;
   private int port;
+
   private int[] localPorts;
   private int connections = 1;
   private int idleCheckTime = 300;
 
-  private Sequence sequence = new DefaultSequence();
-  private ResponseListener consumer = new DefaultFuture.DefaultListener();
-  private NotificationListener consumer2 = new NotificationListener() {
-    @Override
-    public void done(Notification notification) {
-      LOGGER.info("received notification: {}", notification);
-    }
-  };
+  private int nodeId;
+  private Sequence<Integer> sequence;
+  private ResponseListener consumer;
+  private NotificationListener consumer2;
 
-  private Cmpp20Client() {
-  }
-
-  public static Cmpp20Client newConnection() {
-    return new Cmpp20Client();
-  }
-
-  public Cmpp20Client loginName(String loginName) {
+  private Cmpp20Client(int nodeId, String loginName, String loginPassword, String host, int port) {
+    this.nodeId = nodeId;
     this.loginName = loginName;
-    return this;
-  }
-
-  public Cmpp20Client loginPassword(String loginPassword) {
     this.loginPassword = loginPassword;
-    return this;
-  }
-
-  public Cmpp20Client host(String host) {
     this.host = host;
-    return this;
+    this.port = port;
+    this.sequence = new DefaultSequence();
+    this.consumer = new DefaultFuture.DefaultListener(loginName);
+    this.consumer2 = new DefaultProxyListener(loginName, new NotificationListener() {
+      @Override
+      public void done(Notification notification) {
+        LOGGER.info("received notification: {}", notification);
+      }
+    });
   }
 
-  public Cmpp20Client port(int port) {
-    this.port = port;
-    return this;
+  public static Cmpp20Client newConnection(int nodeId, String loginName, String loginPassword, String host, int port) {
+    return new Cmpp20Client(nodeId, loginName, loginPassword, host, port);
   }
+
 
   public Cmpp20Client localPorts(int... localPorts) {
     this.localPorts = localPorts;
@@ -114,7 +107,7 @@ public class Cmpp20Client {
     return this;
   }
 
-  public Cmpp20Client sequence(Sequence sequence) {
+  public Cmpp20Client sequence(Sequence<Integer> sequence) {
     this.sequence = sequence;
     return this;
   }
@@ -141,7 +134,7 @@ public class Cmpp20Client {
    */
   public Cmpp20Client connect() {
 
-    HandlerInitializer mix = new HandlerInitializer(loginName, loginPassword, new DefaultProxyListener(consumer2), consumer, sequence, bizGroup, idleCheckTime);
+    HandlerInitializer mix = new HandlerInitializer(loginName, loginPassword, consumer2, consumer, sequence, bizGroup, idleCheckTime);
 
     bootstrap.remoteAddress(host, port);
 
@@ -163,6 +156,13 @@ public class Cmpp20Client {
     workGroup.shutdownGracefully().syncUninterruptibly();
     bizGroup.shutdownGracefully().syncUninterruptibly();
 
+    if (consumer instanceof DefaultFuture.DefaultListener) {
+      DefaultFuture.cleanUp(loginName);
+    }
+    if (consumer2 instanceof DefaultProxyListener) {
+      DefaultProxyListener.cleanUp(loginName);
+    }
+
     LOGGER.info("shutdown gracefully, disconnect to [{}:{}] success", host, port);
   }
 
@@ -170,10 +170,10 @@ public class Cmpp20Client {
     if (message.msgSrc == null) {
       message.msgSrc(loginName);
     }
-    SubmitMessage[] req = message.split(sequence);
+    SubmitMessage[] req = message.split(nodeId, sequence);
     DefaultFuture[] futures = new DefaultFuture[req.length];
     for (int i = 0; i < req.length; i++) {
-      futures[i] = new DefaultFuture(req[i]);
+      futures[i] = new DefaultFuture(loginName, req[i]);
     }
 
     Channel channel = null;
@@ -287,7 +287,7 @@ public class Cmpp20Client {
       return this;
     }
 
-    public SubmitMessage[] split(Sequence sequence) {
+    public SubmitMessage[] split(int nodeId, Sequence<Integer> sequence) {
 
       SmsMessage message;
       if (StringUtils.isNoneBlank(text)) {
@@ -301,8 +301,14 @@ public class Cmpp20Client {
 
       SmsPdu[] pdus = message.getPdus();
       SubmitMessage[] split = new SubmitMessage[pdus.length];
+
+      Calendar calendar = Calendar.getInstance();
+      MsgId msgId = new MsgId(nodeId, calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH), calendar.get(Calendar.HOUR), calendar.get(Calendar.MINUTE), calendar.get(Calendar.SECOND), sequence.next());
+
       for (int i = 0; i < pdus.length; i++) {
         final SubmitMessage submit = new SubmitMessage(sequence);
+
+        submit.setMsgId(msgId);
 
         for (String phone : phones) {
           submit.getDestTerminalIds().add(phone);

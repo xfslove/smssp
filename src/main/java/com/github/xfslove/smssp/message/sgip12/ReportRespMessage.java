@@ -30,8 +30,8 @@ public class ReportRespMessage implements SgipMessage {
     this.head = new SgipHead(SgipConstants.COMMAND_ID_REPORT_RESP, sequenceNumber);
   }
 
-  public ReportRespMessage(Sequence sequence) {
-    this.head = new SgipHead(SgipConstants.COMMAND_ID_REPORT_RESP, (SequenceNumber) sequence.next());
+  public ReportRespMessage(Sequence<SequenceNumber> sequence) {
+    this.head = new SgipHead(SgipConstants.COMMAND_ID_REPORT_RESP, sequence.next());
   }
 
   @Override

@@ -15,8 +15,8 @@ public class ActiveTestMessage implements CmppMessage {
     head = new CmppHead(CmppConstants.CMPP_ACTIVE_TEST, sequenceId);
   }
 
-  public ActiveTestMessage(Sequence sequence) {
-    head = new CmppHead(CmppConstants.CMPP_ACTIVE_TEST, (int) sequence.next());
+  public ActiveTestMessage(Sequence<Integer> sequence) {
+    head = new CmppHead(CmppConstants.CMPP_ACTIVE_TEST, sequence.next());
   }
 
   @Override

@@ -1,9 +1,10 @@
 package com.github.xfslove.smssp.client;
 
-import com.google.common.cache.*;
+import com.github.xfslove.smssp.cache.DefaultCache;
 import io.netty.util.internal.logging.InternalLogger;
 import io.netty.util.internal.logging.InternalLoggerFactory;
 
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
@@ -18,30 +19,20 @@ public class DefaultFuture implements ResponseFuture {
 
   private static final InternalLogger LOGGER = InternalLoggerFactory.getInstance(DefaultFuture.class);
 
-  private static final Cache<String, DefaultFuture> FUTURES_CACHE = CacheBuilder.newBuilder().initialCapacity(256).expireAfterAccess(30, TimeUnit.SECONDS)
-      .removalListener(new RemovalListener<String, DefaultFuture>() {
-        @Override
-        public void onRemoval(RemovalNotification<String, DefaultFuture> notification) {
+  private static final ConcurrentMap<String, DefaultCache<String, DefaultFuture>> CACHE = new ConcurrentHashMap<>(64);
 
-          RemovalCause cause = notification.getCause();
-          if (!RemovalCause.EXPLICIT.equals(cause)) {
-            LOGGER.warn("drop cached future {} cause by {}", notification.getValue().request, cause);
-          }
-
-        }
-      })
-      .build();
-  private static final ConcurrentMap<String, DefaultFuture> FUTURES = FUTURES_CACHE.asMap();
-
+  private String cacheKey;
   private Request request;
-  private Response response;
+  private volatile Response response;
 
   private final Lock lock = new ReentrantLock();
   private final Condition done = lock.newCondition();
 
-  public DefaultFuture(Request request) {
+  public DefaultFuture(String cacheKey, Request request) {
     this.request = request;
-    FUTURES.put(request.getId(), this);
+    this.cacheKey = cacheKey;
+    CACHE.putIfAbsent(cacheKey, new DefaultCache<String, DefaultFuture>());
+    CACHE.get(cacheKey).put(request.getId(), this);
   }
 
   @Override
@@ -61,7 +52,7 @@ public class DefaultFuture implements ResponseFuture {
         lock.unlock();
       }
       if (!isDone()) {
-        FUTURES.remove(request.getId());
+        CACHE.get(cacheKey).remove(request.getId());
         LOGGER.warn("drop request message {} cause by timeout", request);
         return null;
       }
@@ -84,8 +75,17 @@ public class DefaultFuture implements ResponseFuture {
     }
   }
 
-  private static void received(Response response) {
-    DefaultFuture future = FUTURES.remove(response.getId());
+  @Override
+  public String toString() {
+    return "DefaultFuture{" +
+        "cacheKey='" + cacheKey + '\'' +
+        ", request=" + request +
+        ", response=" + response +
+        '}';
+  }
+
+  private static void received(String cacheKey, Response response) {
+    DefaultFuture future = CACHE.get(cacheKey).remove(response.getId());
 
     if (future != null) {
       future.receive(response);
@@ -94,11 +94,24 @@ public class DefaultFuture implements ResponseFuture {
     }
   }
 
+  public static void cleanUp(String cacheKey) {
+    DefaultCache<String, DefaultFuture> cache = CACHE.remove(cacheKey);
+    if (cache != null) {
+      cache.cleanUp();
+    }
+  }
+
   public static class DefaultListener implements ResponseListener {
+
+    private String cacheKey;
+
+    public DefaultListener(String cacheKey) {
+      this.cacheKey = cacheKey;
+    }
 
     @Override
     public void done(Response response) {
-      DefaultFuture.received(response);
+      DefaultFuture.received(cacheKey, response);
     }
   }
 }

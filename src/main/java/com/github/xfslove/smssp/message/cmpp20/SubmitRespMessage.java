@@ -48,8 +48,8 @@ public class SubmitRespMessage implements CmppMessage, Response {
     head = new CmppHead(CmppConstants.CMPP_SUBMIT_RESP, sequenceId);
   }
 
-  public SubmitRespMessage(Sequence sequence) {
-    head = new CmppHead(CmppConstants.CMPP_SUBMIT_RESP, (int) sequence.next());
+  public SubmitRespMessage(Sequence<Integer> sequence) {
+    head = new CmppHead(CmppConstants.CMPP_SUBMIT_RESP, sequence.next());
   }
 
   @Override

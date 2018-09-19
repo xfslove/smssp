@@ -22,11 +22,11 @@ public class ActiveTestHandler extends ChannelDuplexHandler {
 
   private final InternalLogger logger = InternalLoggerFactory.getInstance(getClass());
 
-  private Sequence sequence;
+  private Sequence<Integer> sequence;
 
   private boolean keepAlive;
 
-  public ActiveTestHandler(Sequence sequence, boolean keepAlive) {
+  public ActiveTestHandler(Sequence<Integer> sequence, boolean keepAlive) {
     this.sequence = sequence;
     this.keepAlive = keepAlive;
   }

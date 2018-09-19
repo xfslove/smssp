@@ -47,8 +47,8 @@ public class DeliverRespMessage implements CmppMessage {
     head = new CmppHead(CmppConstants.CMPP_DELIVER_RESP, sequenceId);
   }
 
-  public DeliverRespMessage(Sequence sequence) {
-    head = new CmppHead(CmppConstants.CMPP_DELIVER_RESP, (int) sequence.next());
+  public DeliverRespMessage(Sequence<Integer> sequence) {
+    head = new CmppHead(CmppConstants.CMPP_DELIVER_RESP, sequence.next());
   }
 
   @Override

@@ -27,8 +27,8 @@ public class BindRespMessage implements SgipMessage {
     this.head = new SgipHead(SgipConstants.COMMAND_ID_BIND_RESP, sequenceNumber);
   }
 
-  public BindRespMessage(Sequence sequence) {
-    this.head = new SgipHead(SgipConstants.COMMAND_ID_BIND_RESP, (SequenceNumber) sequence.next());
+  public BindRespMessage(Sequence<SequenceNumber> sequence) {
+    this.head = new SgipHead(SgipConstants.COMMAND_ID_BIND_RESP, sequence.next());
   }
 
   @Override

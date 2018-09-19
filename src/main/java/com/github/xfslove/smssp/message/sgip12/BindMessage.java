@@ -46,8 +46,8 @@ public class BindMessage implements SgipMessage {
     this.head = new SgipHead(SgipConstants.COMMAND_ID_BIND, sequenceNumber);
   }
 
-  public BindMessage(Sequence sequence) {
-    this.head = new SgipHead(SgipConstants.COMMAND_ID_BIND, (SequenceNumber) sequence.next());
+  public BindMessage(Sequence<SequenceNumber> sequence) {
+    this.head = new SgipHead(SgipConstants.COMMAND_ID_BIND, sequence.next());
   }
 
   @Override
