@@ -9,6 +9,8 @@ import com.github.xfslove.smssp.notification.NotificationListener;
 import com.github.xfslove.smssp.transport.netty4.handler.sgip12.server.HandlerInitializer;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.PooledByteBufAllocator;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -36,6 +38,7 @@ public class Sgip12Server {
       .channel(NioServerSocketChannel.class)
       .childOption(ChannelOption.TCP_NODELAY, Boolean.TRUE)
       .childOption(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT);
+  private Channel channel;
 
   private EventExecutorGroup bizGroup = new DefaultEventExecutorGroup(32);
 
@@ -86,7 +89,10 @@ public class Sgip12Server {
 
     HandlerInitializer handler = new HandlerInitializer(loginName, loginPassword, consumer, sequence, bizGroup, idleCheckTime);
 
-    bootstrap.childHandler(handler).bind(port).syncUninterruptibly();
+    ChannelFuture channelFuture = bootstrap.childHandler(handler).bind(port);
+    channelFuture.syncUninterruptibly();
+
+    channel = channelFuture.channel();
 
     LOGGER.info("{} bind server success, listen port[{}]", loginName, port);
 
@@ -94,6 +100,9 @@ public class Sgip12Server {
   }
 
   public void close() {
+    if (channel != null) {
+      channel.close();
+    }
 
     bossGroup.shutdownGracefully().syncUninterruptibly();
     workerGroup.shutdownGracefully().syncUninterruptibly();
