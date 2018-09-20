@@ -51,7 +51,7 @@ public class BindHandler extends ChannelDuplexHandler {
           @Override
           public void operationComplete(Future<? super Void> future) throws Exception {
             if (future.isSuccess()) {
-              logger.info("{} bind failure[result:{}] and close channel", bind.getLoginName(), 2);
+              logger.info("{}:{} bind failure[result:{}] and close channel", name, bind.getLoginName(), 2);
               ctx.channel().close();
             }
           }
@@ -67,7 +67,7 @@ public class BindHandler extends ChannelDuplexHandler {
           @Override
           public void operationComplete(Future<? super Void> future) throws Exception {
             if (future.isSuccess()) {
-              logger.info("{} bind failure[result:{}] and close channel", bind.getLoginName(), 1);
+              logger.info("{}:{} bind failure[result:{}] and close channel", name, bind.getLoginName(), 1);
               ctx.channel().close();
             }
           }
@@ -82,7 +82,7 @@ public class BindHandler extends ChannelDuplexHandler {
           @Override
           public void operationComplete(Future<? super Void> future) throws Exception {
             if (future.isSuccess()) {
-              logger.info("{} bind failure[result:{}] and close channel", bind.getLoginName(), 4);
+              logger.info("{}:{} bind failure[result:{}] and close channel", name, bind.getLoginName(), 4);
               ctx.channel().close();
             }
           }

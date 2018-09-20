@@ -66,7 +66,7 @@ public class ConnectHandler extends ChannelDuplexHandler {
           @Override
           public void operationComplete(Future<? super Void> future) throws Exception {
             if (future.isSuccess()) {
-              logger.info("{} connect failure[result:{}] and close channel", connect.getSourceAddr(), 3);
+              logger.info("{}:{} connect failure[result:{}] and close channel", name, connect.getSourceAddr(), 3);
               channel.close();
             }
           }
@@ -82,7 +82,7 @@ public class ConnectHandler extends ChannelDuplexHandler {
           @Override
           public void operationComplete(Future<? super Void> future) throws Exception {
             if (future.isSuccess()) {
-              logger.info("{} connect failure[result:{}] and close channel", connect.getSourceAddr(), 3);
+              logger.info("{}:{} connect failure[result:{}] and close channel", name, connect.getSourceAddr(), 3);
               channel.close();
             }
           }
