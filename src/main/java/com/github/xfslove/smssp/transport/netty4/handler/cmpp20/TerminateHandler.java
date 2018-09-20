@@ -1,8 +1,9 @@
 package com.github.xfslove.smssp.transport.netty4.handler.cmpp20;
 
+import com.github.xfslove.smssp.message.Sequence;
 import com.github.xfslove.smssp.message.cmpp20.TerminateMessage;
 import com.github.xfslove.smssp.message.cmpp20.TerminateRespMessage;
-import com.github.xfslove.smssp.message.Sequence;
+import com.github.xfslove.smssp.transport.netty4.handler.AttributeConstant;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandler;
@@ -32,11 +33,12 @@ public class TerminateHandler extends ChannelDuplexHandler {
   }
 
   @Override
-  public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+  public void channelRead(final ChannelHandlerContext ctx, Object msg) throws Exception {
     final Channel channel = ctx.channel();
 
     if (msg instanceof TerminateRespMessage) {
-      logger.info("received terminate resp message and close channel");
+      String name = ctx.channel().attr(AttributeConstant.NAME).getAndSet(null);
+      logger.info("{} received terminate resp message and close channel", name);
       channel.close();
       return;
     }
@@ -51,7 +53,8 @@ public class TerminateHandler extends ChannelDuplexHandler {
         @Override
         public void operationComplete(Future<? super Void> future) throws Exception {
           if (future.isSuccess()) {
-            logger.info("terminate success and close channel");
+            String name = ctx.channel().attr(AttributeConstant.NAME).getAndSet(null);
+            logger.info("{} terminate success and close channel", name);
             channel.close();
           }
         }
@@ -81,13 +84,15 @@ public class TerminateHandler extends ChannelDuplexHandler {
                 @Override
                 public void run() {
                   if (ctx.channel().isActive()) {
-                    logger.info("close channel due to not received resp message");
+                    String name = ctx.channel().attr(AttributeConstant.NAME).getAndSet(null);
+                    logger.info("{} close channel due to not received resp message", name);
                     ctx.channel().close();
                   }
                 }
               }, 500, TimeUnit.MILLISECONDS);
 
-              logger.info("request terminate when idle and delay 500ms close channel if no resp message");
+              String name = ctx.channel().attr(AttributeConstant.NAME).get();
+              logger.info("{} request terminate when idle and delay 500ms close channel if no resp message", name);
             }
           }
         });

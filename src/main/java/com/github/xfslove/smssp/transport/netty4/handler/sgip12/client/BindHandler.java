@@ -4,10 +4,12 @@ import com.github.xfslove.smssp.message.Sequence;
 import com.github.xfslove.smssp.message.sgip12.BindMessage;
 import com.github.xfslove.smssp.message.sgip12.BindRespMessage;
 import com.github.xfslove.smssp.message.sgip12.SequenceNumber;
+import com.github.xfslove.smssp.transport.netty4.handler.AttributeConstant;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.util.AttributeKey;
 import io.netty.util.internal.logging.InternalLogger;
 import io.netty.util.internal.logging.InternalLoggerFactory;
 
@@ -24,13 +26,13 @@ public class BindHandler extends ChannelDuplexHandler {
 
   private Sequence<SequenceNumber> sequence;
 
-  private String loginName;
+  private String name;
 
-  private String loginPassword;
+  private String password;
 
-  public BindHandler(String loginName, String loginPassword, Sequence<SequenceNumber> sequence) {
-    this.loginName = loginName;
-    this.loginPassword = loginPassword;
+  public BindHandler(String name, String password, Sequence<SequenceNumber> sequence) {
+    this.name = name;
+    this.password = password;
     this.sequence = sequence;
   }
 
@@ -40,10 +42,10 @@ public class BindHandler extends ChannelDuplexHandler {
     // 发送bind请求
     BindMessage bind = new BindMessage(sequence);
 
-    bind.setLoginName(loginName);
-    bind.setLoginPassword(loginPassword);
+    bind.setLoginName(name);
+    bind.setLoginPassword(password);
     ctx.writeAndFlush(bind);
-    logger.info("client bind request");
+    logger.info("{} client bind request", name);
 
     ctx.fireChannelActive();
   }
@@ -60,12 +62,12 @@ public class BindHandler extends ChannelDuplexHandler {
 
       if (result == 0) {
         // bind 成功
-        logger.info("bind success");
-
+        logger.info("{} bind success", name);
+        channel.attr(AttributeConstant.NAME).set(name);
       } else {
 
         channel.close();
-        logger.info("bind failure[result:{}]", result);
+        logger.info("{} bind failure[result:{}]", name, result);
       }
 
       return;

@@ -3,11 +3,13 @@ package com.github.xfslove.smssp.transport.netty4.handler.cmpp20.client;
 import com.github.xfslove.smssp.message.cmpp20.ConnectMessage;
 import com.github.xfslove.smssp.message.cmpp20.ConnectRespMessage;
 import com.github.xfslove.smssp.message.Sequence;
+import com.github.xfslove.smssp.transport.netty4.handler.AttributeConstant;
 import com.github.xfslove.smssp.util.ByteUtil;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.util.AttributeKey;
 import io.netty.util.internal.logging.InternalLogger;
 import io.netty.util.internal.logging.InternalLoggerFactory;
 import org.apache.commons.codec.digest.DigestUtils;
@@ -26,16 +28,16 @@ public class ConnectHandler extends ChannelDuplexHandler {
 
   private final InternalLogger logger = InternalLoggerFactory.getInstance(getClass());
 
-  private String loginName;
+  private String name;
 
-  private String loginPassword;
+  private String password;
 
   private Sequence<Integer> sequence;
 
-  public ConnectHandler(String loginName, String loginPassword, Sequence<Integer> sequence) {
+  public ConnectHandler(String name, String password, Sequence<Integer> sequence) {
     this.sequence = sequence;
-    this.loginName = loginName;
-    this.loginPassword = loginPassword;
+    this.name = name;
+    this.password = password;
   }
 
   @Override
@@ -45,15 +47,15 @@ public class ConnectHandler extends ChannelDuplexHandler {
     ConnectMessage connect = new ConnectMessage(sequence);
 
     connect.setTimestamp(Integer.valueOf(DateFormatUtils.format(new Date(), "MMddHHmmss")));
-    connect.setSourceAddr(loginName);
+    connect.setSourceAddr(name);
     byte[] sourceBytes = connect.getSourceAddr().getBytes(StandardCharsets.ISO_8859_1);
-    byte[] secretBytes = loginPassword.getBytes(StandardCharsets.ISO_8859_1);
+    byte[] secretBytes = password.getBytes(StandardCharsets.ISO_8859_1);
     byte[] timestampBytes = StringUtils.leftPad(String.valueOf(connect.getTimestamp()), 10, "0").getBytes(StandardCharsets.ISO_8859_1);
     byte[] authenticationBytes = DigestUtils.md5(ByteUtil.concat(sourceBytes, new byte[9], secretBytes, timestampBytes));
     connect.setAuthenticatorSource(authenticationBytes);
 
     ctx.writeAndFlush(connect);
-    logger.info("connect request");
+    logger.info("{} connect request", name);
 
     ctx.fireChannelActive();
   }
@@ -70,11 +72,11 @@ public class ConnectHandler extends ChannelDuplexHandler {
 
       if (result == 0) {
         // connect 成功
-        logger.info("connect success");
-
+        logger.info("{} connect success", name);
+        channel.attr(AttributeConstant.NAME).set(name);
       } else {
 
-        logger.info("connect failure[result:{}] and close channel", result);
+        logger.info("{} connect failure[result:{}] and close channel", name, result);
         channel.close();
       }
 

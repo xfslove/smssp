@@ -1,8 +1,9 @@
 package com.github.xfslove.smssp.transport.netty4.handler.cmpp20;
 
+import com.github.xfslove.smssp.message.Sequence;
 import com.github.xfslove.smssp.message.cmpp20.ActiveTestMessage;
 import com.github.xfslove.smssp.message.cmpp20.ActiveTestRespMessage;
-import com.github.xfslove.smssp.message.Sequence;
+import com.github.xfslove.smssp.transport.netty4.handler.AttributeConstant;
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
@@ -32,7 +33,7 @@ public class ActiveTestHandler extends ChannelDuplexHandler {
   }
 
   @Override
-  public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+  public void channelRead(final ChannelHandlerContext ctx, Object msg) throws Exception {
     // activeTest
     if (msg instanceof ActiveTestMessage) {
       ActiveTestMessage active = (ActiveTestMessage) msg;
@@ -43,7 +44,8 @@ public class ActiveTestHandler extends ChannelDuplexHandler {
         @Override
         public void operationComplete(Future<? super Void> future) throws Exception {
           if (future.isSuccess()) {
-            logger.info("received active test message");
+            String name = ctx.channel().attr(AttributeConstant.NAME).get();
+            logger.info("{} received active test message", name);
           }
         }
       });
@@ -53,7 +55,8 @@ public class ActiveTestHandler extends ChannelDuplexHandler {
 
     // activeTestResp
     if (msg instanceof ActiveTestRespMessage) {
-      logger.info("received active test resp message");
+      String name = ctx.channel().attr(AttributeConstant.NAME).get();
+      logger.info("{} received active test resp message", name);
       return;
     }
 
@@ -76,7 +79,8 @@ public class ActiveTestHandler extends ChannelDuplexHandler {
             @Override
             public void operationComplete(Future<? super Void> future) throws Exception {
               if (future.isSuccess()) {
-                logger.info("request active test when idle");
+                String name = ctx.channel().attr(AttributeConstant.NAME).get();
+                logger.info("{} request active test when idle", name);
               }
             }
           });

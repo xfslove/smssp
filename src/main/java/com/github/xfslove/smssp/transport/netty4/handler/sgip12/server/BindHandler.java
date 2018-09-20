@@ -3,6 +3,7 @@ package com.github.xfslove.smssp.transport.netty4.handler.sgip12.server;
 import com.github.xfslove.smssp.message.Message;
 import com.github.xfslove.smssp.message.sgip12.BindMessage;
 import com.github.xfslove.smssp.message.sgip12.BindRespMessage;
+import com.github.xfslove.smssp.transport.netty4.handler.AttributeConstant;
 import com.github.xfslove.smssp.transport.netty4.handler.SessionEvent;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelDuplexHandler;
@@ -23,17 +24,15 @@ import io.netty.util.internal.logging.InternalLoggerFactory;
 @ChannelHandler.Sharable
 public class BindHandler extends ChannelDuplexHandler {
 
-  private static final AttributeKey<Boolean> SESSION_VALID = AttributeKey.valueOf("sessionValid");
-
   private final InternalLogger logger = InternalLoggerFactory.getInstance(getClass());
 
-  private final String loginName;
+  private final String name;
 
-  private final String loginPassword;
+  private final String password;
 
-  public BindHandler(String loginName, String loginPassword) {
-    this.loginName = loginName;
-    this.loginPassword = loginPassword;
+  public BindHandler(String name, String password) {
+    this.name = name;
+    this.password = password;
   }
 
   @Override
@@ -42,18 +41,18 @@ public class BindHandler extends ChannelDuplexHandler {
 
     // bind 请求
     if (msg instanceof BindMessage) {
-      BindMessage bind = (BindMessage) msg;
+      final BindMessage bind = (BindMessage) msg;
 
       BindRespMessage bindResp = new BindRespMessage(bind.getHead().getSequenceNumber());
 
-      if (Boolean.TRUE.equals(ctx.channel().attr(SESSION_VALID).get())) {
+      if (Boolean.TRUE.equals(ctx.channel().attr(AttributeConstant.SESSION).get())) {
         // 重复登录
         bindResp.setResult(2);
         ctx.writeAndFlush(bindResp).addListener(new GenericFutureListener<Future<? super Void>>() {
           @Override
           public void operationComplete(Future<? super Void> future) throws Exception {
             if (future.isSuccess()) {
-              logger.info("bind failure[result:{}] and close channel", 2);
+              logger.info("{} bind failure[result:{}] and close channel", bind.getLoginName(), 2);
               ctx.channel().close();
             }
           }
@@ -62,14 +61,14 @@ public class BindHandler extends ChannelDuplexHandler {
       }
 
 
-      if (!loginName.equals(bind.getLoginName()) || !loginPassword.equals(bind.getLoginPassword())) {
+      if (!name.equals(bind.getLoginName()) || !password.equals(bind.getLoginPassword())) {
         // 用户名密码错误
         bindResp.setResult(1);
         ctx.writeAndFlush(bindResp).addListener(new GenericFutureListener<Future<? super Void>>() {
           @Override
           public void operationComplete(Future<? super Void> future) throws Exception {
             if (future.isSuccess()) {
-              logger.info("bind failure[result:{}] and close channel", 1);
+              logger.info("{} bind failure[result:{}] and close channel", bind.getLoginName(), 1);
               ctx.channel().close();
             }
           }
@@ -84,7 +83,7 @@ public class BindHandler extends ChannelDuplexHandler {
           @Override
           public void operationComplete(Future<? super Void> future) throws Exception {
             if (future.isSuccess()) {
-              logger.info("bind failure[result:{}] and close channel", 4);
+              logger.info("{} bind failure[result:{}] and close channel", bind.getLoginName(), 4);
               ctx.channel().close();
             }
           }
@@ -97,8 +96,9 @@ public class BindHandler extends ChannelDuplexHandler {
         @Override
         public void operationComplete(Future<? super Void> future) throws Exception {
           if (future.isSuccess()) {
-            logger.info("bind success");
-            channel.attr(SESSION_VALID).set(true);
+            logger.info("{} bind success", bind.getLoginName());
+            channel.attr(AttributeConstant.SESSION).set(true);
+            channel.attr(AttributeConstant.NAME).set(bind.getLoginName());
           }
         }
       });
@@ -106,9 +106,10 @@ public class BindHandler extends ChannelDuplexHandler {
       return;
     }
 
-    if (!Boolean.TRUE.equals(channel.attr(SESSION_VALID).get())) {
+    if (!Boolean.TRUE.equals(channel.attr(AttributeConstant.SESSION).get())) {
       // 没有注册 session 收到消息
-      logger.info("received message when session not valid, fire SESSION_EVENT[NOT_VALID]", msg);
+      channel.attr(AttributeConstant.NAME).set(name);
+      logger.info("{} received message when session not valid, fire SESSION_EVENT[NOT_VALID]", name, msg);
 
       ctx.fireUserEventTriggered(SessionEvent.NOT_VALID((Message) msg));
       return;
@@ -120,7 +121,7 @@ public class BindHandler extends ChannelDuplexHandler {
   @Override
   public void channelInactive(ChannelHandlerContext ctx) throws Exception {
 
-    ctx.channel().attr(SESSION_VALID).set(null);
+    ctx.channel().attr(AttributeConstant.SESSION).set(null);
 
     ctx.fireChannelInactive();
   }

@@ -3,13 +3,15 @@ package com.github.xfslove.smssp.transport.netty4.handler.cmpp20.server;
 import com.github.xfslove.smssp.message.Message;
 import com.github.xfslove.smssp.message.cmpp20.DeliverMessage;
 import com.github.xfslove.smssp.message.cmpp20.DeliverRespMessage;
-import com.github.xfslove.smssp.transport.netty4.handler.SessionEvent;
 import com.github.xfslove.smssp.notification.NotificationListener;
+import com.github.xfslove.smssp.transport.netty4.handler.AttributeConstant;
+import com.github.xfslove.smssp.transport.netty4.handler.SessionEvent;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.util.AttributeKey;
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.GenericFutureListener;
 import io.netty.util.internal.logging.InternalLogger;
@@ -84,7 +86,8 @@ public class DeliverHandler extends ChannelDuplexHandler {
         ctx.writeAndFlush(deliverResp).addListener(new GenericFutureListener<Future<? super Void>>() {
           @Override
           public void operationComplete(Future<? super Void> listener) throws Exception {
-            logger.warn("discard[NOT_VALID] deliver message {} and close channel", msg);
+            String name = ctx.channel().attr(AttributeConstant.NAME).getAndSet(null);
+            logger.warn("{} discard[NOT_VALID] deliver message {} and close channel", name, msg);
             ctx.channel().close();
           }
         });
