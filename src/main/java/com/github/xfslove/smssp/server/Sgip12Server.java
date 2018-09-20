@@ -29,18 +29,11 @@ public class Sgip12Server {
 
   private static final InternalLogger LOGGER = InternalLoggerFactory.getInstance(Sgip12Server.class);
 
-  private EventLoopGroup bossGroup = new NioEventLoopGroup(1, new DefaultThreadFactory("sgipServerBoss", true));
-
-  private EventLoopGroup workerGroup = new NioEventLoopGroup(Math.min(Runtime.getRuntime().availableProcessors() + 1, 32), new DefaultThreadFactory("sgipServerWorker", true));
-
-  private ServerBootstrap bootstrap = new ServerBootstrap()
-      .group(bossGroup, workerGroup)
-      .channel(NioServerSocketChannel.class)
-      .childOption(ChannelOption.TCP_NODELAY, Boolean.TRUE)
-      .childOption(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT);
+  private EventLoopGroup bossGroup;
+  private EventLoopGroup workGroup;
+  private EventExecutorGroup bizGroup;
+  private ServerBootstrap bootstrap;
   private Channel channel;
-
-  private EventExecutorGroup bizGroup = new DefaultEventExecutorGroup(32);
 
   private String loginName;
   private String loginPassword;
@@ -64,6 +57,15 @@ public class Sgip12Server {
       }
     });
     this.sequence = new DefaultSequence(nodeId);
+
+    this.bossGroup =  new NioEventLoopGroup(1, new DefaultThreadFactory("sgipServerBoss-"+loginName, true));
+    this.workGroup = new NioEventLoopGroup(Math.min(Runtime.getRuntime().availableProcessors() + 1, 32), new DefaultThreadFactory("sgipServerWorker-" + loginName, true));
+    this.bizGroup = new DefaultEventExecutorGroup(32, new DefaultThreadFactory("sgipServerBiz-" + loginName, true));
+    this.bootstrap  = new ServerBootstrap()
+        .group(bossGroup, workGroup)
+        .channel(NioServerSocketChannel.class)
+        .childOption(ChannelOption.TCP_NODELAY, Boolean.TRUE)
+        .childOption(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT);
   }
 
   public static Sgip12Server newBind(int nodeId, String loginName, String loginPassword, int port) {
@@ -105,7 +107,7 @@ public class Sgip12Server {
     }
 
     bossGroup.shutdownGracefully().syncUninterruptibly();
-    workerGroup.shutdownGracefully().syncUninterruptibly();
+    workGroup.shutdownGracefully().syncUninterruptibly();
     bizGroup.shutdownGracefully().syncUninterruptibly();
 
     if (consumer instanceof DefaultProxyListener) {

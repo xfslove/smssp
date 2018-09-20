@@ -45,18 +45,9 @@ public class Sgip12Client {
 
   private static final InternalLogger LOGGER = InternalLoggerFactory.getInstance(Sgip12Client.class);
 
-  private EventLoopGroup workGroup = new NioEventLoopGroup(Math.min(Runtime.getRuntime().availableProcessors() + 1, 32), new DefaultThreadFactory("sgipWorker", true));
-
-  private Bootstrap bootstrap = new Bootstrap().group(workGroup)
-      .channel(NioSocketChannel.class)
-      .option(ChannelOption.SO_KEEPALIVE, true)
-      .option(ChannelOption.TCP_NODELAY, true)
-      .option(ChannelOption.SO_REUSEADDR, true)
-      .option(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
-      .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 3000);
-
-  private EventExecutorGroup bizGroup = new DefaultEventExecutorGroup(32);
-
+  private EventLoopGroup workGroup;
+  private EventExecutorGroup bizGroup;
+  private Bootstrap bootstrap;
   private ChannelPool channelPool;
 
   private String loginName;
@@ -79,6 +70,16 @@ public class Sgip12Client {
     this.port = port;
     this.sequence = new DefaultSequence(nodeId);
     this.consumer = new DefaultFuture.DefaultListener(loginName);
+
+    this.workGroup = new NioEventLoopGroup(Math.min(Runtime.getRuntime().availableProcessors() + 1, 32), new DefaultThreadFactory("sgipWorker-" + loginName, true));
+    this.bizGroup = new DefaultEventExecutorGroup(32, new DefaultThreadFactory("sgipBiz-" + loginName, true));
+    this.bootstrap = new Bootstrap().group(workGroup)
+        .channel(NioSocketChannel.class)
+        .option(ChannelOption.SO_KEEPALIVE, true)
+        .option(ChannelOption.TCP_NODELAY, true)
+        .option(ChannelOption.SO_REUSEADDR, true)
+        .option(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
+        .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 3000);
   }
 
   public static Sgip12Client newConnection(int nodeId, String loginName, String loginPassword, String host, int port) {

@@ -51,18 +51,9 @@ public class Cmpp20Client {
 
   private static final InternalLogger LOGGER = InternalLoggerFactory.getInstance(Cmpp20Client.class);
 
-  private EventLoopGroup workGroup = new NioEventLoopGroup(Math.min(Runtime.getRuntime().availableProcessors() + 1, 32), new DefaultThreadFactory("cmppWorker", true));
-
-  private Bootstrap bootstrap = new Bootstrap().group(workGroup)
-      .channel(NioSocketChannel.class)
-      .option(ChannelOption.SO_KEEPALIVE, true)
-      .option(ChannelOption.TCP_NODELAY, true)
-      .option(ChannelOption.SO_REUSEADDR, true)
-      .option(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
-      .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 3000);
-
-  private EventExecutorGroup bizGroup = new DefaultEventExecutorGroup(32);
-
+  private EventLoopGroup workGroup;
+  private EventExecutorGroup bizGroup;
+  private Bootstrap bootstrap;
   private ChannelPool channelPool;
 
   private String loginName;
@@ -93,6 +84,16 @@ public class Cmpp20Client {
         LOGGER.info("{} received notification: {}", loginName, notification);
       }
     });
+
+    this.workGroup = new NioEventLoopGroup(Math.min(Runtime.getRuntime().availableProcessors() + 1, 32), new DefaultThreadFactory("cmppWorker-" + loginName, true));
+    this.bizGroup = new DefaultEventExecutorGroup(32, new DefaultThreadFactory("cmppBiz-" + loginName, true));
+    this.bootstrap = new Bootstrap().group(workGroup)
+        .channel(NioSocketChannel.class)
+        .option(ChannelOption.SO_KEEPALIVE, true)
+        .option(ChannelOption.TCP_NODELAY, true)
+        .option(ChannelOption.SO_REUSEADDR, true)
+        .option(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
+        .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 3000);
   }
 
   public static Cmpp20Client newConnection(int nodeId, String loginName, String loginPassword, String host, int port) {
