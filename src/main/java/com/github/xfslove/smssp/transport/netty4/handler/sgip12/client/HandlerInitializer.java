@@ -12,7 +12,6 @@ import io.netty.channel.ChannelInitializer;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 import io.netty.handler.timeout.IdleStateHandler;
-import io.netty.util.concurrent.EventExecutorGroup;
 
 import java.util.concurrent.TimeUnit;
 
@@ -30,16 +29,13 @@ public class HandlerInitializer extends ChannelInitializer<Channel> {
 
   private Sequence<SequenceNumber> sequence;
 
-  private EventExecutorGroup bizEventGroup;
-
   private int idleCheckTime;
 
-  public HandlerInitializer(String loginName, String loginPassword, ResponseListener consumer, Sequence<SequenceNumber> sequence, EventExecutorGroup bizEventGroup, int idleCheckTime) {
+  public HandlerInitializer(String loginName, String loginPassword, ResponseListener consumer, Sequence<SequenceNumber> sequence, int idleCheckTime) {
     this.loginName = loginName;
     this.loginPassword = loginPassword;
     this.consumer = consumer;
     this.sequence = sequence;
-    this.bizEventGroup = bizEventGroup;
     this.idleCheckTime = idleCheckTime;
   }
 
@@ -54,7 +50,7 @@ public class HandlerInitializer extends ChannelInitializer<Channel> {
 
     channel.pipeline().addLast("sgipBindHandler", new BindHandler(loginName, loginPassword, sequence));
     channel.pipeline().addLast("sgipUnBindHandler", new UnBindHandler(sequence));
-    channel.pipeline().addLast(bizEventGroup, "sgipSubmitHandler", new SubmitHandler(consumer));
+    channel.pipeline().addLast("sgipSubmitHandler", new SubmitHandler(consumer));
     channel.pipeline().addLast("sgipException", new ExceptionHandler());
 
   }

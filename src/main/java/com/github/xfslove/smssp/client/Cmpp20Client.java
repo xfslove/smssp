@@ -29,7 +29,9 @@ import io.netty.channel.pool.ChannelPool;
 import io.netty.channel.pool.ChannelPoolHandler;
 import io.netty.channel.pool.FixedChannelPool;
 import io.netty.channel.socket.nio.NioSocketChannel;
-import io.netty.util.concurrent.*;
+import io.netty.util.concurrent.DefaultPromise;
+import io.netty.util.concurrent.DefaultThreadFactory;
+import io.netty.util.concurrent.Future;
 import io.netty.util.internal.PlatformDependent;
 import io.netty.util.internal.SocketUtils;
 import io.netty.util.internal.logging.InternalLogger;
@@ -52,7 +54,6 @@ public class Cmpp20Client {
   private static final InternalLogger LOGGER = InternalLoggerFactory.getInstance(Cmpp20Client.class);
 
   private EventLoopGroup workGroup;
-  private EventExecutorGroup bizGroup;
   private Bootstrap bootstrap;
   private ChannelPool channelPool;
 
@@ -86,7 +87,6 @@ public class Cmpp20Client {
     });
 
     this.workGroup = new NioEventLoopGroup(Math.min(Runtime.getRuntime().availableProcessors() + 1, 32), new DefaultThreadFactory("cmppWorker-" + loginName, true));
-    this.bizGroup = new DefaultEventExecutorGroup(32, new DefaultThreadFactory("cmppBiz-" + loginName, true));
     this.bootstrap = new Bootstrap().group(workGroup)
         .channel(NioSocketChannel.class)
         .option(ChannelOption.SO_KEEPALIVE, true)
@@ -138,7 +138,7 @@ public class Cmpp20Client {
    */
   public Cmpp20Client connect() {
 
-    HandlerInitializer mix = new HandlerInitializer(loginName, loginPassword, consumer2, consumer, sequence, bizGroup, idleCheckTime);
+    HandlerInitializer mix = new HandlerInitializer(loginName, loginPassword, consumer2, consumer, sequence, idleCheckTime);
 
     bootstrap.remoteAddress(host, port);
 
@@ -158,7 +158,6 @@ public class Cmpp20Client {
     channelPool.close();
 
     workGroup.shutdownGracefully().syncUninterruptibly();
-    bizGroup.shutdownGracefully().syncUninterruptibly();
 
     if (consumer instanceof DefaultFuture.DefaultListener) {
       DefaultFuture.cleanUp(loginName);

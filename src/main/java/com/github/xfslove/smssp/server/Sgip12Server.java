@@ -15,9 +15,7 @@ import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
-import io.netty.util.concurrent.DefaultEventExecutorGroup;
 import io.netty.util.concurrent.DefaultThreadFactory;
-import io.netty.util.concurrent.EventExecutorGroup;
 import io.netty.util.internal.logging.InternalLogger;
 import io.netty.util.internal.logging.InternalLoggerFactory;
 
@@ -31,7 +29,6 @@ public class Sgip12Server {
 
   private EventLoopGroup bossGroup;
   private EventLoopGroup workGroup;
-  private EventExecutorGroup bizGroup;
   private ServerBootstrap bootstrap;
   private Channel channel;
 
@@ -60,7 +57,6 @@ public class Sgip12Server {
 
     this.bossGroup =  new NioEventLoopGroup(1, new DefaultThreadFactory("sgipServerBoss-"+loginName, true));
     this.workGroup = new NioEventLoopGroup(Math.min(Runtime.getRuntime().availableProcessors() + 1, 32), new DefaultThreadFactory("sgipServerWorker-" + loginName, true));
-    this.bizGroup = new DefaultEventExecutorGroup(32, new DefaultThreadFactory("sgipServerBiz-" + loginName, true));
     this.bootstrap  = new ServerBootstrap()
         .group(bossGroup, workGroup)
         .channel(NioServerSocketChannel.class)
@@ -89,7 +85,7 @@ public class Sgip12Server {
 
   public Sgip12Server bind() {
 
-    HandlerInitializer handler = new HandlerInitializer(loginName, loginPassword, consumer, sequence, bizGroup, idleCheckTime);
+    HandlerInitializer handler = new HandlerInitializer(loginName, loginPassword, consumer, sequence, idleCheckTime);
 
     ChannelFuture channelFuture = bootstrap.childHandler(handler).bind(port);
     channelFuture.syncUninterruptibly();
@@ -108,7 +104,6 @@ public class Sgip12Server {
 
     bossGroup.shutdownGracefully().syncUninterruptibly();
     workGroup.shutdownGracefully().syncUninterruptibly();
-    bizGroup.shutdownGracefully().syncUninterruptibly();
 
     if (consumer instanceof DefaultProxyListener) {
       DefaultProxyListener.cleanUp(loginName);

@@ -26,10 +26,8 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.pool.ChannelPool;
 import io.netty.channel.pool.FixedChannelPool;
 import io.netty.channel.socket.nio.NioSocketChannel;
-import io.netty.util.concurrent.DefaultEventExecutorGroup;
 import io.netty.util.concurrent.DefaultPromise;
 import io.netty.util.concurrent.DefaultThreadFactory;
-import io.netty.util.concurrent.EventExecutorGroup;
 import io.netty.util.internal.logging.InternalLogger;
 import io.netty.util.internal.logging.InternalLoggerFactory;
 import org.apache.commons.lang3.StringUtils;
@@ -46,7 +44,6 @@ public class Sgip12Client {
   private static final InternalLogger LOGGER = InternalLoggerFactory.getInstance(Sgip12Client.class);
 
   private EventLoopGroup workGroup;
-  private EventExecutorGroup bizGroup;
   private Bootstrap bootstrap;
   private ChannelPool channelPool;
 
@@ -72,7 +69,6 @@ public class Sgip12Client {
     this.consumer = new DefaultFuture.DefaultListener(loginName);
 
     this.workGroup = new NioEventLoopGroup(Math.min(Runtime.getRuntime().availableProcessors() + 1, 32), new DefaultThreadFactory("sgipWorker-" + loginName, true));
-    this.bizGroup = new DefaultEventExecutorGroup(32, new DefaultThreadFactory("sgipBiz-" + loginName, true));
     this.bootstrap = new Bootstrap().group(workGroup)
         .channel(NioSocketChannel.class)
         .option(ChannelOption.SO_KEEPALIVE, true)
@@ -108,7 +104,7 @@ public class Sgip12Client {
 
   public Sgip12Client connect() {
 
-    HandlerInitializer handler = new HandlerInitializer(loginName, loginPassword, consumer, sequence, bizGroup, idleCheckTime);
+    HandlerInitializer handler = new HandlerInitializer(loginName, loginPassword, consumer, sequence, idleCheckTime);
 
     bootstrap.remoteAddress(host, port);
 
@@ -163,7 +159,6 @@ public class Sgip12Client {
     channelPool.close();
 
     workGroup.shutdownGracefully().syncUninterruptibly();
-    bizGroup.shutdownGracefully().syncUninterruptibly();
 
     if (consumer instanceof DefaultFuture.DefaultListener) {
       DefaultFuture.cleanUp(loginName);
