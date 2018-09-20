@@ -5,7 +5,6 @@ import com.github.xfslove.smsj.sms.dcs.SmsDcs;
 import com.github.xfslove.smsj.sms.ud.SmsUdhElement;
 import com.github.xfslove.smsj.sms.ud.SmsUdhIei;
 import com.github.xfslove.smsj.sms.ud.SmsUdhUtil;
-import com.github.xfslove.smsj.util.StringUtil;
 import com.github.xfslove.smssp.message.Message;
 import com.github.xfslove.smssp.message.Sequence;
 import com.github.xfslove.smssp.notification.Notification;
@@ -13,6 +12,7 @@ import com.github.xfslove.smssp.util.ByteUtil;
 import io.netty.buffer.ByteBuf;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 
 /**
  * @author hanwen
@@ -387,8 +387,8 @@ public class DeliverMessage extends SmsPdu implements CmppMessage, Notification 
         "head=" + head +
         ", msgId=" + msgId +
         ", dcs=" + getDcs().getValue() +
-        ", userDataHeader='" + StringUtil.bytesToHexString(getUdhBytes()) + '\'' +
-        ", userData='" + StringUtil.getString(getUdBytes(), getDcs().getAlphabet(), StandardCharsets.UTF_8) + '\'' +
+        ", userDataHeader=" + Arrays.toString(getUdhBytes()) +
+        ", userData=" + Arrays.toString(getUdBytes()) +
         ", destId='" + destId + '\'' +
         ", serviceId='" + serviceId + '\'' +
         ", tpPid=" + tpPid +

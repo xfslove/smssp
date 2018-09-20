@@ -10,6 +10,7 @@ import io.netty.buffer.ByteBuf;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -349,8 +350,8 @@ public class SubmitMessage extends SmsPdu implements SgipMessage, Request {
     return "SubmitMessage{" +
         "head=" + head +
         ", dcs=" + getDcs().getValue() +
-        ", userDataHeader='" + StringUtil.bytesToHexString(getUdhBytes()) + '\'' +
-        ", userData='" + StringUtil.getString(getUdBytes(), getDcs().getAlphabet(), Charset.forName("GBK")) + '\'' +
+        ", userDataHeader=" + Arrays.toString(getUdhBytes()) +
+        ", userData=" + Arrays.toString(getUdBytes()) +
         ", spNumber='" + spNumber + '\'' +
         ", chargeNumber='" + chargeNumber + '\'' +
         ", userNumbers=" + userNumbers +

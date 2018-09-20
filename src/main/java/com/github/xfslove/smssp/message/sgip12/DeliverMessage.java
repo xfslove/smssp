@@ -13,6 +13,7 @@ import io.netty.buffer.ByteBuf;
 
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 
 /**
  * @author hanwen
@@ -181,8 +182,8 @@ public class DeliverMessage extends SmsPdu implements SgipMessage, Notification 
     return "DeliverMessage{" +
         "head=" + head +
         ", dcs=" + getDcs().getValue() +
-        ", userDataHeader='" + StringUtil.bytesToHexString(getUdhBytes()) + '\'' +
-        ", userData='" + StringUtil.getString(getUdBytes(), getDcs().getAlphabet(), Charset.forName("GBK")) + '\'' +
+        ", userDataHeader=" + Arrays.toString(getUdhBytes()) +
+        ", userData=" + Arrays.toString(getUdBytes()) +
         ", spNumber='" + spNumber + '\'' +
         ", userNumber='" + userNumber + '\'' +
         ", tpPid=" + tpPid +
