@@ -214,6 +214,7 @@ public class Cmpp20Client {
   public static class MessageBuilder {
 
     private String[] phones;
+    private String spNumber;
 
     private String text;
     private SmsAlphabet alphabet = SmsAlphabet.UCS2;
@@ -290,6 +291,11 @@ public class Cmpp20Client {
       return this;
     }
 
+    public MessageBuilder spNumber(String spNumber) {
+      this.spNumber = spNumber;
+      return this;
+    }
+
     public SubmitMessage[] split(int nodeId, Sequence<Integer> sequence) {
 
       SmsMessage message;
@@ -335,6 +341,7 @@ public class Cmpp20Client {
       return "SubmitMessage{" +
           "phones=" + Arrays.toString(phones) +
           ", text='" + text + '\'' +
+          ", spNumber='" + spNumber + '\'' +
           ", alphabet=" + alphabet +
           ", msgClass=" + msgClass +
           ", srcId='" + srcId + '\'' +
