@@ -19,14 +19,14 @@ public class DefaultProxyListener implements NotificationListener {
   private static final ConcurrentMap<String, DefaultCache<String, Notification>> MSG_CACHE = new ConcurrentHashMap<>(64);
   private static final ConcurrentMap<String, DefaultCache<String, String[]>> MERGE_CACHE = new ConcurrentHashMap<>(64);
 
-  private String cacheKey;
+  private String name;
   private NotificationListener target;
 
-  public DefaultProxyListener(String cacheKey, NotificationListener target) {
+  public DefaultProxyListener(String name, NotificationListener target) {
     this.target = target;
-    this.cacheKey = cacheKey;
-    MSG_CACHE.putIfAbsent(cacheKey, new DefaultCache<String, Notification>());
-    MERGE_CACHE.putIfAbsent(cacheKey, new DefaultCache<String, String[]>());
+    this.name = name;
+    MSG_CACHE.putIfAbsent(name, new DefaultCache<String, Notification>());
+    MERGE_CACHE.putIfAbsent(name, new DefaultCache<String, String[]>());
   }
 
   @Override
@@ -34,7 +34,7 @@ public class DefaultProxyListener implements NotificationListener {
 
     Notification.Partition partition = notification.getPartition();
     if (partition == null) {
-      LOGGER.warn("drop received notification message {}, maybe it's not extract partition info", notification);
+      LOGGER.warn("{} drop received notification message {}, maybe it's not extract partition info", name, notification);
       return;
     }
 
@@ -43,11 +43,11 @@ public class DefaultProxyListener implements NotificationListener {
       return;
     }
 
-    LOGGER.info("received notification message {}, partition {}, cache it 30m to wait other parts", notification, partition);
-    MSG_CACHE.get(cacheKey).put(notification.getId(), notification);
+    LOGGER.info("{} received notification message {}, partition {}, cache it 30m to wait other parts", name, notification, partition);
+    MSG_CACHE.get(name).put(notification.getId(), notification);
 
-    MERGE_CACHE.get(cacheKey).putIfAbsent(partition.getKey(), new String[partition.getTotal()]);
-    String[] exists = MERGE_CACHE.get(cacheKey).get(partition.getKey());
+    MERGE_CACHE.get(name).putIfAbsent(partition.getKey(), new String[partition.getTotal()]);
+    String[] exists = MERGE_CACHE.get(name).get(partition.getKey());
 
     exists[partition.getIndex() - 1] = notification.getId();
 
@@ -61,14 +61,14 @@ public class DefaultProxyListener implements NotificationListener {
 
     Notification full = null;
     for (int i = 0; i < partition.getTotal(); i++) {
-      Notification one = MSG_CACHE.get(cacheKey).remove(exists[i]);
+      Notification one = MSG_CACHE.get(name).remove(exists[i]);
 
       if (full == null) {
         full = one;
       } else {
 
         if (!full.concat(one)) {
-          LOGGER.warn("drop message {} cause by it can't merged", notification);
+          LOGGER.warn("{} drop message {} cause by it can't merged", name, notification);
         }
       }
     }

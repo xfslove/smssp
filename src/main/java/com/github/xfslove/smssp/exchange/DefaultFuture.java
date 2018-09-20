@@ -21,18 +21,18 @@ public class DefaultFuture implements ResponseFuture {
 
   private static final ConcurrentMap<String, DefaultCache<String, DefaultFuture>> CACHE = new ConcurrentHashMap<>(64);
 
-  private String cacheKey;
+  private String name;
   private Request request;
   private volatile Response response;
 
   private final Lock lock = new ReentrantLock();
   private final Condition done = lock.newCondition();
 
-  public DefaultFuture(String cacheKey, Request request) {
+  public DefaultFuture(String name, Request request) {
     this.request = request;
-    this.cacheKey = cacheKey;
-    CACHE.putIfAbsent(cacheKey, new DefaultCache<String, DefaultFuture>());
-    CACHE.get(cacheKey).put(request.getId(), this);
+    this.name = name;
+    CACHE.putIfAbsent(name, new DefaultCache<String, DefaultFuture>());
+    CACHE.get(name).put(request.getId(), this);
   }
 
   @Override
@@ -52,8 +52,8 @@ public class DefaultFuture implements ResponseFuture {
         lock.unlock();
       }
       if (!isDone()) {
-        CACHE.get(cacheKey).remove(request.getId());
-        LOGGER.warn("drop request message {} cause by timeout", request);
+        CACHE.get(name).remove(request.getId());
+        LOGGER.warn("{} drop request message {} cause by timeout", name, request);
         return null;
       }
     }
@@ -78,19 +78,19 @@ public class DefaultFuture implements ResponseFuture {
   @Override
   public String toString() {
     return "DefaultFuture{" +
-        "cacheKey='" + cacheKey + '\'' +
+        "name='" + name + '\'' +
         ", request=" + request +
         ", response=" + response +
         '}';
   }
 
-  private static void received(String cacheKey, Response response) {
-    DefaultFuture future = CACHE.get(cacheKey).remove(response.getId());
+  private static void received(String name, Response response) {
+    DefaultFuture future = CACHE.get(name).remove(response.getId());
 
     if (future != null) {
       future.receive(response);
     } else {
-      LOGGER.warn("drop received unrelated response message {}", response);
+      LOGGER.warn("{} drop received unrelated response message {}", name, response);
     }
   }
 
