@@ -8,7 +8,7 @@ import com.github.xfslove.smsj.sms.ud.SmsUdhUtil;
 import com.github.xfslove.smsj.util.StringUtil;
 import com.github.xfslove.smssp.message.Message;
 import com.github.xfslove.smssp.message.Sequence;
-import com.github.xfslove.smssp.server.Notification;
+import com.github.xfslove.smssp.notification.Notification;
 import com.github.xfslove.smssp.util.ByteUtil;
 import io.netty.buffer.ByteBuf;
 

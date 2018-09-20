@@ -8,13 +8,15 @@ import com.github.xfslove.smsj.sms.dcs.SmsAlphabet;
 import com.github.xfslove.smsj.sms.dcs.SmsDcs;
 import com.github.xfslove.smsj.sms.dcs.SmsMsgClass;
 import com.github.xfslove.smsj.wap.mms.SmsMmsNotificationMessage;
+import com.github.xfslove.smssp.exchange.DefaultFuture;
+import com.github.xfslove.smssp.exchange.ResponseListener;
 import com.github.xfslove.smssp.message.Sequence;
 import com.github.xfslove.smssp.message.sgip12.DefaultSequence;
 import com.github.xfslove.smssp.message.sgip12.SequenceNumber;
 import com.github.xfslove.smssp.message.sgip12.SubmitMessage;
 import com.github.xfslove.smssp.message.sgip12.SubmitRespMessage;
-import com.github.xfslove.smssp.netty4.handler.sgip12.client.HandlerInitializer;
-import com.github.xfslove.smssp.netty4.handler.sgip12.client.PoolHandler;
+import com.github.xfslove.smssp.transport.netty4.handler.sgip12.client.HandlerInitializer;
+import com.github.xfslove.smssp.transport.netty4.handler.sgip12.client.PoolHandler;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.Channel;
@@ -32,6 +34,7 @@ import io.netty.util.internal.logging.InternalLogger;
 import io.netty.util.internal.logging.InternalLoggerFactory;
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -130,7 +133,7 @@ public class Sgip12Client {
         channel.writeAndFlush(submit);
       }
     } catch (Exception e) {
-      LOGGER.info("acquired channel failure, exception message: {}", e.getMessage());
+      LOGGER.warn("acquired channel failure, exception message: {}", e.getMessage());
       return null;
     } finally {
       if (channel != null) {
@@ -283,6 +286,25 @@ public class Sgip12Client {
       }
 
       return split;
+    }
+
+    @Override
+    public String toString() {
+      return "SubmitMessage{" +
+          "phones=" + Arrays.toString(phones) +
+          ", text='" + text + '\'' +
+          ", alphabet=" + alphabet +
+          ", msgClass=" + msgClass +
+          ", spNumber='" + spNumber + '\'' +
+          ", corpId='" + corpId + '\'' +
+          ", serviceType='" + serviceType + '\'' +
+          ", morelatetoMTFlag=" + morelatetoMTFlag +
+          ", transactionId='" + transactionId + '\'' +
+          ", from='" + from + '\'' +
+          ", size=" + size +
+          ", contentLocation='" + contentLocation + '\'' +
+          ", expiry=" + expiry +
+          '}';
     }
   }
 }

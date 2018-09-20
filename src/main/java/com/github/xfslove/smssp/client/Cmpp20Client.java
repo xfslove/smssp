@@ -8,16 +8,18 @@ import com.github.xfslove.smsj.sms.dcs.SmsAlphabet;
 import com.github.xfslove.smsj.sms.dcs.SmsDcs;
 import com.github.xfslove.smsj.sms.dcs.SmsMsgClass;
 import com.github.xfslove.smsj.wap.mms.SmsMmsNotificationMessage;
+import com.github.xfslove.smssp.exchange.DefaultFuture;
+import com.github.xfslove.smssp.exchange.ResponseListener;
 import com.github.xfslove.smssp.message.Sequence;
 import com.github.xfslove.smssp.message.cmpp20.DefaultSequence;
 import com.github.xfslove.smssp.message.cmpp20.MsgId;
 import com.github.xfslove.smssp.message.cmpp20.SubmitMessage;
 import com.github.xfslove.smssp.message.cmpp20.SubmitRespMessage;
-import com.github.xfslove.smssp.netty4.handler.cmpp20.mix.HandlerInitializer;
-import com.github.xfslove.smssp.netty4.handler.cmpp20.mix.PoolHandler;
-import com.github.xfslove.smssp.server.DefaultProxyListener;
-import com.github.xfslove.smssp.server.Notification;
-import com.github.xfslove.smssp.server.NotificationListener;
+import com.github.xfslove.smssp.transport.netty4.handler.cmpp20.mix.HandlerInitializer;
+import com.github.xfslove.smssp.transport.netty4.handler.cmpp20.mix.PoolHandler;
+import com.github.xfslove.smssp.notification.DefaultProxyListener;
+import com.github.xfslove.smssp.notification.Notification;
+import com.github.xfslove.smssp.notification.NotificationListener;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.*;
@@ -36,6 +38,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Deque;
 import java.util.concurrent.TimeUnit;
@@ -326,6 +329,24 @@ public class Cmpp20Client {
 
       return split;
     }
+
+    @Override
+    public String toString() {
+      return "SubmitMessage{" +
+          "phones=" + Arrays.toString(phones) +
+          ", text='" + text + '\'' +
+          ", alphabet=" + alphabet +
+          ", msgClass=" + msgClass +
+          ", srcId='" + srcId + '\'' +
+          ", serviceId='" + serviceId + '\'' +
+          ", msgSrc='" + msgSrc + '\'' +
+          ", transactionId='" + transactionId + '\'' +
+          ", from='" + from + '\'' +
+          ", size=" + size +
+          ", contentLocation='" + contentLocation + '\'' +
+          ", expiry=" + expiry +
+          '}';
+    }
   }
 
   private class CmppChannelPool extends FixedChannelPool {
@@ -366,5 +387,6 @@ public class Cmpp20Client {
       return availableAddress.poll();
     }
   }
+
 
 }
