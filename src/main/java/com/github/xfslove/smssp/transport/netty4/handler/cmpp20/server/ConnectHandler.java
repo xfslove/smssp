@@ -3,7 +3,7 @@ package com.github.xfslove.smssp.transport.netty4.handler.cmpp20.server;
 import com.github.xfslove.smssp.message.Message;
 import com.github.xfslove.smssp.message.cmpp20.ConnectMessage;
 import com.github.xfslove.smssp.message.cmpp20.ConnectRespMessage;
-import com.github.xfslove.smssp.transport.netty4.handler.AttributeConstant;
+import com.github.xfslove.smssp.transport.netty4.handler.AttributeConstants;
 import com.github.xfslove.smssp.transport.netty4.handler.SessionEvent;
 import com.github.xfslove.smssp.util.ByteUtil;
 import io.netty.channel.Channel;
@@ -96,8 +96,8 @@ public class ConnectHandler extends ChannelDuplexHandler {
         public void operationComplete(Future<? super Void> future) throws Exception {
           if (future.isSuccess()) {
             logger.info("{} connect success", connect.getSourceAddr());
-            channel.attr(AttributeConstant.SESSION).set(true);
-            channel.attr(AttributeConstant.NAME).set(connect.getSourceAddr());
+            channel.attr(AttributeConstants.SESSION).set(true);
+            channel.attr(AttributeConstants.NAME).set(connect.getSourceAddr());
           }
         }
       });
@@ -105,9 +105,9 @@ public class ConnectHandler extends ChannelDuplexHandler {
       return;
     }
 
-    if (!Boolean.TRUE.equals(channel.attr(AttributeConstant.SESSION).get())) {
+    if (!Boolean.TRUE.equals(channel.attr(AttributeConstants.SESSION).get())) {
       // 没有注册 session 收到消息
-      channel.attr(AttributeConstant.NAME).set(name);
+      channel.attr(AttributeConstants.NAME).set(name);
       logger.info("{} received message when session not valid, fire SESSION_EVENT[NOT_VALID]", name, msg);
 
       ctx.fireUserEventTriggered(SessionEvent.NOT_VALID((Message) msg));
@@ -120,7 +120,7 @@ public class ConnectHandler extends ChannelDuplexHandler {
   @Override
   public void channelInactive(ChannelHandlerContext ctx) throws Exception {
 
-    ctx.channel().attr(AttributeConstant.SESSION).set(null);
+    ctx.channel().attr(AttributeConstants.SESSION).set(null);
 
     ctx.fireChannelInactive();
   }

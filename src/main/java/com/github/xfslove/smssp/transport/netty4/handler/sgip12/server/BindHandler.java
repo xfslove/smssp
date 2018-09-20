@@ -3,13 +3,12 @@ package com.github.xfslove.smssp.transport.netty4.handler.sgip12.server;
 import com.github.xfslove.smssp.message.Message;
 import com.github.xfslove.smssp.message.sgip12.BindMessage;
 import com.github.xfslove.smssp.message.sgip12.BindRespMessage;
-import com.github.xfslove.smssp.transport.netty4.handler.AttributeConstant;
+import com.github.xfslove.smssp.transport.netty4.handler.AttributeConstants;
 import com.github.xfslove.smssp.transport.netty4.handler.SessionEvent;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.util.AttributeKey;
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.GenericFutureListener;
 import io.netty.util.internal.logging.InternalLogger;
@@ -45,7 +44,7 @@ public class BindHandler extends ChannelDuplexHandler {
 
       BindRespMessage bindResp = new BindRespMessage(bind.getHead().getSequenceNumber());
 
-      if (Boolean.TRUE.equals(ctx.channel().attr(AttributeConstant.SESSION).get())) {
+      if (Boolean.TRUE.equals(ctx.channel().attr(AttributeConstants.SESSION).get())) {
         // 重复登录
         bindResp.setResult(2);
         ctx.writeAndFlush(bindResp).addListener(new GenericFutureListener<Future<? super Void>>() {
@@ -97,8 +96,8 @@ public class BindHandler extends ChannelDuplexHandler {
         public void operationComplete(Future<? super Void> future) throws Exception {
           if (future.isSuccess()) {
             logger.info("{} bind success", bind.getLoginName());
-            channel.attr(AttributeConstant.SESSION).set(true);
-            channel.attr(AttributeConstant.NAME).set(bind.getLoginName());
+            channel.attr(AttributeConstants.SESSION).set(true);
+            channel.attr(AttributeConstants.NAME).set(bind.getLoginName());
           }
         }
       });
@@ -106,9 +105,9 @@ public class BindHandler extends ChannelDuplexHandler {
       return;
     }
 
-    if (!Boolean.TRUE.equals(channel.attr(AttributeConstant.SESSION).get())) {
+    if (!Boolean.TRUE.equals(channel.attr(AttributeConstants.SESSION).get())) {
       // 没有注册 session 收到消息
-      channel.attr(AttributeConstant.NAME).set(name);
+      channel.attr(AttributeConstants.NAME).set(name);
       logger.info("{} received message when session not valid, fire SESSION_EVENT[NOT_VALID]", name, msg);
 
       ctx.fireUserEventTriggered(SessionEvent.NOT_VALID((Message) msg));
@@ -121,7 +120,7 @@ public class BindHandler extends ChannelDuplexHandler {
   @Override
   public void channelInactive(ChannelHandlerContext ctx) throws Exception {
 
-    ctx.channel().attr(AttributeConstant.SESSION).set(null);
+    ctx.channel().attr(AttributeConstants.SESSION).set(null);
 
     ctx.fireChannelInactive();
   }

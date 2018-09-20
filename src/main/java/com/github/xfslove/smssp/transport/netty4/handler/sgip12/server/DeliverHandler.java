@@ -6,12 +6,11 @@ import com.github.xfslove.smssp.message.sgip12.DeliverRespMessage;
 import com.github.xfslove.smssp.message.sgip12.ReportMessage;
 import com.github.xfslove.smssp.message.sgip12.ReportRespMessage;
 import com.github.xfslove.smssp.notification.NotificationListener;
-import com.github.xfslove.smssp.transport.netty4.handler.AttributeConstant;
+import com.github.xfslove.smssp.transport.netty4.handler.AttributeConstants;
 import com.github.xfslove.smssp.transport.netty4.handler.SessionEvent;
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.util.AttributeKey;
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.GenericFutureListener;
 import io.netty.util.internal.logging.InternalLogger;
@@ -83,7 +82,7 @@ public class DeliverHandler extends ChannelDuplexHandler {
         ctx.writeAndFlush(deliverResp).addListener(new GenericFutureListener<Future<? super Void>>() {
           @Override
           public void operationComplete(Future<? super Void> listener) throws Exception {
-            String name = ctx.channel().attr(AttributeConstant.NAME).getAndSet(null);
+            String name = ctx.channel().attr(AttributeConstants.NAME).getAndSet(null);
             logger.warn("{} discard[NOT_VALID] deliver message {} and close channel", name, msg);
             ctx.channel().close();
           }
@@ -102,7 +101,7 @@ public class DeliverHandler extends ChannelDuplexHandler {
         ctx.writeAndFlush(reportResp).addListener(new GenericFutureListener<Future<? super Void>>() {
           @Override
           public void operationComplete(Future<? super Void> listener) throws Exception {
-            String name = ctx.channel().attr(AttributeConstant.NAME).getAndSet(null);
+            String name = ctx.channel().attr(AttributeConstants.NAME).getAndSet(null);
             logger.warn("{} discard[NOT_VALID] report message {} and close channel", name, msg);
             ctx.channel().close();
           }

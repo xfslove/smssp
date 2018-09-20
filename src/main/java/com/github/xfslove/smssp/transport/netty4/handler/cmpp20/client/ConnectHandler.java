@@ -3,13 +3,12 @@ package com.github.xfslove.smssp.transport.netty4.handler.cmpp20.client;
 import com.github.xfslove.smssp.message.cmpp20.ConnectMessage;
 import com.github.xfslove.smssp.message.cmpp20.ConnectRespMessage;
 import com.github.xfslove.smssp.message.Sequence;
-import com.github.xfslove.smssp.transport.netty4.handler.AttributeConstant;
+import com.github.xfslove.smssp.transport.netty4.handler.AttributeConstants;
 import com.github.xfslove.smssp.util.ByteUtil;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.util.AttributeKey;
 import io.netty.util.internal.logging.InternalLogger;
 import io.netty.util.internal.logging.InternalLoggerFactory;
 import org.apache.commons.codec.digest.DigestUtils;
@@ -73,7 +72,7 @@ public class ConnectHandler extends ChannelDuplexHandler {
       if (result == 0) {
         // connect 成功
         logger.info("{} connect success", name);
-        channel.attr(AttributeConstant.NAME).set(name);
+        channel.attr(AttributeConstants.NAME).set(name);
       } else {
 
         logger.info("{} connect failure[result:{}] and close channel", name, result);

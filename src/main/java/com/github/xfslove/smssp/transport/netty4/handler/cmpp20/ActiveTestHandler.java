@@ -3,7 +3,7 @@ package com.github.xfslove.smssp.transport.netty4.handler.cmpp20;
 import com.github.xfslove.smssp.message.Sequence;
 import com.github.xfslove.smssp.message.cmpp20.ActiveTestMessage;
 import com.github.xfslove.smssp.message.cmpp20.ActiveTestRespMessage;
-import com.github.xfslove.smssp.transport.netty4.handler.AttributeConstant;
+import com.github.xfslove.smssp.transport.netty4.handler.AttributeConstants;
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
@@ -44,7 +44,7 @@ public class ActiveTestHandler extends ChannelDuplexHandler {
         @Override
         public void operationComplete(Future<? super Void> future) throws Exception {
           if (future.isSuccess()) {
-            String name = ctx.channel().attr(AttributeConstant.NAME).get();
+            String name = ctx.channel().attr(AttributeConstants.NAME).get();
             logger.info("{} received active test message", name);
           }
         }
@@ -55,7 +55,7 @@ public class ActiveTestHandler extends ChannelDuplexHandler {
 
     // activeTestResp
     if (msg instanceof ActiveTestRespMessage) {
-      String name = ctx.channel().attr(AttributeConstant.NAME).get();
+      String name = ctx.channel().attr(AttributeConstants.NAME).get();
       logger.info("{} received active test resp message", name);
       return;
     }
@@ -79,7 +79,7 @@ public class ActiveTestHandler extends ChannelDuplexHandler {
             @Override
             public void operationComplete(Future<? super Void> future) throws Exception {
               if (future.isSuccess()) {
-                String name = ctx.channel().attr(AttributeConstant.NAME).get();
+                String name = ctx.channel().attr(AttributeConstants.NAME).get();
                 logger.info("{} request active test when idle", name);
               }
             }
