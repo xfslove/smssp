@@ -15,11 +15,11 @@ import com.github.xfslove.smssp.message.cmpp20.DefaultSequence;
 import com.github.xfslove.smssp.message.cmpp20.MsgId;
 import com.github.xfslove.smssp.message.cmpp20.SubmitMessage;
 import com.github.xfslove.smssp.message.cmpp20.SubmitRespMessage;
-import com.github.xfslove.smssp.transport.netty4.handler.cmpp20.mix.HandlerInitializer;
-import com.github.xfslove.smssp.transport.netty4.handler.cmpp20.mix.PoolHandler;
 import com.github.xfslove.smssp.notification.DefaultProxyListener;
 import com.github.xfslove.smssp.notification.Notification;
 import com.github.xfslove.smssp.notification.NotificationListener;
+import com.github.xfslove.smssp.transport.netty4.handler.cmpp20.mix.HandlerInitializer;
+import com.github.xfslove.smssp.transport.netty4.handler.cmpp20.mix.PoolHandler;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.*;
@@ -79,7 +79,7 @@ public class Cmpp20Client {
   private ResponseListener consumer;
   private NotificationListener consumer2;
 
-  private Cmpp20Client(int nodeId, String loginName, String loginPassword, String host, int port) {
+  private Cmpp20Client(int nodeId, final String loginName, String loginPassword, String host, int port) {
     this.nodeId = nodeId;
     this.loginName = loginName;
     this.loginPassword = loginPassword;
@@ -90,7 +90,7 @@ public class Cmpp20Client {
     this.consumer2 = new DefaultProxyListener(loginName, new NotificationListener() {
       @Override
       public void done(Notification notification) {
-        LOGGER.info("received notification: {}", notification);
+        LOGGER.info("{} received notification: {}", loginName, notification);
       }
     });
   }
@@ -148,7 +148,7 @@ public class Cmpp20Client {
       channelPool = new CmppChannelPool(bootstrap, new PoolHandler(mix));
     }
 
-    LOGGER.info("init connection pool to [{}:{}] success", host, port);
+    LOGGER.info("{} init connection pool to [{}:{}] success", loginName, host, port);
     return this;
   }
 
@@ -166,7 +166,7 @@ public class Cmpp20Client {
       DefaultProxyListener.cleanUp(loginName);
     }
 
-    LOGGER.info("shutdown gracefully, disconnect to [{}:{}] success", host, port);
+    LOGGER.info("{} shutdown gracefully, disconnect to [{}:{}] success", loginName, host, port);
   }
 
   public SubmitRespMessage[] submit(MessageBuilder message, int timeout) {
@@ -188,7 +188,7 @@ public class Cmpp20Client {
         channel.writeAndFlush(submit);
       }
     } catch (Exception e) {
-      LOGGER.warn("acquired channel failure, exception message: {}", e.getMessage());
+      LOGGER.warn("{} acquired channel failure, exception message: {}", loginName, e.getMessage());
       return null;
     } finally {
       if (channel != null) {
@@ -203,7 +203,7 @@ public class Cmpp20Client {
       try {
         response = (SubmitRespMessage) futures[i].getResponse(timeout);
       } catch (InterruptedException e) {
-        LOGGER.warn("get response failure, exception message: {}", e.getMessage());
+        LOGGER.warn("{} get response failure, exception message: {}", loginName, e.getMessage());
       }
       resp[i] = response;
     }

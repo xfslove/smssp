@@ -113,7 +113,7 @@ public class Sgip12Client {
 
     channelPool = new FixedChannelPool(bootstrap, new PoolHandler(handler), connections);
 
-    LOGGER.info("init connection pool to [{}:{}] success", host, port);
+    LOGGER.info("{} init connection pool to [{}:{}] success", loginName, host, port);
     return this;
   }
 
@@ -133,7 +133,7 @@ public class Sgip12Client {
         channel.writeAndFlush(submit);
       }
     } catch (Exception e) {
-      LOGGER.warn("acquired channel failure, exception message: {}", e.getMessage());
+      LOGGER.warn("{} acquired channel failure, exception message: {}", loginName, e.getMessage());
       return null;
     } finally {
       if (channel != null) {
@@ -148,7 +148,7 @@ public class Sgip12Client {
       try {
         response = (SubmitRespMessage) futures[i].getResponse(timeout);
       } catch (InterruptedException e) {
-        LOGGER.warn("get response failure, exception message: {}", e.getMessage());
+        LOGGER.warn("{} get response failure, exception message: {}", loginName, e.getMessage());
       }
       resp[i] = response;
     }
@@ -168,7 +168,7 @@ public class Sgip12Client {
       DefaultFuture.cleanUp(loginName);
     }
 
-    LOGGER.info("shutdown gracefully, disconnect to [{}:{}] success", host, port);
+    LOGGER.info("{} shutdown gracefully, disconnect to [{}:{}] success", loginName, host, port);
   }
 
   public static class MessageBuilder {

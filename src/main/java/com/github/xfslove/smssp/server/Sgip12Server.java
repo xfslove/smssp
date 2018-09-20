@@ -49,7 +49,7 @@ public class Sgip12Server {
   private Sequence<SequenceNumber> sequence;
   private NotificationListener consumer;
 
-  private Sgip12Server(int nodeId, String loginName, String loginPassword, int port) {
+  private Sgip12Server(int nodeId, final String loginName, String loginPassword, int port) {
     this.nodeId = nodeId;
     this.loginName = loginName;
     this.loginPassword = loginPassword;
@@ -57,7 +57,7 @@ public class Sgip12Server {
     this.consumer = new DefaultProxyListener(loginName, new NotificationListener() {
       @Override
       public void done(Notification notification) {
-        LOGGER.info("received notification: {}", notification);
+        LOGGER.info("{} received notification: {}", loginName, notification);
       }
     });
     this.sequence = new DefaultSequence(nodeId);
@@ -88,7 +88,7 @@ public class Sgip12Server {
 
     bootstrap.childHandler(handler).bind(port).syncUninterruptibly();
 
-    LOGGER.info("bind server success, listen port[{}]", port);
+    LOGGER.info("{} bind server success, listen port[{}]", loginName, port);
 
     return this;
   }
