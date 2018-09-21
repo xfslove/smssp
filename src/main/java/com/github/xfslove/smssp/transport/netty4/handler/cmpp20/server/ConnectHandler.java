@@ -29,14 +29,14 @@ import java.util.Arrays;
 @ChannelHandler.Sharable
 public class ConnectHandler extends ChannelDuplexHandler {
 
-  private final InternalLogger logger = InternalLoggerFactory.getInstance(getClass());
+  private static final InternalLogger LOGGER = InternalLoggerFactory.getInstance(ConnectHandler.class);
 
-  private final String name;
+  private final String username;
 
   private final String password;
 
-  public ConnectHandler(String name, String password) {
-    this.name = name;
+  public ConnectHandler(String username, String password) {
+    this.username = username;
     this.password = password;
   }
 
@@ -52,12 +52,12 @@ public class ConnectHandler extends ChannelDuplexHandler {
       resp.setVersion(ConnectMessage.VERSION_20);
 
 
-      byte[] sourceBytes = name.getBytes(StandardCharsets.ISO_8859_1);
+      byte[] sourceBytes = username.getBytes(StandardCharsets.ISO_8859_1);
       byte[] secretBytes = password.getBytes(StandardCharsets.ISO_8859_1);
       byte[] timestampBytes = StringUtils.leftPad(String.valueOf(connect.getTimestamp()), 10, "0").getBytes(StandardCharsets.ISO_8859_1);
       byte[] authenticatorSource = DigestUtils.md5(ByteUtil.concat(sourceBytes, new byte[9], secretBytes, timestampBytes));
 
-      if (!connect.getSourceAddr().equals(name) ||
+      if (!connect.getSourceAddr().equals(username) ||
           !Arrays.equals(authenticatorSource, connect.getAuthenticatorSource())) {
 
         // 认证错误
@@ -66,7 +66,7 @@ public class ConnectHandler extends ChannelDuplexHandler {
           @Override
           public void operationComplete(Future<? super Void> future) throws Exception {
             if (future.isSuccess()) {
-              logger.info("{} connect failure[result:{}] and close channel", connect.getSourceAddr(), 3);
+              LOGGER.info("connect failure[result:{}] and close channel", 3);
               channel.close();
             }
           }
@@ -82,7 +82,7 @@ public class ConnectHandler extends ChannelDuplexHandler {
           @Override
           public void operationComplete(Future<? super Void> future) throws Exception {
             if (future.isSuccess()) {
-              logger.info("{} connect failure[result:{}] and close channel", connect.getSourceAddr(), 3);
+              LOGGER.info("connect failure[result:{}] and close channel", 3);
               channel.close();
             }
           }
@@ -95,7 +95,7 @@ public class ConnectHandler extends ChannelDuplexHandler {
         @Override
         public void operationComplete(Future<? super Void> future) throws Exception {
           if (future.isSuccess()) {
-            logger.info("{} connect success", connect.getSourceAddr());
+            LOGGER.info("connect success");
             channel.attr(AttributeConstants.SESSION).set(true);
           }
         }
@@ -106,7 +106,7 @@ public class ConnectHandler extends ChannelDuplexHandler {
 
     if (!Boolean.TRUE.equals(channel.attr(AttributeConstants.SESSION).get())) {
       // 没有注册 session 收到消息
-      logger.info("received message when session not valid, fire SESSION_EVENT[NOT_VALID]", msg);
+      LOGGER.info("received message when session not valid, fire SESSION_EVENT[NOT_VALID]", msg);
 
       ctx.fireUserEventTriggered(SessionEvent.NOT_VALID((Message) msg));
       return;

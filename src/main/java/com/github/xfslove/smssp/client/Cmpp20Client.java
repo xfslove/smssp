@@ -48,8 +48,8 @@ public class Cmpp20Client {
   private Bootstrap bootstrap;
   private ChannelPool channelPool;
 
-  private String loginName;
-  private String loginPassword;
+  private String username;
+  private String password;
   private String host;
   private int port;
 
@@ -62,22 +62,22 @@ public class Cmpp20Client {
   private ResponseListener consumer;
   private NotificationListener consumer2;
 
-  private Cmpp20Client(int nodeId, final String loginName, String loginPassword, String host, int port) {
+  private Cmpp20Client(int nodeId, final String username, String password, String host, int port) {
     this.nodeId = nodeId;
-    this.loginName = loginName;
-    this.loginPassword = loginPassword;
+    this.username = username;
+    this.password = password;
     this.host = host;
     this.port = port;
     this.sequence = new DefaultSequence();
-    this.consumer = new DefaultFuture.DefaultListener(loginName);
-    this.consumer2 = new DefaultProxyListener(loginName, new NotificationListener() {
+    this.consumer = new DefaultFuture.DefaultListener(username);
+    this.consumer2 = new DefaultProxyListener(username, new NotificationListener() {
       @Override
       public void done(Notification notification) {
-        LOGGER.info("{} received notification: {}", loginName, notification);
+        LOGGER.info("{} received notification: {}", username, notification);
       }
     });
 
-    this.workGroup = new NioEventLoopGroup(Math.min(Runtime.getRuntime().availableProcessors() + 1, 32), new DefaultThreadFactory("cmppWorker-" + loginName, true));
+    this.workGroup = new NioEventLoopGroup(Math.min(Runtime.getRuntime().availableProcessors() + 1, 32), new DefaultThreadFactory("cmppWorker-" + username, true));
     this.bootstrap = new Bootstrap().group(workGroup)
         .channel(NioSocketChannel.class)
         .option(ChannelOption.SO_KEEPALIVE, true)
@@ -107,16 +107,6 @@ public class Cmpp20Client {
     return this;
   }
 
-  public Cmpp20Client responseListener(ResponseListener consumer) {
-    this.consumer = consumer;
-    return this;
-  }
-
-  public Cmpp20Client notificationListener(NotificationListener consumer2) {
-    this.consumer2 = consumer2;
-    return this;
-  }
-
   public Cmpp20Client idleCheckTime(int idleCheckTime) {
     this.idleCheckTime = idleCheckTime;
     return this;
@@ -129,7 +119,7 @@ public class Cmpp20Client {
    */
   public Cmpp20Client connect() {
 
-    HandlerInitializer mix = new HandlerInitializer(loginName, loginPassword, consumer2, consumer, sequence, idleCheckTime);
+    HandlerInitializer mix = new HandlerInitializer(username, password, consumer2, consumer, sequence, idleCheckTime);
 
     bootstrap.remoteAddress(host, port);
 
@@ -140,7 +130,7 @@ public class Cmpp20Client {
       channelPool = new CmppChannelPool(bootstrap, new PoolHandler(mix));
     }
 
-    LOGGER.info("{} init connection pool to [{}:{}] success", loginName, host, port);
+    LOGGER.info("{} init connection pool to [{}:{}] success", username, host, port);
     return this;
   }
 
@@ -153,13 +143,13 @@ public class Cmpp20Client {
     workGroup.shutdownGracefully().syncUninterruptibly();
 
     if (consumer instanceof DefaultFuture.DefaultListener) {
-      DefaultFuture.cleanUp(loginName);
+      DefaultFuture.cleanUp(username);
     }
     if (consumer2 instanceof DefaultProxyListener) {
-      DefaultProxyListener.cleanUp(loginName);
+      DefaultProxyListener.cleanUp(username);
     }
 
-    LOGGER.info("{} shutdown gracefully, disconnect to [{}:{}] success", loginName, host, port);
+    LOGGER.info("{} shutdown gracefully, disconnect to [{}:{}] success", username, host, port);
   }
 
   public SubmitRespMessage[] submit(Message message, int timeout) {
@@ -194,7 +184,7 @@ public class Cmpp20Client {
 
     DefaultFuture[] futures = new DefaultFuture[req.length];
     for (int i = 0; i < req.length; i++) {
-      futures[i] = new DefaultFuture(loginName, req[i]);
+      futures[i] = new DefaultFuture(username, req[i]);
     }
 
     Channel channel = null;
@@ -206,7 +196,7 @@ public class Cmpp20Client {
         channel.writeAndFlush(submit);
       }
     } catch (Exception e) {
-      LOGGER.warn("{} acquired channel failure, exception message: {}", loginName, e.getMessage());
+      LOGGER.warn("{} acquired channel failure, exception message: {}", username, e.getMessage());
       return null;
     } finally {
       if (channel != null) {
@@ -221,7 +211,7 @@ public class Cmpp20Client {
       try {
         response = (SubmitRespMessage) futures[i].getResponse(timeout);
       } catch (InterruptedException e) {
-        LOGGER.warn("{} get response failure, exception message: {}", loginName, e.getMessage());
+        LOGGER.warn("{} get response failure, exception message: {}", username, e.getMessage());
       }
       resp[i] = response;
     }

@@ -20,7 +20,7 @@ import io.netty.util.internal.logging.InternalLoggerFactory;
 @ChannelHandler.Sharable
 public class ActiveTestHandler extends ChannelDuplexHandler {
 
-  private final InternalLogger logger = InternalLoggerFactory.getInstance(getClass());
+  private static final InternalLogger LOGGER = InternalLoggerFactory.getInstance(ActiveTestHandler.class);
 
   private Sequence<Integer> sequence;
 
@@ -43,7 +43,7 @@ public class ActiveTestHandler extends ChannelDuplexHandler {
         @Override
         public void operationComplete(Future<? super Void> future) throws Exception {
           if (future.isSuccess()) {
-            logger.info("received active test message");
+            LOGGER.info("received active test message");
           }
         }
       });
@@ -53,7 +53,7 @@ public class ActiveTestHandler extends ChannelDuplexHandler {
 
     // activeTestResp
     if (msg instanceof ActiveTestRespMessage) {
-      logger.info("received active test resp message");
+      LOGGER.info("received active test resp message");
       return;
     }
 
@@ -76,7 +76,7 @@ public class ActiveTestHandler extends ChannelDuplexHandler {
             @Override
             public void operationComplete(Future<? super Void> future) throws Exception {
               if (future.isSuccess()) {
-                logger.info("request active test when idle");
+                LOGGER.info("request active test when idle");
               }
             }
           });

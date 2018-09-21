@@ -24,7 +24,7 @@ import io.netty.util.internal.logging.InternalLoggerFactory;
 @ChannelHandler.Sharable
 public class DeliverHandler extends ChannelDuplexHandler {
 
-  private final InternalLogger logger = InternalLoggerFactory.getInstance(getClass());
+  private static final InternalLogger LOGGER = InternalLoggerFactory.getInstance(DeliverHandler.class);
 
   private NotificationListener consumer;
 
@@ -81,7 +81,7 @@ public class DeliverHandler extends ChannelDuplexHandler {
         ctx.writeAndFlush(deliverResp).addListener(new GenericFutureListener<Future<? super Void>>() {
           @Override
           public void operationComplete(Future<? super Void> listener) throws Exception {
-            logger.warn("discard[NOT_VALID] deliver message {} and close channel", msg);
+            LOGGER.warn("discard[NOT_VALID] deliver message {} and close channel", msg);
             ctx.channel().close();
           }
         });
@@ -99,7 +99,7 @@ public class DeliverHandler extends ChannelDuplexHandler {
         ctx.writeAndFlush(reportResp).addListener(new GenericFutureListener<Future<? super Void>>() {
           @Override
           public void operationComplete(Future<? super Void> listener) throws Exception {
-            logger.warn("discard[NOT_VALID] report message {} and close channel", msg);
+            LOGGER.warn("discard[NOT_VALID] report message {} and close channel", msg);
             ctx.channel().close();
           }
         });

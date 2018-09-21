@@ -26,7 +26,7 @@ import java.util.concurrent.TimeUnit;
 @ChannelHandler.Sharable
 public class UnBindHandler extends ChannelDuplexHandler {
 
-  private final InternalLogger logger = InternalLoggerFactory.getInstance(getClass());
+  private static final InternalLogger LOGGER = InternalLoggerFactory.getInstance(UnBindHandler.class);
 
   private Sequence<SequenceNumber> sequence;
 
@@ -49,7 +49,7 @@ public class UnBindHandler extends ChannelDuplexHandler {
         @Override
         public void operationComplete(Future<? super Void> future) throws Exception {
           if (future.isSuccess()) {
-            logger.info("unbind success and close channel");
+            LOGGER.info("unbind success and close channel");
             channel.close();
           }
         }
@@ -60,7 +60,7 @@ public class UnBindHandler extends ChannelDuplexHandler {
 
     // unbindResp
     if (msg instanceof UnBindRespMessage) {
-      logger.info("received unbind resp message and close channel");
+      LOGGER.info("received unbind resp message and close channel");
       channel.close();
       return;
     }
@@ -88,13 +88,13 @@ public class UnBindHandler extends ChannelDuplexHandler {
                 @Override
                 public void run() {
                   if (ctx.channel().isActive()) {
-                    logger.info("close channel due to not received resp message");
+                    LOGGER.info("close channel due to not received resp message");
                     ctx.channel().close();
                   }
                 }
               }, 500, TimeUnit.MILLISECONDS);
 
-              logger.info("request unbind when idle and delay 500ms close channel if no resp message");
+              LOGGER.info("request unbind when idle and delay 500ms close channel if no resp message");
             }
           }
         });

@@ -27,9 +27,9 @@ import java.util.concurrent.TimeUnit;
  */
 public class HandlerInitializer extends ChannelInitializer<Channel> {
 
-  private String loginName;
+  private String username;
 
-  private String loginPassword;
+  private String password;
 
   private NotificationListener consumer2;
 
@@ -39,9 +39,9 @@ public class HandlerInitializer extends ChannelInitializer<Channel> {
 
   private int idleCheckTime;
 
-  public HandlerInitializer(String loginName, String loginPassword, NotificationListener consumer2, ResponseListener consumer, Sequence<Integer> sequence, int idleCheckTime) {
-    this.loginName = loginName;
-    this.loginPassword = loginPassword;
+  public HandlerInitializer(String username, String password, NotificationListener consumer2, ResponseListener consumer, Sequence<Integer> sequence, int idleCheckTime) {
+    this.username = username;
+    this.password = password;
     this.consumer2 = consumer2;
     this.consumer = consumer;
     this.sequence = sequence;
@@ -57,7 +57,7 @@ public class HandlerInitializer extends ChannelInitializer<Channel> {
     channel.pipeline().addLast("cmppMessageCodec", new MessageCodec());
     channel.pipeline().addLast("cmppMessageLogging", new LoggingHandler(LogLevel.DEBUG));
 
-    channel.pipeline().addLast("cmppConnectHandler", new ConnectHandler(loginName, loginPassword, sequence));
+    channel.pipeline().addLast("cmppConnectHandler", new ConnectHandler(username, password, sequence));
     channel.pipeline().addLast("cmppActiveTestHandler", new ActiveTestHandler(sequence, true));
     channel.pipeline().addLast("cmppTerminateHandler", new TerminateHandler(sequence));
     channel.pipeline().addLast("cmppSubmitHandler", new SubmitHandler(consumer));

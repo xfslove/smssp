@@ -3,7 +3,6 @@ package com.github.xfslove.smssp.transport.netty4.handler.cmpp20;
 import com.github.xfslove.smssp.message.Sequence;
 import com.github.xfslove.smssp.message.cmpp20.TerminateMessage;
 import com.github.xfslove.smssp.message.cmpp20.TerminateRespMessage;
-import com.github.xfslove.smssp.transport.netty4.handler.AttributeConstants;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandler;
@@ -24,7 +23,7 @@ import java.util.concurrent.TimeUnit;
 @ChannelHandler.Sharable
 public class TerminateHandler extends ChannelDuplexHandler {
 
-  private final InternalLogger logger = InternalLoggerFactory.getInstance(getClass());
+  private static final InternalLogger LOGGER = InternalLoggerFactory.getInstance(TerminateHandler.class);
 
   private Sequence<Integer> sequence;
 
@@ -37,7 +36,7 @@ public class TerminateHandler extends ChannelDuplexHandler {
     final Channel channel = ctx.channel();
 
     if (msg instanceof TerminateRespMessage) {
-      logger.info("received terminate resp message and close channel");
+      LOGGER.info("received terminate resp message and close channel");
       channel.close();
       return;
     }
@@ -52,7 +51,7 @@ public class TerminateHandler extends ChannelDuplexHandler {
         @Override
         public void operationComplete(Future<? super Void> future) throws Exception {
           if (future.isSuccess()) {
-            logger.info("terminate success and close channel");
+            LOGGER.info("terminate success and close channel");
             channel.close();
           }
         }
@@ -82,13 +81,13 @@ public class TerminateHandler extends ChannelDuplexHandler {
                 @Override
                 public void run() {
                   if (ctx.channel().isActive()) {
-                    logger.info("close channel due to not received resp message");
+                    LOGGER.info("close channel due to not received resp message");
                     ctx.channel().close();
                   }
                 }
               }, 500, TimeUnit.MILLISECONDS);
 
-              logger.info("request terminate when idle and delay 500ms close channel if no resp message");
+              LOGGER.info("request terminate when idle and delay 500ms close channel if no resp message");
             }
           }
         });

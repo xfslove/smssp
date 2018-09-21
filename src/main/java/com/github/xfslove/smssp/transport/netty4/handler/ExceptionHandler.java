@@ -15,12 +15,12 @@ import io.netty.util.internal.logging.InternalLoggerFactory;
 @ChannelHandler.Sharable
 public class ExceptionHandler extends ChannelDuplexHandler {
 
-  private final InternalLogger logger = InternalLoggerFactory.getInstance(getClass());
+  private static final InternalLogger LOGGER = InternalLoggerFactory.getInstance(ExceptionHandler.class);
 
   @Override
   public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
 
-    logger.warn("catch exception message: {}, and close channel", cause.getMessage());
+    LOGGER.warn("catch exception message: {}, and close channel", cause.getMessage());
     ctx.channel().close();
   }
 }

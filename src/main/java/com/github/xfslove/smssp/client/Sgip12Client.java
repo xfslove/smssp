@@ -38,28 +38,26 @@ public class Sgip12Client {
   private Bootstrap bootstrap;
   private ChannelPool channelPool;
 
-  private String loginName;
-  private String loginPassword;
+  private String username;
+  private String password;
   private String host;
   private int port;
 
   private int idleCheckTime = 30;
   private int connections = 1;
 
-  private int nodeId;
   private Sequence<SequenceNumber> sequence;
   private ResponseListener consumer;
 
-  private Sgip12Client(int nodeId, String loginName, String loginPassword, String host, int port) {
-    this.nodeId = nodeId;
-    this.loginName = loginName;
-    this.loginPassword = loginPassword;
+  private Sgip12Client(int nodeId, String username, String password, String host, int port) {
+    this.username = username;
+    this.password = password;
     this.host = host;
     this.port = port;
     this.sequence = new DefaultSequence(nodeId);
-    this.consumer = new DefaultFuture.DefaultListener(loginName);
+    this.consumer = new DefaultFuture.DefaultListener(username);
 
-    this.workGroup = new NioEventLoopGroup(Math.min(Runtime.getRuntime().availableProcessors() + 1, 32), new DefaultThreadFactory("sgipWorker-" + loginName, true));
+    this.workGroup = new NioEventLoopGroup(Math.min(Runtime.getRuntime().availableProcessors() + 1, 32), new DefaultThreadFactory("sgipWorker-" + username, true));
     this.bootstrap = new Bootstrap().group(workGroup)
         .channel(NioSocketChannel.class)
         .option(ChannelOption.SO_KEEPALIVE, true)
@@ -88,20 +86,15 @@ public class Sgip12Client {
     return this;
   }
 
-  public Sgip12Client responseListener(ResponseListener consumer) {
-    this.consumer = consumer;
-    return this;
-  }
-
   public Sgip12Client connect() {
 
-    HandlerInitializer handler = new HandlerInitializer(loginName, loginPassword, consumer, sequence, idleCheckTime);
+    HandlerInitializer handler = new HandlerInitializer(username, password, consumer, sequence, idleCheckTime);
 
     bootstrap.remoteAddress(host, port);
 
     channelPool = new FixedChannelPool(bootstrap, new PoolHandler(handler), connections);
 
-    LOGGER.info("{} init connection pool to [{}:{}] success", loginName, host, port);
+    LOGGER.info("{} init connection pool to [{}:{}] success", username, host, port);
     return this;
   }
 
@@ -129,7 +122,7 @@ public class Sgip12Client {
 
     DefaultFuture[] futures = new DefaultFuture[req.length];
     for (int i = 0; i < req.length; i++) {
-      futures[i] = new DefaultFuture(loginName, req[i]);
+      futures[i] = new DefaultFuture(username, req[i]);
     }
 
     Channel channel = null;
@@ -141,7 +134,7 @@ public class Sgip12Client {
         channel.writeAndFlush(submit);
       }
     } catch (Exception e) {
-      LOGGER.warn("{} acquired channel failure, exception message: {}", loginName, e.getMessage());
+      LOGGER.warn("{} acquired channel failure, exception message: {}", username, e.getMessage());
       return null;
     } finally {
       if (channel != null) {
@@ -156,7 +149,7 @@ public class Sgip12Client {
       try {
         response = (SubmitRespMessage) futures[i].getResponse(timeout);
       } catch (InterruptedException e) {
-        LOGGER.warn("{} get response failure, exception message: {}", loginName, e.getMessage());
+        LOGGER.warn("{} get response failure, exception message: {}", username, e.getMessage());
       }
       resp[i] = response;
     }
@@ -174,10 +167,10 @@ public class Sgip12Client {
     workGroup.shutdownGracefully().syncUninterruptibly();
 
     if (consumer instanceof DefaultFuture.DefaultListener) {
-      DefaultFuture.cleanUp(loginName);
+      DefaultFuture.cleanUp(username);
     }
 
-    LOGGER.info("{} shutdown gracefully, disconnect to [{}:{}] success", loginName, host, port);
+    LOGGER.info("{} shutdown gracefully, disconnect to [{}:{}] success", username, host, port);
   }
 
 }

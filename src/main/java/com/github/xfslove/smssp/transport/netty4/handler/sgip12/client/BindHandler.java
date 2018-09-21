@@ -20,16 +20,16 @@ import io.netty.util.internal.logging.InternalLoggerFactory;
 @ChannelHandler.Sharable
 public class BindHandler extends ChannelDuplexHandler {
 
-  private final InternalLogger logger = InternalLoggerFactory.getInstance(getClass());
+  private static final InternalLogger LOGGER = InternalLoggerFactory.getInstance(BindHandler.class);
 
   private Sequence<SequenceNumber> sequence;
 
-  private String name;
+  private String username;
 
   private String password;
 
-  public BindHandler(String name, String password, Sequence<SequenceNumber> sequence) {
-    this.name = name;
+  public BindHandler(String username, String password, Sequence<SequenceNumber> sequence) {
+    this.username = username;
     this.password = password;
     this.sequence = sequence;
   }
@@ -40,10 +40,10 @@ public class BindHandler extends ChannelDuplexHandler {
     // 发送bind请求
     BindMessage bind = new BindMessage(sequence);
 
-    bind.setLoginName(name);
+    bind.setLoginName(username);
     bind.setLoginPassword(password);
     ctx.writeAndFlush(bind);
-    logger.info("client bind request");
+    LOGGER.info("client bind request");
 
     ctx.fireChannelActive();
   }
@@ -60,11 +60,11 @@ public class BindHandler extends ChannelDuplexHandler {
 
       if (result == 0) {
         // bind 成功
-        logger.info("bind success");
+        LOGGER.info("bind success");
       } else {
 
         channel.close();
-        logger.info("bind failure[result:{}]", result);
+        LOGGER.info("bind failure[result:{}]", result);
       }
 
       return;

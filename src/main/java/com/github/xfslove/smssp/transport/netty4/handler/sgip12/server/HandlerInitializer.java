@@ -23,17 +23,17 @@ public class HandlerInitializer extends ChannelInitializer<Channel> {
 
   private NotificationListener consumer;
 
-  private String loginName;
+  private String username;
 
-  private String loginPassword;
+  private String password;
 
   private Sequence<SequenceNumber> sequence;
 
   private int idleCheckTime;
 
-  public HandlerInitializer(String loginName, String loginPassword, NotificationListener consumer, Sequence<SequenceNumber> sequence, int idleCheckTime) {
-    this.loginName = loginName;
-    this.loginPassword = loginPassword;
+  public HandlerInitializer(String username, String password, NotificationListener consumer, Sequence<SequenceNumber> sequence, int idleCheckTime) {
+    this.username = username;
+    this.password = password;
     this.consumer = consumer;
     this.sequence = sequence;
     this.idleCheckTime = idleCheckTime;
@@ -47,7 +47,7 @@ public class HandlerInitializer extends ChannelInitializer<Channel> {
     channel.pipeline().addLast("sgipMessageCodec", new MessageCodec());
     channel.pipeline().addLast("sgipMessageLogging", new LoggingHandler(LogLevel.DEBUG));
 
-    channel.pipeline().addLast("sgipBindHandler", new BindHandler(loginName, loginPassword));
+    channel.pipeline().addLast("sgipBindHandler", new BindHandler(username, password));
     channel.pipeline().addLast("sgipUnBindHandler", new UnBindHandler(sequence));
     channel.pipeline().addLast("sgipDeliverHandler", new DeliverHandler(consumer));
     channel.pipeline().addLast("sgipException", new ExceptionHandler());

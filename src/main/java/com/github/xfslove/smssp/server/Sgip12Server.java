@@ -32,31 +32,29 @@ public class Sgip12Server {
   private ServerBootstrap bootstrap;
   private Channel channel;
 
-  private String loginName;
-  private String loginPassword;
+  private String username;
+  private String password;
   private int port;
 
   private int idleCheckTime = 30;
 
-  private int nodeId;
   private Sequence<SequenceNumber> sequence;
   private NotificationListener consumer;
 
-  private Sgip12Server(int nodeId, final String loginName, String loginPassword, int port) {
-    this.nodeId = nodeId;
-    this.loginName = loginName;
-    this.loginPassword = loginPassword;
+  private Sgip12Server(int nodeId, final String username, String password, int port) {
+    this.username = username;
+    this.password = password;
     this.port = port;
-    this.consumer = new DefaultProxyListener(loginName, new NotificationListener() {
+    this.consumer = new DefaultProxyListener(username, new NotificationListener() {
       @Override
       public void done(Notification notification) {
-        LOGGER.info("{} received notification: {}", loginName, notification);
+        LOGGER.info("{} received notification: {}", username, notification);
       }
     });
     this.sequence = new DefaultSequence(nodeId);
 
-    this.bossGroup =  new NioEventLoopGroup(1, new DefaultThreadFactory("sgipServerBoss-"+loginName, true));
-    this.workGroup = new NioEventLoopGroup(Math.min(Runtime.getRuntime().availableProcessors() + 1, 32), new DefaultThreadFactory("sgipServerWorker-" + loginName, true));
+    this.bossGroup =  new NioEventLoopGroup(1, new DefaultThreadFactory("sgipServerBoss-"+ username, true));
+    this.workGroup = new NioEventLoopGroup(Math.min(Runtime.getRuntime().availableProcessors() + 1, 32), new DefaultThreadFactory("sgipServerWorker-" + username, true));
     this.bootstrap  = new ServerBootstrap()
         .group(bossGroup, workGroup)
         .channel(NioServerSocketChannel.class)
@@ -85,14 +83,14 @@ public class Sgip12Server {
 
   public Sgip12Server bind() {
 
-    HandlerInitializer handler = new HandlerInitializer(loginName, loginPassword, consumer, sequence, idleCheckTime);
+    HandlerInitializer handler = new HandlerInitializer(username, password, consumer, sequence, idleCheckTime);
 
     ChannelFuture channelFuture = bootstrap.childHandler(handler).bind(port);
     channelFuture.syncUninterruptibly();
 
     channel = channelFuture.channel();
 
-    LOGGER.info("{} bind server success, listen port[{}]", loginName, port);
+    LOGGER.info("{} bind server success, listen port[{}]", username, port);
 
     return this;
   }
@@ -106,7 +104,7 @@ public class Sgip12Server {
     workGroup.shutdownGracefully().syncUninterruptibly();
 
     if (consumer instanceof DefaultProxyListener) {
-      DefaultProxyListener.cleanUp(loginName);
+      DefaultProxyListener.cleanUp(username);
     }
 
     LOGGER.info("shutdown server gracefully success");

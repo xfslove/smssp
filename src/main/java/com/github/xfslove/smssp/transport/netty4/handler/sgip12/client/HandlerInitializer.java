@@ -21,9 +21,9 @@ import java.util.concurrent.TimeUnit;
  */
 public class HandlerInitializer extends ChannelInitializer<Channel> {
 
-  private String loginName;
+  private String username;
 
-  private String loginPassword;
+  private String password;
 
   private ResponseListener consumer;
 
@@ -31,9 +31,9 @@ public class HandlerInitializer extends ChannelInitializer<Channel> {
 
   private int idleCheckTime;
 
-  public HandlerInitializer(String loginName, String loginPassword, ResponseListener consumer, Sequence<SequenceNumber> sequence, int idleCheckTime) {
-    this.loginName = loginName;
-    this.loginPassword = loginPassword;
+  public HandlerInitializer(String username, String password, ResponseListener consumer, Sequence<SequenceNumber> sequence, int idleCheckTime) {
+    this.username = username;
+    this.password = password;
     this.consumer = consumer;
     this.sequence = sequence;
     this.idleCheckTime = idleCheckTime;
@@ -48,7 +48,7 @@ public class HandlerInitializer extends ChannelInitializer<Channel> {
     channel.pipeline().addLast("sgipMessageCodec", new MessageCodec());
     channel.pipeline().addLast("sgipMessageLogging", new LoggingHandler(LogLevel.DEBUG));
 
-    channel.pipeline().addLast("sgipBindHandler", new BindHandler(loginName, loginPassword, sequence));
+    channel.pipeline().addLast("sgipBindHandler", new BindHandler(username, password, sequence));
     channel.pipeline().addLast("sgipUnBindHandler", new UnBindHandler(sequence));
     channel.pipeline().addLast("sgipSubmitHandler", new SubmitHandler(consumer));
     channel.pipeline().addLast("sgipException", new ExceptionHandler());

@@ -24,17 +24,17 @@ import java.util.Date;
 @ChannelHandler.Sharable
 public class ConnectHandler extends ChannelDuplexHandler {
 
-  private final InternalLogger logger = InternalLoggerFactory.getInstance(getClass());
+  private static final InternalLogger LOGGER = InternalLoggerFactory.getInstance(ConnectHandler.class);
 
-  private String name;
+  private String username;
 
   private String password;
 
   private Sequence<Integer> sequence;
 
-  public ConnectHandler(String name, String password, Sequence<Integer> sequence) {
+  public ConnectHandler(String username, String password, Sequence<Integer> sequence) {
     this.sequence = sequence;
-    this.name = name;
+    this.username = username;
     this.password = password;
   }
 
@@ -45,7 +45,7 @@ public class ConnectHandler extends ChannelDuplexHandler {
     ConnectMessage connect = new ConnectMessage(sequence);
 
     connect.setTimestamp(Integer.valueOf(DateFormatUtils.format(new Date(), "MMddHHmmss")));
-    connect.setSourceAddr(name);
+    connect.setSourceAddr(username);
     byte[] sourceBytes = connect.getSourceAddr().getBytes(StandardCharsets.ISO_8859_1);
     byte[] secretBytes = password.getBytes(StandardCharsets.ISO_8859_1);
     byte[] timestampBytes = StringUtils.leftPad(String.valueOf(connect.getTimestamp()), 10, "0").getBytes(StandardCharsets.ISO_8859_1);
@@ -53,7 +53,7 @@ public class ConnectHandler extends ChannelDuplexHandler {
     connect.setAuthenticatorSource(authenticationBytes);
 
     ctx.writeAndFlush(connect);
-    logger.info("connect request");
+    LOGGER.info("connect request");
 
     ctx.fireChannelActive();
   }
@@ -70,10 +70,10 @@ public class ConnectHandler extends ChannelDuplexHandler {
 
       if (result == 0) {
         // connect 成功
-        logger.info("connect success");
+        LOGGER.info("connect success");
       } else {
 
-        logger.info("connect failure[result:{}] and close channel", result);
+        LOGGER.info("connect failure[result:{}] and close channel", result);
         channel.close();
       }
 
