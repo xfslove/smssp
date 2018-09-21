@@ -156,7 +156,9 @@ public class Sgip12Client {
 
   public void close() {
 
-    channelPool.close();
+    if (channelPool != null) {
+      channelPool.close();
+    }
 
     workGroup.shutdownGracefully().syncUninterruptibly();
 
