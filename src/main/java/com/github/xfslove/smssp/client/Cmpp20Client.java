@@ -1,13 +1,6 @@
 package com.github.xfslove.smssp.client;
 
-import com.github.xfslove.smsj.sms.SmsMessage;
 import com.github.xfslove.smsj.sms.SmsPdu;
-import com.github.xfslove.smsj.sms.SmsTextMessage;
-import com.github.xfslove.smsj.sms.dcs.DcsGroup;
-import com.github.xfslove.smsj.sms.dcs.SmsAlphabet;
-import com.github.xfslove.smsj.sms.dcs.SmsDcs;
-import com.github.xfslove.smsj.sms.dcs.SmsMsgClass;
-import com.github.xfslove.smsj.wap.mms.SmsMmsNotificationMessage;
 import com.github.xfslove.smssp.exchange.DefaultFuture;
 import com.github.xfslove.smssp.exchange.ResponseListener;
 import com.github.xfslove.smssp.message.Sequence;
@@ -36,11 +29,9 @@ import io.netty.util.internal.PlatformDependent;
 import io.netty.util.internal.SocketUtils;
 import io.netty.util.internal.logging.InternalLogger;
 import io.netty.util.internal.logging.InternalLoggerFactory;
-import org.apache.commons.lang3.StringUtils;
 
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Deque;
 import java.util.concurrent.TimeUnit;
@@ -171,11 +162,36 @@ public class Cmpp20Client {
     LOGGER.info("{} shutdown gracefully, disconnect to [{}:{}] success", loginName, host, port);
   }
 
-  public SubmitRespMessage[] submit(MessageBuilder message, int timeout) {
-    if (message.msgSrc == null) {
-      message.msgSrc(loginName);
+  public SubmitRespMessage[] submit(Message message, int timeout) {
+
+    Message.Cmpp20 cmpp20 = (Message.Cmpp20) message;
+
+    SmsPdu[] pdus = cmpp20.getPdu().convert();
+
+    SubmitMessage[] req = new SubmitMessage[pdus.length];
+    Calendar calendar = Calendar.getInstance();
+    MsgId msgId = new MsgId(nodeId, calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH), calendar.get(Calendar.HOUR), calendar.get(Calendar.MINUTE), calendar.get(Calendar.SECOND), sequence.next());
+
+    for (int i = 0; i < pdus.length; i++) {
+      final SubmitMessage submit = new SubmitMessage(sequence);
+
+      submit.setMsgId(msgId);
+
+      for (String phone : cmpp20.getPhones()) {
+        submit.getDestTerminalIds().add(phone);
+      }
+      submit.setSrcId(cmpp20.getSrcId());
+      submit.setServiceId(cmpp20.getServiceId());
+      submit.setPkTotal(pdus.length);
+      submit.setPkNumber(i + 1);
+      submit.setMsgSrc(cmpp20.getMsgSrc());
+
+      submit.setUserDataHeaders(pdus[i].getUserDateHeaders());
+      submit.setUserData(pdus[i].getUserData());
+      req[i] = submit;
     }
-    SubmitMessage[] req = message.split(nodeId, sequence);
+
+
     DefaultFuture[] futures = new DefaultFuture[req.length];
     for (int i = 0; i < req.length; i++) {
       futures[i] = new DefaultFuture(loginName, req[i]);
@@ -211,151 +227,6 @@ public class Cmpp20Client {
     }
 
     return resp;
-  }
-
-  public static class MessageBuilder {
-
-    private String[] phones;
-    private String spNumber;
-
-    private String text;
-    private SmsAlphabet alphabet = SmsAlphabet.UCS2;
-    private SmsMsgClass msgClass;
-
-    private String srcId;
-    private String serviceId;
-    private String msgSrc;
-
-    private String transactionId;
-    private String from;
-    private int size;
-    private String contentLocation;
-    private int expiry = 7 * 24 * 60 * 60;
-
-    public MessageBuilder text(String text) {
-      this.text = text;
-      return this;
-    }
-
-    public MessageBuilder phones(String... phones) {
-      this.phones = phones;
-      return this;
-    }
-
-    public MessageBuilder charset(SmsAlphabet alphabet) {
-      this.alphabet = alphabet;
-      return this;
-    }
-
-    public MessageBuilder messageClass(SmsMsgClass msgClass) {
-      this.msgClass = msgClass;
-      return this;
-    }
-
-    public MessageBuilder srcId(String srcId) {
-      this.srcId = srcId;
-      return this;
-    }
-
-    public MessageBuilder serviceId(String serviceId) {
-      this.serviceId = serviceId;
-      return this;
-    }
-
-    public MessageBuilder msgSrc(String msgSrc) {
-      this.msgSrc = msgSrc;
-      return this;
-    }
-
-
-    public MessageBuilder transactionId(String transactionId) {
-      this.transactionId = transactionId;
-      return this;
-    }
-
-    public MessageBuilder from(String from) {
-      this.from = from;
-      return this;
-    }
-
-    public MessageBuilder size(int size) {
-      this.size = size;
-      return this;
-    }
-
-    public MessageBuilder contentLocation(String contentLocation) {
-      this.contentLocation = contentLocation;
-      return this;
-    }
-
-    public MessageBuilder expiry(int expiry) {
-      this.expiry = expiry;
-      return this;
-    }
-
-    public MessageBuilder spNumber(String spNumber) {
-      this.spNumber = spNumber;
-      return this;
-    }
-
-    public SubmitMessage[] split(int nodeId, Sequence<Integer> sequence) {
-
-      SmsMessage message;
-      if (StringUtils.isNoneBlank(text)) {
-        message = new SmsTextMessage(this.text, SmsDcs.general(DcsGroup.GENERAL_DATA_CODING, alphabet, msgClass));
-      } else {
-        message = new SmsMmsNotificationMessage(contentLocation, size);
-        ((SmsMmsNotificationMessage) message).setFrom(from + "/TYPE=PLMN");
-        ((SmsMmsNotificationMessage) message).setTransactionId(transactionId);
-        ((SmsMmsNotificationMessage) message).setExpiry(expiry);
-      }
-
-      SmsPdu[] pdus = message.getPdus();
-      SubmitMessage[] split = new SubmitMessage[pdus.length];
-
-      Calendar calendar = Calendar.getInstance();
-      MsgId msgId = new MsgId(nodeId, calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH), calendar.get(Calendar.HOUR), calendar.get(Calendar.MINUTE), calendar.get(Calendar.SECOND), sequence.next());
-
-      for (int i = 0; i < pdus.length; i++) {
-        final SubmitMessage submit = new SubmitMessage(sequence);
-
-        submit.setMsgId(msgId);
-
-        for (String phone : phones) {
-          submit.getDestTerminalIds().add(phone);
-        }
-        submit.setSrcId(srcId);
-        submit.setServiceId(serviceId);
-        submit.setPkTotal(pdus.length);
-        submit.setPkNumber(i + 1);
-        submit.setMsgSrc(msgSrc);
-
-        submit.setUserDataHeaders(pdus[i].getUserDateHeaders());
-        submit.setUserData(pdus[i].getUserData());
-        split[i] = submit;
-      }
-
-      return split;
-    }
-
-    @Override
-    public String toString() {
-      return "SubmitMessage{" +
-          "phones=" + Arrays.toString(phones) +
-          ", text='" + text + '\'' +
-          ", spNumber='" + spNumber + '\'' +
-          ", alphabet=" + alphabet +
-          ", msgClass=" + msgClass +
-          ", srcId='" + srcId + '\'' +
-          ", serviceId='" + serviceId + '\'' +
-          ", msgSrc='" + msgSrc + '\'' +
-          ", transactionId='" + transactionId + '\'' +
-          ", from='" + from + '\'' +
-          ", size=" + size +
-          ", contentLocation='" + contentLocation + '\'' +
-          ", expiry=" + expiry +
-          '}';
-    }
   }
 
   private class CmppChannelPool extends FixedChannelPool {

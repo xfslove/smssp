@@ -1,13 +1,6 @@
 package com.github.xfslove.smssp.client;
 
-import com.github.xfslove.smsj.sms.SmsMessage;
 import com.github.xfslove.smsj.sms.SmsPdu;
-import com.github.xfslove.smsj.sms.SmsTextMessage;
-import com.github.xfslove.smsj.sms.dcs.DcsGroup;
-import com.github.xfslove.smsj.sms.dcs.SmsAlphabet;
-import com.github.xfslove.smsj.sms.dcs.SmsDcs;
-import com.github.xfslove.smsj.sms.dcs.SmsMsgClass;
-import com.github.xfslove.smsj.wap.mms.SmsMmsNotificationMessage;
 import com.github.xfslove.smssp.exchange.DefaultFuture;
 import com.github.xfslove.smssp.exchange.ResponseListener;
 import com.github.xfslove.smssp.message.Sequence;
@@ -30,9 +23,7 @@ import io.netty.util.concurrent.DefaultPromise;
 import io.netty.util.concurrent.DefaultThreadFactory;
 import io.netty.util.internal.logging.InternalLogger;
 import io.netty.util.internal.logging.InternalLoggerFactory;
-import org.apache.commons.lang3.StringUtils;
 
-import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -114,8 +105,28 @@ public class Sgip12Client {
     return this;
   }
 
-  public SubmitRespMessage[] submit(MessageBuilder message, int timeout) {
-    SubmitMessage[] req = message.split(sequence);
+  public SubmitRespMessage[] submit(Message message, int timeout) {
+
+    Message.Sgip12 sgip12 = (Message.Sgip12) message;
+
+    SmsPdu[] pdus = sgip12.getPdu().convert();
+    SubmitMessage[] req = new SubmitMessage[pdus.length];
+    for (int i = 0; i < pdus.length; i++) {
+      final SubmitMessage submit = new SubmitMessage(sequence);
+
+      for (String phone : sgip12.getPhones()) {
+        submit.getUserNumbers().add(phone);
+      }
+      submit.setSpNumber(sgip12.getSpNumber());
+      submit.setCorpId(sgip12.getCorpId());
+      submit.setServiceType(sgip12.getServiceType());
+      submit.setMorelatetoMTFlag(sgip12.getMorelatetoMTFlag());
+
+      submit.setUserDataHeaders(pdus[i].getUserDateHeaders());
+      submit.setUserData(pdus[i].getUserData());
+      req[i] = submit;
+    }
+
     DefaultFuture[] futures = new DefaultFuture[req.length];
     for (int i = 0; i < req.length; i++) {
       futures[i] = new DefaultFuture(loginName, req[i]);
@@ -169,140 +180,4 @@ public class Sgip12Client {
     LOGGER.info("{} shutdown gracefully, disconnect to [{}:{}] success", loginName, host, port);
   }
 
-  public static class MessageBuilder {
-
-    private String[] phones;
-
-    private String text;
-    private SmsAlphabet alphabet = SmsAlphabet.UCS2;
-    private SmsMsgClass msgClass;
-
-    private String spNumber;
-    private String corpId;
-    private String serviceType;
-    private int morelatetoMTFlag = 3;
-
-    private String transactionId;
-    private String from;
-    private int size;
-    private String contentLocation;
-    private int expiry = 7 * 24 * 60 * 60;
-
-    public MessageBuilder phones(String... phones) {
-      this.phones = phones;
-      return this;
-    }
-
-    public MessageBuilder text(String text) {
-      this.text = text;
-      return this;
-    }
-
-    public MessageBuilder charset(SmsAlphabet alphabet) {
-      this.alphabet = alphabet;
-      return this;
-    }
-
-    public MessageBuilder messageClass(SmsMsgClass msgClass) {
-      this.msgClass = msgClass;
-      return this;
-    }
-
-    public MessageBuilder spNumber(String spNumber) {
-      this.spNumber = spNumber;
-      return this;
-    }
-
-    public MessageBuilder corpId(String corpId) {
-      this.corpId = corpId;
-      return this;
-    }
-
-    public MessageBuilder serviceType(String serviceType) {
-      this.serviceType = serviceType;
-      return this;
-    }
-
-    public MessageBuilder morelatetoMTFlag(int morelatetoMTFlag) {
-      this.morelatetoMTFlag = morelatetoMTFlag;
-      return this;
-    }
-
-    public MessageBuilder transactionId(String transactionId) {
-      this.transactionId = transactionId;
-      return this;
-    }
-
-    public MessageBuilder from(String from) {
-      this.from = from;
-      return this;
-    }
-
-    public MessageBuilder size(int size) {
-      this.size = size;
-      return this;
-    }
-
-    public MessageBuilder contentLocation(String contentLocation) {
-      this.contentLocation = contentLocation;
-      return this;
-    }
-
-    public MessageBuilder expiry(int expiry) {
-      this.expiry = expiry;
-      return this;
-    }
-
-    public SubmitMessage[] split(Sequence<SequenceNumber> sequence) {
-
-      SmsMessage message;
-      if (StringUtils.isNoneBlank(text)) {
-        message = new SmsTextMessage(this.text, SmsDcs.general(DcsGroup.GENERAL_DATA_CODING, alphabet, msgClass));
-      } else {
-        message = new SmsMmsNotificationMessage(contentLocation, size);
-        ((SmsMmsNotificationMessage) message).setFrom(from + "/TYPE=PLMN");
-        ((SmsMmsNotificationMessage) message).setTransactionId(transactionId);
-        ((SmsMmsNotificationMessage) message).setExpiry(expiry);
-      }
-
-      SmsPdu[] pdus = message.getPdus();
-      SubmitMessage[] split = new SubmitMessage[pdus.length];
-      for (int i = 0; i < pdus.length; i++) {
-        final SubmitMessage submit = new SubmitMessage(sequence);
-
-        for (String phone : phones) {
-          submit.getUserNumbers().add(phone);
-        }
-        submit.setSpNumber(spNumber);
-        submit.setCorpId(corpId);
-        submit.setServiceType(serviceType);
-        submit.setMorelatetoMTFlag(morelatetoMTFlag);
-
-        submit.setUserDataHeaders(pdus[i].getUserDateHeaders());
-        submit.setUserData(pdus[i].getUserData());
-        split[i] = submit;
-      }
-
-      return split;
-    }
-
-    @Override
-    public String toString() {
-      return "SubmitMessage{" +
-          "phones=" + Arrays.toString(phones) +
-          ", text='" + text + '\'' +
-          ", alphabet=" + alphabet +
-          ", msgClass=" + msgClass +
-          ", spNumber='" + spNumber + '\'' +
-          ", corpId='" + corpId + '\'' +
-          ", serviceType='" + serviceType + '\'' +
-          ", morelatetoMTFlag=" + morelatetoMTFlag +
-          ", transactionId='" + transactionId + '\'' +
-          ", from='" + from + '\'' +
-          ", size=" + size +
-          ", contentLocation='" + contentLocation + '\'' +
-          ", expiry=" + expiry +
-          '}';
-    }
-  }
 }
