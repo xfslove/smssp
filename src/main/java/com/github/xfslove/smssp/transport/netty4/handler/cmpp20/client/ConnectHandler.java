@@ -1,9 +1,8 @@
 package com.github.xfslove.smssp.transport.netty4.handler.cmpp20.client;
 
+import com.github.xfslove.smssp.message.Sequence;
 import com.github.xfslove.smssp.message.cmpp20.ConnectMessage;
 import com.github.xfslove.smssp.message.cmpp20.ConnectRespMessage;
-import com.github.xfslove.smssp.message.Sequence;
-import com.github.xfslove.smssp.transport.netty4.handler.AttributeConstants;
 import com.github.xfslove.smssp.util.ByteUtil;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelDuplexHandler;
@@ -54,7 +53,7 @@ public class ConnectHandler extends ChannelDuplexHandler {
     connect.setAuthenticatorSource(authenticationBytes);
 
     ctx.writeAndFlush(connect);
-    logger.info("{} connect request", name);
+    logger.info("connect request");
 
     ctx.fireChannelActive();
   }
@@ -71,11 +70,10 @@ public class ConnectHandler extends ChannelDuplexHandler {
 
       if (result == 0) {
         // connect 成功
-        logger.info("{} connect success", name);
-        channel.attr(AttributeConstants.NAME).set(name);
+        logger.info("connect success");
       } else {
 
-        logger.info("{} connect failure[result:{}] and close channel", name, result);
+        logger.info("connect failure[result:{}] and close channel", result);
         channel.close();
       }
 

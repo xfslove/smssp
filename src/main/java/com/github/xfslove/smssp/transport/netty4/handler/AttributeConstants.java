@@ -8,6 +8,5 @@ import io.netty.util.AttributeKey;
  */
 public class AttributeConstants {
 
-  public static final AttributeKey<String> NAME = AttributeKey.valueOf("name");
   public static final AttributeKey<Boolean> SESSION = AttributeKey.valueOf("session");
 }

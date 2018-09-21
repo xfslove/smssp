@@ -4,7 +4,6 @@ import com.github.xfslove.smssp.message.Sequence;
 import com.github.xfslove.smssp.message.sgip12.SequenceNumber;
 import com.github.xfslove.smssp.message.sgip12.UnBindMessage;
 import com.github.xfslove.smssp.message.sgip12.UnBindRespMessage;
-import com.github.xfslove.smssp.transport.netty4.handler.AttributeConstants;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandler;
@@ -50,8 +49,7 @@ public class UnBindHandler extends ChannelDuplexHandler {
         @Override
         public void operationComplete(Future<? super Void> future) throws Exception {
           if (future.isSuccess()) {
-            String name = ctx.channel().attr(AttributeConstants.NAME).getAndSet(null);
-            logger.info("{} unbind success and close channel", name);
+            logger.info("unbind success and close channel");
             channel.close();
           }
         }
@@ -62,8 +60,7 @@ public class UnBindHandler extends ChannelDuplexHandler {
 
     // unbindResp
     if (msg instanceof UnBindRespMessage) {
-      String name = ctx.channel().attr(AttributeConstants.NAME).getAndSet(null);
-      logger.info("{} received unbind resp message and close channel", name);
+      logger.info("received unbind resp message and close channel");
       channel.close();
       return;
     }
@@ -91,15 +88,13 @@ public class UnBindHandler extends ChannelDuplexHandler {
                 @Override
                 public void run() {
                   if (ctx.channel().isActive()) {
-                    String name = ctx.channel().attr(AttributeConstants.NAME).getAndSet(null);
-                    logger.info("{} close channel due to not received resp message", name);
+                    logger.info("close channel due to not received resp message");
                     ctx.channel().close();
                   }
                 }
               }, 500, TimeUnit.MILLISECONDS);
 
-              String name = ctx.channel().attr(AttributeConstants.NAME).get();
-              logger.info("{} request unbind when idle and delay 500ms close channel if no resp message", name);
+              logger.info("request unbind when idle and delay 500ms close channel if no resp message");
             }
           }
         });

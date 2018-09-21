@@ -4,7 +4,6 @@ import com.github.xfslove.smssp.message.Message;
 import com.github.xfslove.smssp.message.cmpp20.DeliverMessage;
 import com.github.xfslove.smssp.message.cmpp20.DeliverRespMessage;
 import com.github.xfslove.smssp.notification.NotificationListener;
-import com.github.xfslove.smssp.transport.netty4.handler.AttributeConstants;
 import com.github.xfslove.smssp.transport.netty4.handler.SessionEvent;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -85,8 +84,7 @@ public class DeliverHandler extends ChannelDuplexHandler {
         ctx.writeAndFlush(deliverResp).addListener(new GenericFutureListener<Future<? super Void>>() {
           @Override
           public void operationComplete(Future<? super Void> listener) throws Exception {
-            String name = ctx.channel().attr(AttributeConstants.NAME).getAndSet(null);
-            logger.warn("{} discard[NOT_VALID] deliver message {} and close channel", name, msg);
+            logger.warn("discard[NOT_VALID] deliver message {} and close channel", msg);
             ctx.channel().close();
           }
         });

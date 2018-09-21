@@ -66,7 +66,7 @@ public class ConnectHandler extends ChannelDuplexHandler {
           @Override
           public void operationComplete(Future<? super Void> future) throws Exception {
             if (future.isSuccess()) {
-              logger.info("{}:{} connect failure[result:{}] and close channel", name, connect.getSourceAddr(), 3);
+              logger.info("{} connect failure[result:{}] and close channel", connect.getSourceAddr(), 3);
               channel.close();
             }
           }
@@ -82,7 +82,7 @@ public class ConnectHandler extends ChannelDuplexHandler {
           @Override
           public void operationComplete(Future<? super Void> future) throws Exception {
             if (future.isSuccess()) {
-              logger.info("{}:{} connect failure[result:{}] and close channel", name, connect.getSourceAddr(), 3);
+              logger.info("{} connect failure[result:{}] and close channel", connect.getSourceAddr(), 3);
               channel.close();
             }
           }
@@ -97,7 +97,6 @@ public class ConnectHandler extends ChannelDuplexHandler {
           if (future.isSuccess()) {
             logger.info("{} connect success", connect.getSourceAddr());
             channel.attr(AttributeConstants.SESSION).set(true);
-            channel.attr(AttributeConstants.NAME).set(connect.getSourceAddr());
           }
         }
       });
@@ -107,8 +106,7 @@ public class ConnectHandler extends ChannelDuplexHandler {
 
     if (!Boolean.TRUE.equals(channel.attr(AttributeConstants.SESSION).get())) {
       // 没有注册 session 收到消息
-      channel.attr(AttributeConstants.NAME).set(name);
-      logger.info("{} received message when session not valid, fire SESSION_EVENT[NOT_VALID]", name, msg);
+      logger.info("received message when session not valid, fire SESSION_EVENT[NOT_VALID]", msg);
 
       ctx.fireUserEventTriggered(SessionEvent.NOT_VALID((Message) msg));
       return;

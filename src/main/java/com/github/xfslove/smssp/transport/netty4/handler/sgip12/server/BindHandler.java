@@ -51,7 +51,7 @@ public class BindHandler extends ChannelDuplexHandler {
           @Override
           public void operationComplete(Future<? super Void> future) throws Exception {
             if (future.isSuccess()) {
-              logger.info("{}:{} bind failure[result:{}] and close channel", name, bind.getLoginName(), 2);
+              logger.info("{} bind failure[result:{}] and close channel", bind.getLoginName(), 2);
               ctx.channel().close();
             }
           }
@@ -67,7 +67,7 @@ public class BindHandler extends ChannelDuplexHandler {
           @Override
           public void operationComplete(Future<? super Void> future) throws Exception {
             if (future.isSuccess()) {
-              logger.info("{}:{} bind failure[result:{}] and close channel", name, bind.getLoginName(), 1);
+              logger.info("{} bind failure[result:{}] and close channel", bind.getLoginName(), 1);
               ctx.channel().close();
             }
           }
@@ -82,7 +82,7 @@ public class BindHandler extends ChannelDuplexHandler {
           @Override
           public void operationComplete(Future<? super Void> future) throws Exception {
             if (future.isSuccess()) {
-              logger.info("{}:{} bind failure[result:{}] and close channel", name, bind.getLoginName(), 4);
+              logger.info("{} bind failure[result:{}] and close channel", bind.getLoginName(), 4);
               ctx.channel().close();
             }
           }
@@ -97,7 +97,6 @@ public class BindHandler extends ChannelDuplexHandler {
           if (future.isSuccess()) {
             logger.info("{} bind success", bind.getLoginName());
             channel.attr(AttributeConstants.SESSION).set(true);
-            channel.attr(AttributeConstants.NAME).set(bind.getLoginName());
           }
         }
       });
@@ -107,8 +106,7 @@ public class BindHandler extends ChannelDuplexHandler {
 
     if (!Boolean.TRUE.equals(channel.attr(AttributeConstants.SESSION).get())) {
       // 没有注册 session 收到消息
-      channel.attr(AttributeConstants.NAME).set(name);
-      logger.info("{} received message when session not valid, fire SESSION_EVENT[NOT_VALID]", name, msg);
+      logger.info("received message when session not valid, fire SESSION_EVENT[NOT_VALID]", msg);
 
       ctx.fireUserEventTriggered(SessionEvent.NOT_VALID((Message) msg));
       return;

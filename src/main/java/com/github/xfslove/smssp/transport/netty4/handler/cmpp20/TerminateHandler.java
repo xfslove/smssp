@@ -37,8 +37,7 @@ public class TerminateHandler extends ChannelDuplexHandler {
     final Channel channel = ctx.channel();
 
     if (msg instanceof TerminateRespMessage) {
-      String name = ctx.channel().attr(AttributeConstants.NAME).getAndSet(null);
-      logger.info("{} received terminate resp message and close channel", name);
+      logger.info("received terminate resp message and close channel");
       channel.close();
       return;
     }
@@ -53,8 +52,7 @@ public class TerminateHandler extends ChannelDuplexHandler {
         @Override
         public void operationComplete(Future<? super Void> future) throws Exception {
           if (future.isSuccess()) {
-            String name = ctx.channel().attr(AttributeConstants.NAME).getAndSet(null);
-            logger.info("{} terminate success and close channel", name);
+            logger.info("terminate success and close channel");
             channel.close();
           }
         }
@@ -84,15 +82,13 @@ public class TerminateHandler extends ChannelDuplexHandler {
                 @Override
                 public void run() {
                   if (ctx.channel().isActive()) {
-                    String name = ctx.channel().attr(AttributeConstants.NAME).getAndSet(null);
-                    logger.info("{} close channel due to not received resp message", name);
+                    logger.info("close channel due to not received resp message");
                     ctx.channel().close();
                   }
                 }
               }, 500, TimeUnit.MILLISECONDS);
 
-              String name = ctx.channel().attr(AttributeConstants.NAME).get();
-              logger.info("{} request terminate when idle and delay 500ms close channel if no resp message", name);
+              logger.info("request terminate when idle and delay 500ms close channel if no resp message");
             }
           }
         });

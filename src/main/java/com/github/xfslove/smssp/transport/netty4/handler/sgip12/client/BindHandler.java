@@ -4,7 +4,6 @@ import com.github.xfslove.smssp.message.Sequence;
 import com.github.xfslove.smssp.message.sgip12.BindMessage;
 import com.github.xfslove.smssp.message.sgip12.BindRespMessage;
 import com.github.xfslove.smssp.message.sgip12.SequenceNumber;
-import com.github.xfslove.smssp.transport.netty4.handler.AttributeConstants;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandler;
@@ -44,7 +43,7 @@ public class BindHandler extends ChannelDuplexHandler {
     bind.setLoginName(name);
     bind.setLoginPassword(password);
     ctx.writeAndFlush(bind);
-    logger.info("{} client bind request", name);
+    logger.info("client bind request");
 
     ctx.fireChannelActive();
   }
@@ -61,12 +60,11 @@ public class BindHandler extends ChannelDuplexHandler {
 
       if (result == 0) {
         // bind 成功
-        logger.info("{} bind success", name);
-        channel.attr(AttributeConstants.NAME).set(name);
+        logger.info("bind success");
       } else {
 
         channel.close();
-        logger.info("{} bind failure[result:{}]", name, result);
+        logger.info("bind failure[result:{}]", result);
       }
 
       return;
