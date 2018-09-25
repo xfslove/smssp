@@ -114,7 +114,7 @@ public class SubmitMessage extends SmsPdu implements CmppMessage, Request {
   /**
    * 接收短信的MSISDN号码, 最多100个
    */
-  private List<String> destTerminalIds = new ArrayList<>();
+  private List<String> destTerminalIds = new ArrayList<>(100);
 
   /**
    * 保留
