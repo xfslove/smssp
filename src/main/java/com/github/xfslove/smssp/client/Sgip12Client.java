@@ -86,6 +86,11 @@ public class Sgip12Client {
     return this;
   }
 
+  public Sgip12Client responseListener(ResponseListener consumer) {
+    this.consumer = consumer;
+    return this;
+  }
+
   public Sgip12Client connect() {
 
     HandlerInitializer handler = new HandlerInitializer(username, password, consumer, sequence, idleCheckTime);

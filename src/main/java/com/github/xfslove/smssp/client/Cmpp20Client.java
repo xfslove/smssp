@@ -112,6 +112,16 @@ public class Cmpp20Client {
     return this;
   }
 
+  public Cmpp20Client responseListener(ResponseListener consumer) {
+    this.consumer = consumer;
+    return this;
+  }
+
+  public Cmpp20Client notificationListener(NotificationListener consumer2) {
+    this.consumer2 = consumer2;
+    return this;
+  }
+
   /**
    * 建立链接（长链接），会初始化链接，并保持
    *
