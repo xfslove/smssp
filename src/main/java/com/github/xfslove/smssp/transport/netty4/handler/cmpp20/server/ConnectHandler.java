@@ -49,7 +49,7 @@ public class ConnectHandler extends ChannelDuplexHandler {
       final ConnectMessage connect = (ConnectMessage) msg;
 
       ConnectRespMessage resp = new ConnectRespMessage(connect.getHead().getSequenceId());
-      resp.setVersion(ConnectMessage.VERSION_20);
+      resp.setVersion(ConnectMessage.VERSION_2_0);
 
 
       byte[] sourceBytes = username.getBytes(StandardCharsets.ISO_8859_1);
@@ -74,7 +74,7 @@ public class ConnectHandler extends ChannelDuplexHandler {
         return;
       }
 
-      if (connect.getVersion() != ConnectMessage.VERSION_20) {
+      if (connect.getVersion() != ConnectMessage.VERSION_2_0) {
 
         // 版本太高
         resp.setStatus(4);

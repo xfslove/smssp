@@ -12,7 +12,7 @@ import java.nio.charset.StandardCharsets;
  */
 public class ConnectMessage implements CmppMessage {
 
-  public static final int VERSION_20 = 0x20;
+  public static final int VERSION_2_0 = 0x20;
 
   private final CmppHead head;
 
@@ -20,7 +20,7 @@ public class ConnectMessage implements CmppMessage {
    * 双方协商的版本号(高位4bit表示主版本号,低位4bit表示次版本号)
    * cmpp2.0
    */
-  private final int version = VERSION_20;
+  private final int version = VERSION_2_0;
 
   /**
    * 源地址，此处为SP_Id，即SP的企业代码
