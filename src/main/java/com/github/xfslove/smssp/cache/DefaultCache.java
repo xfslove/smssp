@@ -18,20 +18,25 @@ public class DefaultCache<K, V> {
 
   private static final InternalLogger LOGGER = InternalLoggerFactory.getInstance(DefaultCache.class);
 
-  private final com.google.common.cache.Cache<K, V> cache = CacheBuilder.newBuilder().initialCapacity(256).expireAfterAccess(30, TimeUnit.SECONDS)
-      .removalListener(new RemovalListener<K, V>() {
-        @Override
-        public void onRemoval(RemovalNotification<K, V> notification) {
+  private final com.google.common.cache.Cache<K, V> cache;
+  private final ConcurrentMap<K, V> map;
 
-          RemovalCause cause = notification.getCause();
-          if (!RemovalCause.EXPLICIT.equals(cause)) {
-            LOGGER.warn("drop cache {} cause by {}", notification.getValue(), cause);
+  public DefaultCache(int initCapacity, int expireSeconds) {
+    cache = CacheBuilder.newBuilder().initialCapacity(initCapacity).expireAfterAccess(expireSeconds, TimeUnit.SECONDS)
+        .removalListener(new RemovalListener<K, V>() {
+          @Override
+          public void onRemoval(RemovalNotification<K, V> notification) {
+
+            RemovalCause cause = notification.getCause();
+            if (!RemovalCause.EXPLICIT.equals(cause)) {
+              LOGGER.warn("drop cache {} cause by {}", notification.getValue(), cause);
+            }
+
           }
-
-        }
-      })
-      .build();
-  private final ConcurrentMap<K, V> map = cache.asMap();
+        })
+        .build();
+    map = cache.asMap();
+  }
 
   public V putIfAbsent(K key, V value) {
     return map.putIfAbsent(key, value);

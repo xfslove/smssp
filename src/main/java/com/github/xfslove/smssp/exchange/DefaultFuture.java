@@ -31,7 +31,7 @@ public class DefaultFuture implements ResponseFuture {
   public DefaultFuture(String name, Request request) {
     this.request = request;
     this.name = name;
-    CACHE.putIfAbsent(name, new DefaultCache<String, DefaultFuture>());
+    CACHE.putIfAbsent(name, new DefaultCache<String, DefaultFuture>(1024, 30));
     CACHE.get(name).put(request.getId(), this);
   }
 

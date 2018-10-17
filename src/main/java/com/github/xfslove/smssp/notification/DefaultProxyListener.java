@@ -25,8 +25,8 @@ public class DefaultProxyListener implements NotificationListener {
   public DefaultProxyListener(String name, NotificationListener target) {
     this.target = target;
     this.name = name;
-    MSG_CACHE.putIfAbsent(name, new DefaultCache<String, Notification>());
-    MERGE_CACHE.putIfAbsent(name, new DefaultCache<String, String[]>());
+    MSG_CACHE.putIfAbsent(name, new DefaultCache<String, Notification>(1024, 300));
+    MERGE_CACHE.putIfAbsent(name, new DefaultCache<String, String[]>(1024, 300));
   }
 
   @Override
