@@ -67,8 +67,8 @@ public class Sgip12Client {
         .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 3000);
   }
 
-  public static Sgip12Client newConnection(int nodeId, String loginName, String loginPassword, String host, int port) {
-    return new Sgip12Client(nodeId, loginName, loginPassword, host, port);
+  public static Sgip12Client newConnection(int nodeId, String username, String password, String host, int port) {
+    return new Sgip12Client(nodeId, username, password, host, port);
   }
 
   public Sgip12Client idleCheckTime(int idleCheckTime) {

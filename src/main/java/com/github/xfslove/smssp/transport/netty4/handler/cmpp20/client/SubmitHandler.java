@@ -13,10 +13,10 @@ import io.netty.channel.ChannelHandlerContext;
 @ChannelHandler.Sharable
 public class SubmitHandler extends ChannelDuplexHandler {
 
-  private ResponseListener consumer;
+  private ResponseListener listener;
 
-  public SubmitHandler(ResponseListener consumer) {
-    this.consumer = consumer;
+  public SubmitHandler(ResponseListener listener) {
+    this.listener = listener;
   }
 
   @Override
@@ -24,7 +24,7 @@ public class SubmitHandler extends ChannelDuplexHandler {
 
     // submitResp
     if (msg instanceof SubmitRespMessage) {
-      consumer.done((SubmitRespMessage) msg);
+      listener.done((SubmitRespMessage) msg);
       return;
     }
 

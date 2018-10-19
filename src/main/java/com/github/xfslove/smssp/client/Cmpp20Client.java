@@ -87,8 +87,8 @@ public class Cmpp20Client {
         .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 3000);
   }
 
-  public static Cmpp20Client newConnection(int nodeId, String loginName, String loginPassword, String host, int port) {
-    return new Cmpp20Client(nodeId, loginName, loginPassword, host, port);
+  public static Cmpp20Client newConnection(int nodeId, String username, String password, String host, int port) {
+    return new Cmpp20Client(nodeId, username, password, host, port);
   }
 
 

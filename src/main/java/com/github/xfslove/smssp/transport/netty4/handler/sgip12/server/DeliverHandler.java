@@ -26,10 +26,10 @@ public class DeliverHandler extends ChannelDuplexHandler {
 
   private static final InternalLogger LOGGER = InternalLoggerFactory.getInstance(DeliverHandler.class);
 
-  private NotificationListener consumer;
+  private NotificationListener listener;
 
-  public DeliverHandler(NotificationListener consumer) {
-    this.consumer = consumer;
+  public DeliverHandler(NotificationListener listener) {
+    this.listener = listener;
   }
 
   @Override
@@ -43,7 +43,7 @@ public class DeliverHandler extends ChannelDuplexHandler {
 
       ctx.writeAndFlush(deliverResp);
 
-      consumer.done(deliver);
+      listener.done(deliver);
       return;
     }
 
@@ -55,7 +55,7 @@ public class DeliverHandler extends ChannelDuplexHandler {
 
       ctx.writeAndFlush(reportResp);
 
-      consumer.done(report);
+      listener.done(report);
       return;
     }
 

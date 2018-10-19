@@ -64,7 +64,7 @@ public class BindHandler extends ChannelDuplexHandler {
       } else {
 
         channel.close();
-        LOGGER.info("bind failure[result:{}]", result);
+        LOGGER.info("bind failure[result:{}] and close channel", result);
       }
 
       return;
