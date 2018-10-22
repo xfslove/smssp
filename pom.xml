@@ -9,7 +9,7 @@
 
   <name>smssp</name>
   <url>https://github.com/xfslove/smssp</url>
-  <description>SMS &amp; MMS SP Gateway</description>
+  <description>message (sms, mms, wap) SP gateway</description>
 
   <licenses>
     <license>
