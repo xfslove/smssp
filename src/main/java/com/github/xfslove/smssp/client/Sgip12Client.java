@@ -103,7 +103,37 @@ public class Sgip12Client {
     return this;
   }
 
-  public SubmitRespMessage[] submit(Message message, int timeout) {
+  public SubmitRespMessage submit(SubmitMessage submit, int timeout) {
+
+    DefaultFuture future = new DefaultFuture(username, submit);
+
+    Channel channel = null;
+    try {
+      DefaultPromise<Channel> promise = (DefaultPromise<Channel>) channelPool.acquire();
+      channel = promise.get(timeout, TimeUnit.MILLISECONDS);
+
+      channel.writeAndFlush(submit);
+
+    } catch (Exception e) {
+      LOGGER.warn("{} acquired channel failure, exception message: {}", username, e.getMessage());
+      return null;
+    } finally {
+      if (channel != null) {
+        channelPool.release(channel);
+      }
+    }
+
+    try {
+      return (SubmitRespMessage) future.getResponse(timeout);
+
+    } catch (InterruptedException e) {
+      LOGGER.warn("{} get response failure, exception message: {}", username, e.getMessage());
+      return null;
+    }
+
+  }
+
+  public SubmitMessage[] convert(Message message) {
 
     Message.Sgip12 sgip12 = (Message.Sgip12) message;
 
@@ -115,6 +145,7 @@ public class Sgip12Client {
       for (String phone : sgip12.getPhones()) {
         submit.getUserNumbers().add(phone);
       }
+
       submit.setSpNumber(sgip12.getSpNumber());
       submit.setCorpId(sgip12.getCorpId());
       submit.setServiceType(sgip12.getServiceType());
@@ -125,41 +156,7 @@ public class Sgip12Client {
       req[i] = submit;
     }
 
-    DefaultFuture[] futures = new DefaultFuture[req.length];
-    for (int i = 0; i < req.length; i++) {
-      futures[i] = new DefaultFuture(username, req[i]);
-    }
-
-    Channel channel = null;
-    try {
-      DefaultPromise<Channel> future = (DefaultPromise<Channel>) channelPool.acquire();
-      channel = future.get(timeout, TimeUnit.MILLISECONDS);
-
-      for (SubmitMessage submit : req) {
-        channel.writeAndFlush(submit);
-      }
-    } catch (Exception e) {
-      LOGGER.warn("{} acquired channel failure, exception message: {}", username, e.getMessage());
-      return null;
-    } finally {
-      if (channel != null) {
-        channelPool.release(channel);
-      }
-    }
-
-    SubmitRespMessage[] resp = new SubmitRespMessage[futures.length];
-    for (int i = 0; i < req.length; i++) {
-
-      SubmitRespMessage response = null;
-      try {
-        response = (SubmitRespMessage) futures[i].getResponse(timeout);
-      } catch (InterruptedException e) {
-        LOGGER.warn("{} get response failure, exception message: {}", username, e.getMessage());
-      }
-      resp[i] = response;
-    }
-
-    return resp;
+    return req;
 
   }
 

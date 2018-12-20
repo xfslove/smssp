@@ -162,16 +162,42 @@ public class Cmpp20Client {
     LOGGER.info("{} shutdown gracefully, disconnect to [{}:{}] success", username, host, port);
   }
 
-  public SubmitRespMessage[] submit(Message message, int timeout) {
+  public SubmitRespMessage submit(SubmitMessage submit, int timeout) {
+
+    DefaultFuture future = new DefaultFuture(username, submit);
+
+    Channel channel = null;
+    try {
+      DefaultPromise<Channel> promise = (DefaultPromise<Channel>) channelPool.acquire();
+      channel = promise.get(timeout, TimeUnit.MILLISECONDS);
+
+      channel.writeAndFlush(submit);
+    } catch (Exception e) {
+      LOGGER.warn("{} acquired channel failure, exception message: {}", username, e.getMessage());
+      return null;
+    } finally {
+      if (channel != null) {
+        channelPool.release(channel);
+      }
+    }
+
+    try {
+      return (SubmitRespMessage) future.getResponse(timeout);
+
+    } catch (InterruptedException e) {
+      LOGGER.warn("{} get response failure, exception message: {}", username, e.getMessage());
+      return null;
+    }
+  }
+
+  public SubmitMessage[] convert(Message message) {
 
     Message.Cmpp20 cmpp20 = (Message.Cmpp20) message;
 
     SmsPdu[] pdus = cmpp20.getPdu().convert();
-
     SubmitMessage[] req = new SubmitMessage[pdus.length];
     Calendar calendar = Calendar.getInstance();
     MsgId msgId = new MsgId(nodeId, calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH), calendar.get(Calendar.HOUR), calendar.get(Calendar.MINUTE), calendar.get(Calendar.SECOND), sequence.next());
-
     for (int i = 0; i < pdus.length; i++) {
       final SubmitMessage submit = new SubmitMessage(sequence);
 
@@ -191,42 +217,7 @@ public class Cmpp20Client {
       req[i] = submit;
     }
 
-
-    DefaultFuture[] futures = new DefaultFuture[req.length];
-    for (int i = 0; i < req.length; i++) {
-      futures[i] = new DefaultFuture(username, req[i]);
-    }
-
-    Channel channel = null;
-    try {
-      DefaultPromise<Channel> future = (DefaultPromise<Channel>) channelPool.acquire();
-      channel = future.get(timeout, TimeUnit.MILLISECONDS);
-
-      for (SubmitMessage submit : req) {
-        channel.writeAndFlush(submit);
-      }
-    } catch (Exception e) {
-      LOGGER.warn("{} acquired channel failure, exception message: {}", username, e.getMessage());
-      return null;
-    } finally {
-      if (channel != null) {
-        channelPool.release(channel);
-      }
-    }
-
-    SubmitRespMessage[] resp = new SubmitRespMessage[req.length];
-    for (int i = 0; i < req.length; i++) {
-
-      SubmitRespMessage response = null;
-      try {
-        response = (SubmitRespMessage) futures[i].getResponse(timeout);
-      } catch (InterruptedException e) {
-        LOGGER.warn("{} get response failure, exception message: {}", username, e.getMessage());
-      }
-      resp[i] = response;
-    }
-
-    return resp;
+    return req;
   }
 
   private class CmppChannelPool extends FixedChannelPool {
