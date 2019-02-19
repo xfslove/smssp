@@ -51,6 +51,7 @@ public class HandlerInitializer extends ChannelInitializer<Channel> {
   @Override
   protected void initChannel(Channel channel) throws Exception {
 
+    // todo sharable add static handler
     channel.pipeline().addLast("cmppSocketLogging", new LoggingHandler());
     channel.pipeline().addLast("cmppIdleState", new IdleStateHandler(0, 0, idleCheckTime, TimeUnit.SECONDS));
     channel.pipeline().addLast("cmppMessageLengthCodec", new MesssageLengthCodec(true));

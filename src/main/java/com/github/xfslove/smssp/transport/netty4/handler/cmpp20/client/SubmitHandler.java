@@ -5,6 +5,7 @@ import com.github.xfslove.smssp.message.cmpp20.SubmitRespMessage;
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelPromise;
 
 /**
  * @author hanwen
@@ -31,4 +32,11 @@ public class SubmitHandler extends ChannelDuplexHandler {
     ctx.fireChannelRead(msg);
   }
 
+  @Override
+  public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) throws Exception {
+
+    // todo make sure submit message submit after bind success.
+
+    super.write(ctx, msg, promise);
+  }
 }
