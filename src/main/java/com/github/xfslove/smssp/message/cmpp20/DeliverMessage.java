@@ -97,7 +97,7 @@ public class DeliverMessage extends SmsPdu implements CmppMessage, Notification 
       return null;
     }
     SmsUdhElement firstUdh = udh[0];
-    if (!SmsUdhIei.APP_PORT_8BIT.equals(firstUdh.getUdhIei())) {
+    if (!SmsUdhIei.CONCATENATED_8BIT.equals(firstUdh.getUdhIei())) {
       return null;
     }
 
