@@ -3,15 +3,12 @@ package com.github.xfslove.smssp.message.sgip12;
 import com.github.xfslove.smsj.sms.SmsPdu;
 import com.github.xfslove.smsj.sms.dcs.SmsDcs;
 import com.github.xfslove.smsj.sms.ud.SmsUdhElement;
-import com.github.xfslove.smsj.sms.ud.SmsUdhIei;
 import com.github.xfslove.smsj.sms.ud.SmsUdhUtil;
-import com.github.xfslove.smsj.util.StringUtil;
 import com.github.xfslove.smssp.message.Sequence;
 import com.github.xfslove.smssp.notification.Notification;
 import com.github.xfslove.smssp.util.ByteUtil;
 import io.netty.buffer.ByteBuf;
 
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
@@ -69,13 +66,15 @@ public class DeliverMessage extends SmsPdu implements SgipMessage, Notification 
       return null;
     }
     SmsUdhElement firstUdh = udh[0];
-    if (!SmsUdhIei.CONCATENATED_8BIT.equals(firstUdh.getUdhIei())) {
+    int[] concatUdh = SmsUdhUtil.parse8BitConcatUdh(firstUdh);
+
+    if (concatUdh == null) {
       return null;
     }
 
-    int refNr = firstUdh.getUdhIeiData()[0] & 0xff;
-    int total = firstUdh.getUdhIeiData()[1] & 0xff;
-    int seqNr = firstUdh.getUdhIeiData()[2] & 0xff;
+    int refNr = concatUdh[0];
+    int total = concatUdh[1];
+    int seqNr = concatUdh[2];
     String key = getUserNumber() + "-" + refNr;
 
     return new Partition(total, seqNr, key);

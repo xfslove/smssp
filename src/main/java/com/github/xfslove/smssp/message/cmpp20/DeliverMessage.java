@@ -3,7 +3,6 @@ package com.github.xfslove.smssp.message.cmpp20;
 import com.github.xfslove.smsj.sms.SmsPdu;
 import com.github.xfslove.smsj.sms.dcs.SmsDcs;
 import com.github.xfslove.smsj.sms.ud.SmsUdhElement;
-import com.github.xfslove.smsj.sms.ud.SmsUdhIei;
 import com.github.xfslove.smsj.sms.ud.SmsUdhUtil;
 import com.github.xfslove.smssp.message.Message;
 import com.github.xfslove.smssp.message.Sequence;
@@ -97,13 +96,16 @@ public class DeliverMessage extends SmsPdu implements CmppMessage, Notification 
       return null;
     }
     SmsUdhElement firstUdh = udh[0];
-    if (!SmsUdhIei.CONCATENATED_8BIT.equals(firstUdh.getUdhIei())) {
+
+    int[] concatUdh = SmsUdhUtil.parse8BitConcatUdh(firstUdh);
+
+    if (concatUdh == null) {
       return null;
     }
 
-    int refNr = firstUdh.getUdhIeiData()[0] & 0xff;
-    int total = firstUdh.getUdhIeiData()[1] & 0xff;
-    int seqNr = firstUdh.getUdhIeiData()[2] & 0xff;
+    int refNr = concatUdh[0];
+    int total = concatUdh[1];
+    int seqNr = concatUdh[2];
     String key = getSrcTerminalId() + "-" + refNr;
 
     return new Partition(total, seqNr, key);
