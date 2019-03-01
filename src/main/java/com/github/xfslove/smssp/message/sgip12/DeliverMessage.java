@@ -138,6 +138,8 @@ public class DeliverMessage extends SmsPdu implements SgipMessage, Notification 
 
       int udl = msgLength - udhl - 1;
       byte[] ud = new byte[udl];
+      in.readBytes(ud);
+
       setUserData(ud, new SmsDcs((byte) dcs));
     }
 

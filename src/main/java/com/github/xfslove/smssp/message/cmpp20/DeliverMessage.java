@@ -174,6 +174,8 @@ public class DeliverMessage extends SmsPdu implements CmppMessage, Notification 
 
       int udl = msgLength - udhl - 1;
       byte[] ud = new byte[udl];
+      in.readBytes(ud);
+
       setUserData(ud, new SmsDcs((byte) dcs));
     }
 
