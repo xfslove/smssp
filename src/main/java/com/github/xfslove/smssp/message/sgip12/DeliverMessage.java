@@ -129,9 +129,9 @@ public class DeliverMessage extends SmsPdu implements SgipMessage, Notification 
 
       int udhl = in.readUnsignedByte();
 
+      // udh exclude udhl
       byte[] udh = new byte[udhl];
       in.readBytes(udh);
-      // include udhl
       SmsUdhElement[] udhElements = SmsUdhUtil.deserialize(udh);
 
       setUserDataHeaders(udhElements);
