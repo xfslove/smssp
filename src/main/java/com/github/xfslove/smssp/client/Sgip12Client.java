@@ -21,6 +21,7 @@ import io.netty.channel.pool.FixedChannelPool;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.util.concurrent.DefaultPromise;
 import io.netty.util.concurrent.DefaultThreadFactory;
+import io.netty.util.concurrent.Future;
 import io.netty.util.internal.logging.InternalLogger;
 import io.netty.util.internal.logging.InternalLoggerFactory;
 
@@ -89,6 +90,10 @@ public class Sgip12Client {
   public Sgip12Client responseListener(ResponseListener consumer) {
     this.consumer = consumer;
     return this;
+  }
+
+  public Future<Channel> acquire() {
+    return channelPool.acquire();
   }
 
   public Sgip12Client connect() {

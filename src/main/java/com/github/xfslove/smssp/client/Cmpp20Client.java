@@ -162,6 +162,10 @@ public class Cmpp20Client {
     LOGGER.info("{} shutdown gracefully, disconnect to [{}:{}] success", username, host, port);
   }
 
+  public Future<Channel> acquire() {
+    return channelPool.acquire();
+  }
+
   public SubmitRespMessage submit(SubmitMessage submit, int timeout) {
 
     DefaultFuture future = new DefaultFuture(username, submit);
