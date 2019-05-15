@@ -22,6 +22,7 @@ import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.util.concurrent.DefaultPromise;
 import io.netty.util.concurrent.DefaultThreadFactory;
 import io.netty.util.concurrent.Future;
+import io.netty.util.concurrent.GenericFutureListener;
 import io.netty.util.internal.logging.InternalLogger;
 import io.netty.util.internal.logging.InternalLoggerFactory;
 
@@ -92,10 +93,6 @@ public class Sgip12Client {
     return this;
   }
 
-  public Future<Channel> acquire() {
-    return channelPool.acquire();
-  }
-
   public Sgip12Client connect() {
 
     HandlerInitializer handler = new HandlerInitializer(username, password, consumer, sequence, idleCheckTime);
@@ -108,34 +105,56 @@ public class Sgip12Client {
     return this;
   }
 
+  public void submit(final SubmitMessage submit) {
+
+    channelPool.acquire().addListener(new GenericFutureListener<Future<Channel>>() {
+      @Override
+      public void operationComplete(Future<Channel> future) throws Exception {
+        if (future.isSuccess()) {
+          final Channel channel = future.get();
+          channel.writeAndFlush(submit).addListener(new GenericFutureListener<Future<? super Void>>() {
+            @Override
+            public void operationComplete(Future<? super Void> future) throws Exception {
+              channelPool.release(channel);
+            }
+          });
+        } else {
+          LOGGER.warn("{} acquired channel failure, exception message: {}", username, future.cause().getMessage());
+        }
+      }
+    });
+  }
+
   public SubmitRespMessage submit(SubmitMessage submit, int timeout) {
 
     DefaultFuture future = new DefaultFuture(username, submit);
 
-    Channel channel = null;
+    final Channel channel;
+    DefaultPromise<Channel> promise = (DefaultPromise<Channel>) channelPool.acquire();
+
+    long start = System.currentTimeMillis();
     try {
-      DefaultPromise<Channel> promise = (DefaultPromise<Channel>) channelPool.acquire();
       channel = promise.get(timeout, TimeUnit.MILLISECONDS);
-
-      channel.writeAndFlush(submit);
-
     } catch (Exception e) {
       LOGGER.warn("{} acquired channel failure, exception message: {}", username, e.getMessage());
       return null;
-    } finally {
-      if (channel != null) {
+    }
+    long spend = System.currentTimeMillis() - start;
+
+    channel.writeAndFlush(submit).addListener(new GenericFutureListener<Future<? super Void>>() {
+      @Override
+      public void operationComplete(Future<? super Void> future) throws Exception {
         channelPool.release(channel);
       }
-    }
+    });
 
     try {
-      return (SubmitRespMessage) future.getResponse(timeout);
+      return (SubmitRespMessage) future.getResponse((int) (timeout - spend));
 
     } catch (InterruptedException e) {
       LOGGER.warn("{} get response failure, exception message: {}", username, e.getMessage());
       return null;
     }
-
   }
 
   public SubmitMessage[] convert(Message message) {
