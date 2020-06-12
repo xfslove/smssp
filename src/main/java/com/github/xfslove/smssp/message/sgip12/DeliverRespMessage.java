@@ -17,7 +17,7 @@ public class DeliverRespMessage implements SgipMessage {
   /**
    * Deliver命令是否成功接收
    * 0：接收成功
-   * 其它：错误码参考http://baijiahao.baidu.com/s?id=1554746383651964&wfr=spider&for=pc
+   * 其它：错误码<a href="http://baijiahao.baidu.com/s?id=1554746383651964&amp;wfr=spider&amp;for=pc">连接</a>
    */
   private int result = 0;
 

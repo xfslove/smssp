@@ -40,7 +40,7 @@ public class SubmitRespMessage implements CmppMessage, Response {
    * 6：超过最大信息长
    * 7：业务代码错
    * 8：流量控制错
-   * 9~ ：其他错误码参考http://baijiahao.baidu.com/s?id=1554746383651964&wfr=spider&for=pc
+   * 9 ：其他错误码<a href="http://baijiahao.baidu.com/s?id=1554746383651964&amp;wfr=spider&amp;for=pc">连接</a>
    */
   private int result;
 

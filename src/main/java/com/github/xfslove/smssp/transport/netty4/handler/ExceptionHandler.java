@@ -9,7 +9,7 @@ import io.netty.util.internal.logging.InternalLoggerFactory;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 
 /**
- * sp -> smg session管理handler
+ * sp -&gt; smg session管理handler
  *
  * @author hanwen
  * created at 2018/8/31

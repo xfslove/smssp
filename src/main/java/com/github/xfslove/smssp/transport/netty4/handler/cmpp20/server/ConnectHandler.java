@@ -21,7 +21,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
 /**
- * smg -> sp 链接session管理handler
+ * smg -&gt; sp 链接session管理handler
  *
  * @author hanwen
  * created at 2018/9/2

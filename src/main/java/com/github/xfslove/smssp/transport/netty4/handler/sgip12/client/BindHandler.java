@@ -12,7 +12,7 @@ import io.netty.util.internal.logging.InternalLogger;
 import io.netty.util.internal.logging.InternalLoggerFactory;
 
 /**
- * sp -> smg session管理handler
+ * sp -&gt; smg session管理handler
  *
  * @author hanwen
  * created at 2018/8/31

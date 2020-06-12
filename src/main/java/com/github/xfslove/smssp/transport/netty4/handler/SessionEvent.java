@@ -9,7 +9,8 @@ import com.github.xfslove.smssp.message.Message;
 public class SessionEvent {
 
   /**
-   * session还为注册
+   * @param message message
+   * @return session还为注册
    */
   public static SessionEvent NOT_VALID(Message message) {
     return new SessionEvent("NOT_VALID", message);

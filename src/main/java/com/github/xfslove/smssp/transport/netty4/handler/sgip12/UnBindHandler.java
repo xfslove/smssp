@@ -18,7 +18,7 @@ import io.netty.util.internal.logging.InternalLoggerFactory;
 import java.util.concurrent.TimeUnit;
 
 /**
- * sp -> smg session管理handler
+ * sp -&gt; smg session管理handler
  *
  * @author hanwen
  * created at 2018/8/31
