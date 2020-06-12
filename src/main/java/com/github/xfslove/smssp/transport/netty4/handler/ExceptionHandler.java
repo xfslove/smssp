@@ -3,8 +3,10 @@ package com.github.xfslove.smssp.transport.netty4.handler;
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.util.internal.logging.InternalLogLevel;
 import io.netty.util.internal.logging.InternalLogger;
 import io.netty.util.internal.logging.InternalLoggerFactory;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 
 /**
  * sp -> smg session管理handler
@@ -19,7 +21,9 @@ public class ExceptionHandler extends ChannelDuplexHandler {
 
   @Override
   public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-
+    if (LOGGER.isTraceEnabled()) {
+      LOGGER.log(InternalLogLevel.TRACE, ExceptionUtils.getStackTrace(cause));
+    }
     LOGGER.warn("catch exception message: {}, and close channel", cause.getMessage());
     ctx.channel().close();
   }

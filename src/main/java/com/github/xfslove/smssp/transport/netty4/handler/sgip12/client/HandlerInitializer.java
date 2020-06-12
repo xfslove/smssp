@@ -43,7 +43,7 @@ public class HandlerInitializer extends ChannelInitializer<Channel> {
   protected void initChannel(Channel channel) throws Exception {
 
     // todo sharable add static handler
-    channel.pipeline().addLast("sgipSocketLogging", new LoggingHandler());
+    channel.pipeline().addLast("sgipSocketLogging", new LoggingHandler(LogLevel.TRACE));
     channel.pipeline().addLast("sgipIdleState", new IdleStateHandler(0, 0, idleCheckTime, TimeUnit.SECONDS));
     channel.pipeline().addLast("sgipMessageLengthCodec", new MesssageLengthCodec(true));
     channel.pipeline().addLast("sgipMessageCodec", new MessageCodec());
