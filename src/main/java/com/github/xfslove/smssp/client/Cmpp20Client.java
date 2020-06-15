@@ -222,11 +222,10 @@ public class Cmpp20Client {
     SmsPdu[] pdus = cmpp20.getPdu().convert();
     SubmitMessage[] req = new SubmitMessage[pdus.length];
     Calendar calendar = Calendar.getInstance();
-    MsgId msgId = new MsgId(nodeId, calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH), calendar.get(Calendar.HOUR), calendar.get(Calendar.MINUTE), calendar.get(Calendar.SECOND), sequence.next());
     for (int i = 0; i < pdus.length; i++) {
       final SubmitMessage submit = new SubmitMessage(sequence);
 
-      submit.setMsgId(msgId);
+      submit.setMsgId(new MsgId(nodeId, calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH), calendar.get(Calendar.HOUR), calendar.get(Calendar.MINUTE), calendar.get(Calendar.SECOND), sequence.next()));
 
       for (String phone : cmpp20.getPhones()) {
         submit.getDestTerminalIds().add(phone);
