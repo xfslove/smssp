@@ -4,6 +4,35 @@
 
 可对接联通（SGIP1.2）、移动（CMPP2.0）SP Server
 
+
+
+#### maven
+
+```
+		<repositories>
+        <repository>
+            <id>oss.sonatype.org-snapshot</id>
+            <url>http://oss.sonatype.org/content/repositories/snapshots</url>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
+    
+    <dependency>
+        <groupId>com.github.xfslove</groupId>
+        <artifactId>smssp</artifactId>
+        <version>1.0.2-SNAPSHOT</version>
+    </dependency>
+```
+
+
+
+
+
 ### CMPP2.0
 
 #### Handle Submit Messages
