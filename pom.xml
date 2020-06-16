@@ -103,7 +103,7 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <java.version>1.7</java.version>
-    <netty.version>4.1.45.Final</netty.version>
+    <netty.version>4.1.46.Final</netty.version>
     <commons-lang3.version>3.7</commons-lang3.version>
     <commons-codec.version>1.11</commons-codec.version>
   </properties>
@@ -119,7 +119,7 @@
     <dependency>
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
-      <version>20.0</version>
+      <version>24.1.1-jre</version>
     </dependency>
 
     <dependency>
