@@ -9,7 +9,7 @@
 #### maven
 
 ```
-		<repositories>
+    <repositories>
         <repository>
             <id>oss.sonatype.org-snapshot</id>
             <url>http://oss.sonatype.org/content/repositories/snapshots</url>
