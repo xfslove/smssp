@@ -105,9 +105,9 @@ public class Sgip12Client {
     return this;
   }
 
-  public void submit(final SubmitMessage submit) {
+  public Future<Channel> submit(final SubmitMessage submit) {
 
-    channelPool.acquire().addListener(new GenericFutureListener<Future<Channel>>() {
+    return channelPool.acquire().addListener(new GenericFutureListener<Future<Channel>>() {
       @Override
       public void operationComplete(Future<Channel> future) throws Exception {
         if (future.isSuccess()) {
