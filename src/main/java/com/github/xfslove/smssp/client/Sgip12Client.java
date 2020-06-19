@@ -105,12 +105,13 @@ public class Sgip12Client {
     return this;
   }
 
-  public Future<Channel> submit(final SubmitMessage submit) {
+  public Future<Channel> submit(final SubmitMessage submit, final ResponseListener listener) {
 
     return channelPool.acquire().addListener(new GenericFutureListener<Future<Channel>>() {
       @Override
       public void operationComplete(Future<Channel> future) throws Exception {
         if (future.isSuccess()) {
+          DefaultFuture.newAsyncFuture(username, submit, listener);
           final Channel channel = future.get();
           channel.writeAndFlush(submit).addListener(new GenericFutureListener<Future<? super Void>>() {
             @Override
@@ -125,9 +126,9 @@ public class Sgip12Client {
     });
   }
 
-  public SubmitRespMessage submit(SubmitMessage submit, int timeout) {
+  public SubmitRespMessage submit(final SubmitMessage submit, int timeout) {
 
-    DefaultFuture future = new DefaultFuture(username, submit);
+    DefaultFuture future = DefaultFuture.newFuture(username, submit);
 
     final Channel channel;
     DefaultPromise<Channel> promise = (DefaultPromise<Channel>) channelPool.acquire();

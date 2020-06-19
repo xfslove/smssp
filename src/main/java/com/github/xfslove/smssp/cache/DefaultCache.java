@@ -22,7 +22,7 @@ public class DefaultCache<K, V> {
   private final ConcurrentMap<K, V> map;
 
   public DefaultCache(int initCapacity, int expireSeconds) {
-    cache = CacheBuilder.newBuilder().initialCapacity(initCapacity).expireAfterAccess(expireSeconds, TimeUnit.SECONDS)
+    CacheBuilder<K, V> builder = CacheBuilder.newBuilder().initialCapacity(initCapacity)
         .removalListener(new RemovalListener<K, V>() {
           @Override
           public void onRemoval(RemovalNotification<K, V> notification) {
@@ -33,9 +33,12 @@ public class DefaultCache<K, V> {
             }
 
           }
-        })
-        .build();
-    map = cache.asMap();
+        });
+    if (expireSeconds != -1) {
+      builder.expireAfterAccess(expireSeconds, TimeUnit.SECONDS);
+    }
+    this.cache = builder.build();
+    map = this.cache.asMap();
   }
 
   public V putIfAbsent(K key, V value) {

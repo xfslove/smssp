@@ -68,24 +68,24 @@
     SubmitMessage[] toSubmitMessages = client.convert(sms); 
                                     // client.convert(mms);
 
-    // sync
     client.connect();
+
+    // sync
     for (SubmitMessage toSubmitMessage : toSubmitMessages) {
       SubmitRespMessage submitRespMessage = client.submit(toSubmitMessage, timeout);
       // do something with resp
     }
 
     // async
-    client.responseListener(new ResponseListener() {
-      @Override
-      public void done(Response response) {
-
-        SubmitRespMessage submitRespMessage = (SubmitRespMessage) response;
-        // do something with resp
-      }
-    }).connect();
     for (SubmitMessage toSubmitMessage : toSubmitMessages) {
-      client.submit(toSubmitMessage);
+      client.submit(toSubmitMessage, new ResponseListener() {
+           @Override
+           public void done(Response response) {
+     
+             SubmitRespMessage submitRespMessage = (SubmitRespMessage) response;
+             // do something with resp
+           }
+         });
     }
 ```
 
@@ -146,24 +146,23 @@
     SubmitMessage[] toSubmitMessages = client.convert(sms); 
                                     // client.convert(mms);
 
-    // sync
     client.connect();
+    // sync
     for (SubmitMessage toSubmitMessage : toSubmitMessages) {
       SubmitRespMessage submitRespMessage = client.submit(toSubmitMessage, timeout);
       // do something with resp
     }
 
     // async
-    client.responseListener(new ResponseListener() {
-      @Override
-      public void done(Response response) {
-
-        SubmitRespMessage submitRespMessage = (SubmitRespMessage) response;
-        // do something with resp
-      }
-    }).connect();
     for (SubmitMessage toSubmitMessage : toSubmitMessages) {
-      client.submit(toSubmitMessage);
+      client.submit(toSubmitMessage, new ResponseListener() {
+           @Override
+           public void done(Response response) {
+     
+             SubmitRespMessage submitRespMessage = (SubmitRespMessage) response;
+             // do something with resp
+           }
+         });
     }
 ```
 

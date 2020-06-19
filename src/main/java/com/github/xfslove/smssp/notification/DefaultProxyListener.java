@@ -19,14 +19,14 @@ public class DefaultProxyListener implements NotificationListener {
   private static final ConcurrentMap<String, DefaultCache<String, Notification>> MSG_CACHE = new ConcurrentHashMap<>(64);
   private static final ConcurrentMap<String, DefaultCache<String, String[]>> MERGE_CACHE = new ConcurrentHashMap<>(64);
 
-  private String name;
-  private NotificationListener target;
+  private final String name;
+  private final NotificationListener target;
 
   public DefaultProxyListener(String name, NotificationListener target) {
     this.target = target;
     this.name = name;
-    MSG_CACHE.putIfAbsent(name, new DefaultCache<String, Notification>(1024, 300));
-    MERGE_CACHE.putIfAbsent(name, new DefaultCache<String, String[]>(1024, 300));
+    MSG_CACHE.putIfAbsent(name, new DefaultCache<String, Notification>(1024, 60 * 30));
+    MERGE_CACHE.putIfAbsent(name, new DefaultCache<String, String[]>(1024, 60 * 30));
   }
 
   @Override

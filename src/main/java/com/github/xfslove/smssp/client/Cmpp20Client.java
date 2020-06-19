@@ -163,12 +163,13 @@ public class Cmpp20Client {
     LOGGER.info("{} shutdown gracefully, disconnect to [{}:{}] success", username, host, port);
   }
 
-  public Future<Channel> submit(final SubmitMessage submit) {
+  public void submit(final SubmitMessage submit, final ResponseListener listener) {
 
-    return channelPool.acquire().addListener(new GenericFutureListener<Future<Channel>>() {
+    channelPool.acquire().addListener(new GenericFutureListener<Future<Channel>>() {
       @Override
       public void operationComplete(Future<Channel> future) throws Exception {
         if (future.isSuccess()) {
+          DefaultFuture.newAsyncFuture(username, submit, listener);
           final Channel channel = future.get();
           channel.writeAndFlush(submit).addListener(new GenericFutureListener<Future<? super Void>>() {
             @Override
@@ -185,7 +186,7 @@ public class Cmpp20Client {
 
   public SubmitRespMessage submit(final SubmitMessage submit, int timeout) {
 
-    DefaultFuture future = new DefaultFuture(username, submit);
+    DefaultFuture future = DefaultFuture.newFuture(username, submit);
 
     final Channel channel;
     DefaultPromise<Channel> promise = (DefaultPromise<Channel>) channelPool.acquire();
