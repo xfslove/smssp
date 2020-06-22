@@ -105,6 +105,26 @@ public class Sgip12Client {
     return this;
   }
 
+  public Future<Channel> submit(final SubmitMessage submit) {
+
+    return channelPool.acquire().addListener(new GenericFutureListener<Future<Channel>>() {
+      @Override
+      public void operationComplete(Future<Channel> future) throws Exception {
+        if (future.isSuccess()) {
+          final Channel channel = future.get();
+          channel.writeAndFlush(submit).addListener(new GenericFutureListener<Future<? super Void>>() {
+            @Override
+            public void operationComplete(Future<? super Void> future) throws Exception {
+              channelPool.release(channel);
+            }
+          });
+        } else {
+          LOGGER.warn("{} acquired channel failure, exception message: {}", username, future.cause().getMessage());
+        }
+      }
+    });
+  }
+
   public Future<Channel> submit(final SubmitMessage submit, final ResponseListener listener) {
 
     return channelPool.acquire().addListener(new GenericFutureListener<Future<Channel>>() {
